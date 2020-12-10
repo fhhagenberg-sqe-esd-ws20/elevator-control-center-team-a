@@ -21,5 +21,5 @@ jobs:
       with:
         java-version: 15
     - name: Build with Maven
-      run: xvfg-run --server-args="-screen 0, 800x600x8" mvn -B package --file pom.xml
+      run: xvfb-run --server-args="-screen 0, 800x600x8" mvn -B package --file pom.xml
       
