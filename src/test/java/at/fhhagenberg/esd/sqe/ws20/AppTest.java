@@ -1,5 +1,6 @@
-package at.fhhagenberg.sqe;
+package at.fhhagenberg.esd.sqe.ws20;
 
+import at.fhhagenberg.esd.sqe.ws20.App;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxAssert;
