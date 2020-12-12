@@ -22,4 +22,8 @@ jobs:
         java-version: 15
     - name: Build with Maven
       run: xvfb-run --server-args="-screen 0, 800x600x8" mvn -B package --file pom.xml
-      
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.2.1
+      with:
+        name: Jacoco Report
+        path: target/site/jacoco
