@@ -10,7 +10,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 
-<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="580.0" spacing="10.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="at.fhhagenberg.esd.sqe.ws20.gui.ECCController">
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="400.0" spacing="10.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="at.fhhagenberg.esd.sqe.ws20.gui.ECCController">
    <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
    </padding>
@@ -82,20 +82,36 @@
 	               </VBox>
 	               <VBox>
 	               	   	<children>
-	               	   		<Label text="%ECC.3" />
-		                  	<TextField fx:id="tfSideA" maxWidth="100.0" />
-		                  	<Label text="%Triangle1st.4" />
-		                  	<TextField fx:id="tfSideB" maxWidth="100.0" />
-		                  	<Label text="%Triangle1st.5" />
-		                  	<TextField fx:id="tfSideC" maxWidth="100.0" />
-		                  	<Button fx:id="btnCalc" mnemonicParsing="false" onAction="#calculateTriangleValues" text="%Triangle1st.6" />
+	               	   		<Label text="%ECC.10" />
+		                  	<ToggleButton fx:id="tbtnOperationMode" alignment="CENTER"
+		                  		onAction="#actionClickedBtnOperationMode" text="Manual" minWidth="100.0"/>
+		                  	<VBox spacing="5.0"> 
+		                  		<padding>
+		                  			<Insets top="25.0"/>
+		                  		</padding>
+		                  		<children>
+			                  		<Label fx:id="lTargetFloor" text="%ECC.12" style="-fx-padding: 25 0 5 0;"/>
+				                  	<!-- Combo Box example https://gist.github.com/jewelsea/3062859 -->
+				                  	<ComboBox fx:id="cbTargetFloor" layoutX="15.0" layoutY="33.0" prefWidth="130.0" promptText="Choose Elevator">
+								      <items>
+								        <!--  <FXCollections fx:factory="observableArrayList">
+								          <String fx:value="Apple" />
+								          <String fx:value="Orange" />
+								          <String fx:value="Pear" />
+								        </FXCollections> -->
+								      </items>
+								    </ComboBox>
+				                  	<Button fx:id="btnGo" mnemonicParsing="false" onAction="#gotoTargetFloor" text="%ECC.13" minWidth="100.0"/>
+		                  		</children>
+		                  	</VBox>	
 	               		</children>
 	               </VBox>
                </children>
             </HBox>
             <VBox>
             	<children>
-            		<Label text="%Triangle1st.3" />
+            		<Label text="%ECC.14" />
+            		<TextField fx:id="tfErrorLog" editable="False" minHeight="150.0"/>
             	</children>
             </VBox>
          </children>
