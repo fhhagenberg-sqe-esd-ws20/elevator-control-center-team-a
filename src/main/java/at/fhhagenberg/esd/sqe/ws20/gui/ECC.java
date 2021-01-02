@@ -24,11 +24,11 @@ public class ECC extends Application {
 	@Override
     public void start(Stage stage) {
 		try {
-			ResourceBundle resources = ResourceBundle.getBundle(Messages.getString("Triangle1st.20"));
-			Parent root = FXMLLoader.load(getClass().getResource(Messages.getString("Triangle1st.2")), resources);
+			ResourceBundle resources = ResourceBundle.getBundle(Messages.getString("ECC.0"));
+			Parent root = FXMLLoader.load(getClass().getResource(Messages.getString("ECC.1")), resources);
 			Scene scene = new Scene(root);
 		    
-	        stage.setTitle(Messages.getString("Triangle1st.0"));
+	        stage.setTitle(Messages.getString("ECC.2"));
 	        stage.setScene(scene);
 	        stage.show();
 	    } catch (Exception e) {

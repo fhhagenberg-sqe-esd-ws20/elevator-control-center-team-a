@@ -12,11 +12,22 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class ECCController implements Initializable {
+	
+	@FXML private ComboBox<String> cbElevator; //TODO: init combobox list
+	@FXML private Label lCurFloor;
+	@FXML private Label lNextTarFloor;
+	@FXML private Label lDirection;
+	@FXML private Label lSpeed;
+	@FXML private Label lWeight;
+	@FXML private ImageView ivDoorState;
 	
 	@FXML private TextField tfSideA;
 	@FXML private TextField tfSideB;
