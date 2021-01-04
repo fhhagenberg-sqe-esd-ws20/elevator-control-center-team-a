@@ -2,6 +2,7 @@ package at.fhhagenberg.esd.sqe.ws20.gui;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
@@ -12,7 +13,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -77,11 +81,41 @@ public class ECCController implements Initializable {
 			RowConstraints rCon = new RowConstraints();
 			rCon.setMinHeight(20);
 			rCon.setPercentHeight(100/floors);
+			
+			HBox hb = new HBox();
+			hb.setAlignment(Pos.CENTER_RIGHT);
+			hb.setSpacing(5);
+			hb.setPadding(new Insets(5, 5, 5, 5));
+			
+			File fileDir = new File("images\\doorClosedReworked.png");
+	        Image imageDir = new Image(fileDir.toURI().toString());
+	        ImageView ivDir = new ImageView();
+	        ivDir.setPreserveRatio(true);
+	        ivDir.setFitHeight(20);
+	        ivDir.setImage(imageDir);
+	        
+	        File fileHold = new File("images\\doorClosedReworked.png");
+	        Image imageHold = new Image(fileHold.toURI().toString());
+	        ImageView ivHold = new ImageView();
+	        ivHold.setPreserveRatio(true);
+	        ivHold.setFitHeight(20);
+	        ivHold.setImage(imageHold);
+	        
+	        File fileRequest = new File("images\\doorClosedReworked.png");
+	        Image imageRequest = new Image(fileRequest.toURI().toString());
+	        ImageView ivRequest = new ImageView();
+	        ivRequest.setPreserveRatio(true);
+	        ivRequest.setFitHeight(20);
+	        ivRequest.setImage(imageRequest);
+	        
+			Label lFloor = new Label(cnt.toString());
+			hb.getChildren().addAll(ivRequest, ivHold, ivDir, lFloor);
+			
 			gElevatorFloors.getRowConstraints().add(rCon);
+			gElevatorFloors.add(hb, 0, i);
 		}
-		//gElevatorFloors.setGridLinesVisible(false);
 		
-		setTargetFloors();    //TODO: remove
+		//setTargetFloors();    //TODO: remove
 		//Init elevator 
 		
 	}
@@ -110,6 +144,7 @@ public class ECCController implements Initializable {
 	
 	static Integer cnt = 0;
 	private void setTargetFloors() {  //TODO: Übergabeparameter
+		cnt++;
 		gElevatorFloors.getChildren().retainAll(gElevatorFloors.getChildren().get(0));
 		
 		for(int i = 0; i< 25; i++) {
@@ -126,10 +161,8 @@ public class ECCController implements Initializable {
 			hb.getChildren().addAll(iv, l);
 			
 			gElevatorFloors.add(hb, 0, i);
+
 		}
-		
-		
-		cnt++;
 	}
 	
 	private void translateElevator(Integer percentage) {

@@ -50,10 +50,10 @@
                            <children>
                               <GridPane alignment="BOTTOM_CENTER" HBox.hgrow="ALWAYS">
                                 <columnConstraints>
-                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="40.0" halignment="CENTER"/>
+                                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="40.0" />
                                 </columnConstraints>
                                 <rowConstraints>
-                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" valignment="BOTTOM"/>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="BOTTOM" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
                                     <ImageView fx:id="ivGElvDirDown" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
