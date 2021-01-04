@@ -19,7 +19,7 @@ public class ElevatorState {
     private int currentWeight;
     private DoorStatus currentDoorStatus;
     private List<Boolean> currentFloorButtonsPressed;
-    private List<Integer> servicedFloors;
+    private List<Boolean> servicedFloors;
 
 
     //
@@ -115,11 +115,11 @@ public class ElevatorState {
         this.currentFloorButtonsPressed = currentFloorButtonsPressed;
     }
 
-    public List<Integer> getServicedFloors() {
+    public List<Boolean> getServicedFloors() {
         return servicedFloors;
     }
 
-    public void setServicedFloors(List<Integer> servicedFloors) {
+    public void setServicedFloors(List<Boolean> servicedFloors) {
         this.servicedFloors = servicedFloors;
     }
 }

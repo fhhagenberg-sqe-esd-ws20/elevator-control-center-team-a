@@ -5,6 +5,8 @@ import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorException;
 import org.jetbrains.annotations.NotNull;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 
@@ -76,6 +78,18 @@ public class ElevatorImpl implements IElevator {
 
         state.setCurrentWeight(rmiInterface.getElevatorWeight(elevatorNumber));
         state.setCurrentDoorStatus(DoorStatus.fromInt(rmiInterface.getElevatorDoorStatus(elevatorNumber)));
+
+        final int nrOfFloors = rmiInterface.getFloorNum();
+        List<Boolean> floorButtonsPressed = new ArrayList<>();
+        List<Boolean> servicedFloors = new ArrayList<>();
+
+        for (int floorNr = 0; floorNr < nrOfFloors; ++floorNr) {
+            floorButtonsPressed.add(rmiInterface.getElevatorButton(elevatorNumber, floorNr));
+            servicedFloors.add(rmiInterface.getServicesFloors(elevatorNumber, floorNr));
+        }
+
+        state.setCurrentFloorButtonsPressed(floorButtonsPressed);
+        state.setServicedFloors(servicedFloors);
 
         return state;
     }
