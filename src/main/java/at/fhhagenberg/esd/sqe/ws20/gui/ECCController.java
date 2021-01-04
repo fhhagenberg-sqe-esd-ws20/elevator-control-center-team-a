@@ -1,5 +1,6 @@
 package at.fhhagenberg.esd.sqe.ws20.gui;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.function.UnaryOperator;
@@ -11,6 +12,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -22,6 +24,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 
 public class ECCController implements Initializable {
@@ -65,6 +68,8 @@ public class ECCController implements Initializable {
 			rCon.setPercentHeight(100/floors);
 			gElevatorFloors.getRowConstraints().add(rCon);
 		}
+		
+		setTargetFloors();    //TODO: remove
 	}
 	
 	@FXML
@@ -73,6 +78,7 @@ public class ECCController implements Initializable {
 	        tbtnOperationMode.setText("Automatic");
 	        
 	        doorState.set(true); // TODO: clean set bool property on door state call
+	        setTargetFloors();    //TODO: remove
 	    } else {
 	    	tbtnOperationMode.setText("Manual");
 	    	
@@ -83,4 +89,28 @@ public class ECCController implements Initializable {
 	@FXML protected void gotoTargetFloor(ActionEvent event) {
 		 
 	 }
+	
+	static Integer cnt = 0;
+	private void setTargetFloors() {  //TODO: Übergabeparameter
+		gElevatorFloors.getChildren().retainAll(gElevatorFloors.getChildren().get(0));
+		
+		for(int i = 0; i< 25; i++) {
+			HBox hb = new HBox();
+			hb.setAlignment(Pos.CENTER_RIGHT);
+			
+			File file = new File("images\\doorClosedReworked.png");
+	        Image image = new Image(file.toURI().toString());
+	        ImageView iv = new ImageView();
+	        iv.setPreserveRatio(true);
+	        iv.setFitHeight(20);
+	        iv.setImage(image);
+			Label l = new Label(cnt.toString());
+			hb.getChildren().addAll(iv, l);
+			
+			gElevatorFloors.add(hb, 0, i);
+		}
+		
+		
+		cnt++;
+	}
 }
