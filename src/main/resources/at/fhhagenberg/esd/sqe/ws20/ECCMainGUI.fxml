@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.image.*?>
+<?import javafx.scene.shape.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.*?>
 <?import java.lang.*?>
@@ -15,9 +17,9 @@
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
    </padding>
    <children>
-   	  <Rectangle height="50" width="50" >
+   	  <Rectangle height="50" width="50">
    	  </Rectangle>
-      <VBox spacing="10.0" > <!--style="-fx-border-width: 1; -fx-border-style: solid;"-->
+      <VBox spacing="10.0"> <!--style="-fx-border-width: 1; -fx-border-style: solid;"-->
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
@@ -39,43 +41,57 @@
 						    </ComboBox>
 						    <HBox style="-fx-padding: 25 5 2.5 0;">
 						    	<children>
-						    		<Label text="%ECC.4"/>
+						    		<Label text="%ECC.4" />
 						    		<Label fx:id="lCurFloor" />
 						    	</children>
 						    </HBox>
 						    <HBox style="-fx-padding: 2.5 5 2.5 0;">
 						    	<children>
-						    		<Label text="%ECC.5"/>
+						    		<Label text="%ECC.5" />
 						    		<Label fx:id="lNextTarFloor" />
 						    	</children>
 						    </HBox>
 						    <HBox style="-fx-padding: 2.5 5 2.5 0;">
 						    	<children>
-						    		<Label text="%ECC.6"/>
+						    		<Label text="%ECC.6" />
 						    		<Label fx:id="lDirection" />
 						    	</children>
 						    </HBox>
 						    <HBox style="-fx-padding: 2.5 5 2.5 0;">
 						    	<children>
-						    		<Label text="%ECC.7"/>
+						    		<Label text="%ECC.7" />
 						    		<Label fx:id="lSpeed" />
 						    	</children>
 						    </HBox>
 						    <HBox style="-fx-padding: 2.5 5 2.5 0;">
 						    	<children>
-						    		<Label text="%ECC.8"/>
+						    		<Label text="%ECC.8" />
 						    		<Label fx:id="lWeight" />
 						    	</children>
 						    </HBox>
-						    <HBox style="-fx-padding: 2.5 5 2.5 0;" alignment="CENTER_LEFT">
+						    <HBox alignment="CENTER_LEFT" style="-fx-padding: 2.5 5 2.5 0;">
 						    	<children>
-						    		<Label text="%ECC.9" style="-fx-padding: 0 5 0 0;"/>
-						    		<ImageView fx:id="ivDoorState" fitHeight="30.0" fitWidth="30.0" 
-						                pickOnBounds="true" preserveRatio="true">
-						                <image>
-						                    <Image url="file:images\doorClosedReworked.png" backgroundLoading="true" />
-						                </image>
-						            </ImageView>
+						    		<Label style="-fx-padding: 0 5 0 0;" text="%ECC.9" />
+                              <GridPane>
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES"/>
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+      						    		<ImageView fx:id="ivDoorStateClosed" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+      						                <image>
+      						                    <Image backgroundLoading="true" url="file:images\doorClosedReworked.png" />
+      						                </image>
+      						            </ImageView>
+                                    <ImageView fx:id="ivDoorStateOpen" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" visible="True">
+                                       <image>
+                                          <Image url="file:images\doorOpenReworked.png" />
+                                       </image>
+                                    </ImageView>
+                                 </children>
+                              </GridPane>
 						    	</children>
 						    </HBox>
 	               		</children>
@@ -83,16 +99,15 @@
 	               <VBox>
 	               	   	<children>
 	               	   		<Label text="%ECC.10" />
-		                  	<ToggleButton fx:id="tbtnOperationMode" alignment="CENTER"
-		                  		onAction="#actionClickedBtnOperationMode" text="Manual" minWidth="100.0"/>
+		                  	<ToggleButton fx:id="tbtnOperationMode" alignment="CENTER" minWidth="100.0" onAction="#actionClickedBtnOperationMode" text="Manual" />
 		                  	<VBox spacing="5.0"> 
 		                  		<padding>
-		                  			<Insets top="25.0"/>
+		                  			<Insets top="25.0" />
 		                  		</padding>
 		                  		<children>
-			                  		<Label fx:id="lTargetFloor" text="%ECC.12" style="-fx-padding: 25 0 5 0;"/>
+			                  		<Label fx:id="lTargetFloor" style="-fx-padding: 25 0 5 0;" text="%ECC.12" />
 				                  	<!-- Combo Box example https://gist.github.com/jewelsea/3062859 -->
-				                  	<ComboBox fx:id="cbTargetFloor" layoutX="15.0" layoutY="33.0" prefWidth="130.0" promptText="Choose Elevator">
+				                  	<ComboBox fx:id="cbTargetFloor" layoutX="15.0" layoutY="33.0" prefWidth="130.0" promptText="Choose Floor">
 								      <items>
 								        <!--  <FXCollections fx:factory="observableArrayList">
 								          <String fx:value="Apple" />
@@ -101,7 +116,7 @@
 								        </FXCollections> -->
 								      </items>
 								    </ComboBox>
-				                  	<Button fx:id="btnGo" mnemonicParsing="false" onAction="#gotoTargetFloor" text="%ECC.13" minWidth="100.0"/>
+				                  	<Button fx:id="btnGo" minWidth="100.0" mnemonicParsing="false" onAction="#gotoTargetFloor" text="%ECC.13" />
 		                  		</children>
 		                  	</VBox>	
 	               		</children>
@@ -111,7 +126,7 @@
             <VBox>
             	<children>
             		<Label text="%ECC.14" />
-            		<TextField fx:id="tfErrorLog" editable="False" minHeight="150.0"/>
+            		<TextField fx:id="tfErrorLog" editable="False" minHeight="150.0" />
             	</children>
             </VBox>
          </children>
