@@ -21,11 +21,13 @@ public class ElevatorImpl implements IElevator {
     }
 
 
+    @Override
     @NotNull
     public GeneralInformation queryGeneralInformation() {
         return queryGeneralInformation(DEFAULT_MAXIMUM_RETRIES);
     }
 
+    @Override
     @NotNull
     public GeneralInformation queryGeneralInformation(int maximumRetries) {
         try {
@@ -36,11 +38,13 @@ public class ElevatorImpl implements IElevator {
         }
     }
 
+    @Override
     @NotNull
     public ElevatorState queryElevatorState(int elevatorNumber) {
         return queryElevatorState(elevatorNumber, DEFAULT_MAXIMUM_RETRIES);
     }
 
+    @Override
     @NotNull
     public ElevatorState queryElevatorState(int elevatorNumber, int maximumRetries) {
         try {
@@ -51,6 +55,64 @@ public class ElevatorImpl implements IElevator {
         }
     }
 
+    @Override
+    @NotNull
+    public FloorState queryFloorState(int floorNr) {
+        return queryFloorState(floorNr, DEFAULT_MAXIMUM_RETRIES);
+    }
+
+    @Override
+    @NotNull
+    public FloorState queryFloorState(int floorNr, int maximumRetries) {
+        try {
+            return runSupplierChecked(() -> queryFloorStateInternalUnchecked(floorNr), maximumRetries);
+        } catch (RemoteException | TimeoutException ex) {
+            // TODO: use localised strings as exception text!
+            throw new ElevatorException("Failed to query floor state!", ex);
+        }
+    }
+
+    @Override
+    public void setServicedFloors(int elevatorNr, int servicedFloor, boolean isServiced) {
+        try {
+            rmiInterface.setServicesFloors(elevatorNr, servicedFloor, isServiced);
+        } catch (RemoteException ex) {
+            // TODO: use localised strings as exception text!
+            throw new ElevatorException("Failed to set serviced floor!", ex);
+        }
+    }
+
+    @Override
+    public void setServicedFloors(int elevatorNr, List<Integer> servicedFloors) {
+        for (int servicedFloor : servicedFloors) {
+            setServicedFloors(elevatorNr, servicedFloor, true);
+        }
+    }
+
+    @Override
+    public void setTargetFloor(int elevatorNr, int targetFloor) {
+        try {
+            int currentFloor = rmiInterface.getElevatorFloor(elevatorNr);
+            Direction direction = Direction.Uncommitted;
+            if (targetFloor > currentFloor) {
+                direction = Direction.Up;
+            } else if (targetFloor < currentFloor) {
+                direction = Direction.Down;
+            } else {
+                // TODO: getElevatorFloor() gives the nearest floor number meaning that the elevator still has to move,
+                //       if it equals the target floor numbers. Should this be resolved by calculating floor positions?
+            }
+
+            rmiInterface.setCommittedDirection(elevatorNr, direction.getValue());
+            rmiInterface.setTarget(elevatorNr, targetFloor);
+        } catch (RemoteException ex) {
+            // TODO: use localised strings as exception text!
+            throw new ElevatorException("Failed to set serviced floor!", ex);
+        }
+
+    }
+
+
     @NotNull
     private GeneralInformation queryGeneralInformationInternalUnchecked() throws RemoteException {
         GeneralInformation info = new GeneralInformation();
@@ -60,6 +122,17 @@ public class ElevatorImpl implements IElevator {
         info.setFloorHeight(rmiInterface.getFloorHeight());
 
         return info;
+    }
+
+    @NotNull
+    private FloorState queryFloorStateInternalUnchecked(int floorNr) throws RemoteException {
+        FloorState state = new FloorState();
+
+        state.setHeight(rmiInterface.getFloorHeight());
+        state.setDownRequest(rmiInterface.getFloorButtonDown(floorNr));
+        state.setUpRequest(rmiInterface.getFloorButtonUp(floorNr));
+
+        return state;
     }
 
     @NotNull
@@ -110,7 +183,7 @@ public class ElevatorImpl implements IElevator {
             clockTickBefore = rmiInterface.getClockTick();
             result = supplier.get();
             clockTickAfter = rmiInterface.getClockTick();
-        } while (retries-- > 0 && clockTickAfter != clockTickBefore);
+        } while (--retries > 0 && clockTickAfter != clockTickBefore);
 
         if (clockTickAfter != clockTickBefore) {
             assert retries == 0;

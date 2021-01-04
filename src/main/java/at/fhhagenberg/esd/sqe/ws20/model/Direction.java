@@ -1,16 +1,27 @@
 package at.fhhagenberg.esd.sqe.ws20.model;
 
 public enum Direction {
-    Up,
-    Down,
-    Uncommitted;
+    Up(IElevatorRMI.ELEVATOR_DIRECTION_UP),
+    Down(IElevatorRMI.ELEVATOR_DIRECTION_DOWN),
+    Uncommitted(IElevatorRMI.ELEVATOR_DIRECTION_UNCOMMITTED);
+
+
+    private final int value;
+
+    Direction(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
+    }
 
     public static Direction fromInt(int dir) {
-        if (dir == IElevatorRMI.ELEVATOR_DIRECTION_UP) {
+        if (dir == Up.getValue()) {
             return Up;
-        } else if (dir == IElevatorRMI.ELEVATOR_DIRECTION_DOWN) {
+        } else if (dir == Down.getValue()) {
             return Down;
-        } else if (dir == IElevatorRMI.ELEVATOR_DIRECTION_UNCOMMITTED) {
+        } else if (dir == Uncommitted.getValue()) {
             return Uncommitted;
         }
 
