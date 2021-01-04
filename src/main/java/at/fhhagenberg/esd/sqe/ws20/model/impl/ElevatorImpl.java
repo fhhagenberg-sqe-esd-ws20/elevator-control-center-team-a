@@ -21,6 +21,10 @@ public class ElevatorImpl implements IElevator {
     }
 
 
+    // ----------------------------------------------------------------
+    // IElevator implementation
+    // ----------------------------------------------------------------
+
     @Override
     @NotNull
     public GeneralInformation queryGeneralInformation() {
@@ -48,7 +52,7 @@ public class ElevatorImpl implements IElevator {
     @NotNull
     public ElevatorState queryElevatorState(int elevatorNumber, int maximumRetries) {
         try {
-            return runSupplierChecked(() -> queryElevatorStateInternalUnchecked(elevatorNumber), maximumRetries);
+           return runSupplierChecked(() -> queryElevatorStateInternalUnchecked(elevatorNumber), maximumRetries);
         } catch (RemoteException | TimeoutException ex) {
             // TODO: use localised strings as exception text!
             throw new ElevatorException("Failed to query elevator state!", ex);
@@ -83,7 +87,7 @@ public class ElevatorImpl implements IElevator {
     }
 
     @Override
-    public void setServicedFloors(int elevatorNr, List<Integer> servicedFloors) {
+    public void setServicedFloors(int elevatorNr, @NotNull List<Integer> servicedFloors) {
         for (int servicedFloor : servicedFloors) {
             setServicedFloors(elevatorNr, servicedFloor, true);
         }
@@ -112,6 +116,10 @@ public class ElevatorImpl implements IElevator {
 
     }
 
+
+    // ----------------------------------------------------------------
+    // Private methods for assembling state objects
+    // ----------------------------------------------------------------
 
     @NotNull
     private GeneralInformation queryGeneralInformationInternalUnchecked() throws RemoteException {
@@ -144,7 +152,7 @@ public class ElevatorImpl implements IElevator {
 
         state.setCurrentAcceleration(rmiInterface.getElevatorAccel(elevatorNumber));
         state.setCurrentSpeed(rmiInterface.getElevatorSpeed(elevatorNumber));
-        state.setCurrentDirection(Direction.fromInt(rmiInterface.getElevatorSpeed(elevatorNumber)));
+        state.setCurrentDirection(Direction.fromInt(rmiInterface.getCommittedDirection(elevatorNumber)));
         state.setCurrentPosition(rmiInterface.getElevatorPosition(elevatorNumber));
         state.setCurrentFloor(rmiInterface.getElevatorFloor(elevatorNumber));
         state.setTargetFloor(rmiInterface.getTarget(elevatorNumber));
@@ -167,6 +175,11 @@ public class ElevatorImpl implements IElevator {
         return state;
     }
 
+
+    // ----------------------------------------------------------------
+    // Helper method to check for data consistency
+    // ----------------------------------------------------------------
+
     @FunctionalInterface
     interface ThrowingSupplier<T, E extends Exception> {
         T get() throws E;
@@ -174,19 +187,30 @@ public class ElevatorImpl implements IElevator {
 
     @NotNull
     private <T, E extends Exception> T runSupplierChecked(@NotNull ThrowingSupplier<T, E> supplier, int maximumRetries) throws E, RemoteException, TimeoutException {
-        T result;
-        long clockTickBefore;
-        long clockTickAfter;
+        T result = null;
+        long clockTickBefore = -1;
+        long clockTickAfter = -1;
 
+        ElevatorException storedEx;
         int retries = maximumRetries;
+
         do {
-            clockTickBefore = rmiInterface.getClockTick();
-            result = supplier.get();
-            clockTickAfter = rmiInterface.getClockTick();
-        } while (--retries > 0 && clockTickAfter != clockTickBefore);
+            storedEx = null;
+
+            try {
+                clockTickBefore = rmiInterface.getClockTick();
+                result = supplier.get();
+                clockTickAfter = rmiInterface.getClockTick();
+            } catch (ElevatorException ex) {
+                storedEx = ex;
+            }
+        } while (retries-- > 0 && (storedEx != null || clockTickAfter != clockTickBefore));
+
+        if (storedEx != null) {
+            throw storedEx;
+        }
 
         if (clockTickAfter != clockTickBefore) {
-            assert retries == 0;
             throw new TimeoutException("Maximum number of retries reached. Could not update elevator state consistently!");
         }
 
