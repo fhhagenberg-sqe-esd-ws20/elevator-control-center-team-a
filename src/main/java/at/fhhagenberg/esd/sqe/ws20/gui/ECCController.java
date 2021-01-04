@@ -26,6 +26,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.transform.Translate;
 
 public class ECCController implements Initializable {
 	
@@ -49,7 +51,13 @@ public class ECCController implements Initializable {
 	@FXML private Label lTopFloor;
 	@FXML private Label lGroundFloor;
 	
+	@FXML private ImageView ivGElvDirUp;
+	@FXML private ImageView ivGElvDirDown;
+	@FXML private Label lElvCurFloor;
+	@FXML private Rectangle recElevator;
+	
 	private BooleanProperty doorState = new SimpleBooleanProperty(false);
+	private BooleanProperty elevatorDirection = new SimpleBooleanProperty(false);
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -60,6 +68,9 @@ public class ECCController implements Initializable {
 		ivDoorStateClosed.visibleProperty().bind(doorState.not());
 		ivDoorStateOpen.visibleProperty().bind(doorState);
 		
+		ivGElvDirUp.visibleProperty().bind(elevatorDirection.not());
+		ivGElvDirDown.visibleProperty().bind(elevatorDirection);
+			
 		//Init elvator floors TODO reworke
 		int floors = 25;
 		for(int i = 0; i < floors; i++) {
@@ -68,8 +79,11 @@ public class ECCController implements Initializable {
 			rCon.setPercentHeight(100/floors);
 			gElevatorFloors.getRowConstraints().add(rCon);
 		}
+		//gElevatorFloors.setGridLinesVisible(false);
 		
 		setTargetFloors();    //TODO: remove
+		//Init elevator 
+		
 	}
 	
 	@FXML
@@ -78,11 +92,15 @@ public class ECCController implements Initializable {
 	        tbtnOperationMode.setText("Automatic");
 	        
 	        doorState.set(true); // TODO: clean set bool property on door state call
+	        elevatorDirection.set(true);
+	        translateElevator(50);
 	        setTargetFloors();    //TODO: remove
 	    } else {
 	    	tbtnOperationMode.setText("Manual");
 	    	
 	    	doorState.set(false); // TODO: clean set bool property on door state call
+	    	elevatorDirection.set(false);
+	    	translateElevator(100);
 	    }
 	}
 	
@@ -112,5 +130,17 @@ public class ECCController implements Initializable {
 		
 		
 		cnt++;
+	}
+	
+	private void translateElevator(Integer percentage) {
+		double maxHeight = gElevator.getHeight();
+		double rectangleHeight = recElevator.getHeight();
+		double yRect = -(maxHeight * percentage / 100.0 - rectangleHeight - 10.0);
+		double yLable = yRect - rectangleHeight / 2.0;
+
+		ivGElvDirUp.translateYProperty().set(yRect);
+		ivGElvDirDown.translateYProperty().set(yRect);
+		lElvCurFloor.translateYProperty().set(yRect);
+		recElevator.translateYProperty().set(yRect);
 	}
 }
