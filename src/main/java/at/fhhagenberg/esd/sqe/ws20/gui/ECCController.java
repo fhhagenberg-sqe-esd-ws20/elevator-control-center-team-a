@@ -22,6 +22,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.RowConstraints;
 
 public class ECCController implements Initializable {
 	
@@ -38,7 +39,12 @@ public class ECCController implements Initializable {
 	@FXML private ComboBox<String> cbTargetFloor; //TODO: init combobox list
 	@FXML private Button btnGo;
 	@FXML private TextField tfErrorLog;	
+	
 	@FXML private GridPane gElevator;
+	@FXML private GridPane gElevatorFloors;
+	
+	@FXML private Label lTopFloor;
+	@FXML private Label lGroundFloor;
 	
 	private BooleanProperty doorState = new SimpleBooleanProperty(false);
 
@@ -51,7 +57,14 @@ public class ECCController implements Initializable {
 		ivDoorStateClosed.visibleProperty().bind(doorState.not());
 		ivDoorStateOpen.visibleProperty().bind(doorState);
 		
-		//Init elvator floors
+		//Init elvator floors TODO reworke
+		int floors = 25;
+		for(int i = 0; i < floors; i++) {
+			RowConstraints rCon = new RowConstraints();
+			rCon.setMinHeight(20);
+			rCon.setPercentHeight(100/floors);
+			gElevatorFloors.getRowConstraints().add(rCon);
+		}
 	}
 	
 	@FXML
