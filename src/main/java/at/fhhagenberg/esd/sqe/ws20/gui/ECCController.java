@@ -30,6 +30,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Translate;
 
@@ -87,21 +88,21 @@ public class ECCController implements Initializable {
 			hb.setSpacing(5);
 			hb.setPadding(new Insets(5, 5, 5, 5));
 			
-			File fileDir = new File("images\\doorClosedReworked.png");
+			File fileDir = new File("images\\arrowUp.png");
 	        Image imageDir = new Image(fileDir.toURI().toString());
 	        ImageView ivDir = new ImageView();
 	        ivDir.setPreserveRatio(true);
 	        ivDir.setFitHeight(20);
 	        ivDir.setImage(imageDir);
 	        
-	        File fileHold = new File("images\\doorClosedReworked.png");
+	        File fileHold = new File("images\\hand.png");
 	        Image imageHold = new Image(fileHold.toURI().toString());
 	        ImageView ivHold = new ImageView();
 	        ivHold.setPreserveRatio(true);
 	        ivHold.setFitHeight(20);
 	        ivHold.setImage(imageHold);
 	        
-	        File fileRequest = new File("images\\doorClosedReworked.png");
+	        File fileRequest = new File("images\\filler.jpeg");
 	        Image imageRequest = new Image(fileRequest.toURI().toString());
 	        ImageView ivRequest = new ImageView();
 	        ivRequest.setPreserveRatio(true);
@@ -109,7 +110,9 @@ public class ECCController implements Initializable {
 	        ivRequest.setImage(imageRequest);
 	        
 			Label lFloor = new Label(cnt.toString());
-			hb.getChildren().addAll(ivRequest, ivHold, ivDir, lFloor);
+			Line line = new Line(0,0,10,0);
+			line.translateXProperty().set(10);
+			hb.getChildren().addAll(ivRequest, ivHold, ivDir, lFloor, line);
 			
 			gElevatorFloors.getRowConstraints().add(rCon);
 			gElevatorFloors.add(hb, 0, i);
