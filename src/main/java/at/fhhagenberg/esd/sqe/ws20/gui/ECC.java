@@ -1,6 +1,9 @@
 package at.fhhagenberg.esd.sqe.ws20.gui;
 
 import java.util.ResourceBundle;
+
+import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
+import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorRMIMock;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Parent;
@@ -25,10 +28,14 @@ public class ECC extends Application {
     public void start(Stage stage) {
 		try {
 			ResourceBundle resources = ResourceBundle.getBundle(Messages.getString("ECC.0"));
-			Parent root = FXMLLoader.load(getClass().getResource(Messages.getString("ECC.1")), resources);
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(Messages.getString("ECC.1")), resources);
+			Parent root = loader.load();
+			ECCController controller = loader.getController();
+		    controller.setModel(new ElevatorImpl(new ElevatorRMIMock(5, 25, 10)));	//FIXME: Create correct model
+
 			Scene scene = new Scene(root);
-		    
-	        stage.setTitle(Messages.getString("ECC.2"));
+
+			stage.setTitle(Messages.getString("ECC.2"));
 	        stage.setScene(scene);
 	        stage.show();
 	    } catch (Exception e) {
