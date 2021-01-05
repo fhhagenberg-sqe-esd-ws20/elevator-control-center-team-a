@@ -192,7 +192,7 @@
 	               <VBox>
 	               	   	<children>
 	               	   		<Label text="%ECC.10" />
-		                  	<ToggleButton fx:id="tbtnOperationMode" alignment="CENTER" minWidth="100.0" onAction="#actionClickedBtnOperationMode" text="Manual" />
+		                  	<ToggleButton fx:id="tbtnOperationMode" alignment="CENTER" minWidth="100.0" text="Manual" />
 		                  	<VBox spacing="5.0"> 
 		                  		<padding>
 		                  			<Insets top="25.0" />
