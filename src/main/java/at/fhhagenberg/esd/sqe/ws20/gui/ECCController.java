@@ -149,7 +149,7 @@ public class ECCController implements Initializable {
 			ivRequest.setImage(imageRequest);
 
 			Line line = new Line(0,0,10,0);
-			line.translateXProperty().set(10);
+			line.translateXProperty().set(5);
 
 			hb.getChildren().addAll(ivRequest, ivHold, ivDirUp, ivDirDown, line);
 
