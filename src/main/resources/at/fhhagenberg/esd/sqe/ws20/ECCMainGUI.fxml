@@ -141,7 +141,7 @@
 						    <HBox style="-fx-padding: 2.5 5 2.5 0;">
 						    	<children>
 						    		<Label text="%ECC.5" />
-						    		<Label fx:id="lNextTarFloor" />
+						    		<Label fx:id="lTargetFloor" />
 						    	</children>
 						    </HBox>
 						    <HBox style="-fx-padding: 2.5 5 2.5 0;">
@@ -198,7 +198,7 @@
 		                  			<Insets top="25.0" />
 		                  		</padding>
 		                  		<children>
-			                  		<Label fx:id="lTargetFloor" style="-fx-padding: 0 0 5 0;" text="%ECC.12" />
+			                  		<Label style="-fx-padding: 0 0 5 0;" text="%ECC.12" />
 				                  	<!-- Combo Box example https://gist.github.com/jewelsea/3062859 -->
 				                  	<ComboBox fx:id="cbTargetFloor" layoutX="15.0" layoutY="33.0" prefWidth="130.0" promptText="Choose Floor">
 								      <items>
