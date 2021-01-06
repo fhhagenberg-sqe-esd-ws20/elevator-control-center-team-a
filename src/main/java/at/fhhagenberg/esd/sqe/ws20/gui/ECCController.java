@@ -89,6 +89,8 @@ public class ECCController implements Initializable {
 	private ReadOnlyIntegerProperty selectedFloor;
 	private Timer timer = new Timer();
 
+	private static final double recMargin = 10.0;
+	
 	IElevator model;
 	GeneralInformation info;
 
@@ -255,9 +257,12 @@ public class ECCController implements Initializable {
 	private void translateElevator(Integer percentage) {
 		double maxHeight = gElevator.getHeight();
 		double rectangleHeight = recElevator.getHeight();
-		double yRect = -(maxHeight * percentage / 100.0 - rectangleHeight - 10.0);
-		double yLabel = yRect - rectangleHeight / 2.0;
-
+		double yRect = -(maxHeight * percentage / 100.0);
+		double minTranslation = -(rectangleHeight + recMargin);
+		if(yRect <= minTranslation) {
+			yRect += minTranslation;
+		}
+		
 		ivGElvDirUp.translateYProperty().set(yRect);
 		ivGElvDirDown.translateYProperty().set(yRect);
 		lElvCurFloor.translateYProperty().set(yRect);
