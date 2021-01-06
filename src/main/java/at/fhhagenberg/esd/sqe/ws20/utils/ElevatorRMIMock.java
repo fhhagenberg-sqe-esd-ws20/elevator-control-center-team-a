@@ -6,27 +6,28 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
-class ElevatorInfo {
-    public int committedDirection = IElevatorRMI.ELEVATOR_DIRECTION_UNCOMMITTED;
-    public int elevatorAccel = 0;
-    public List<Boolean> elevatorButtons = new ArrayList<>();
-    public int doorStatus = IElevatorRMI.ELEVATOR_DOORS_CLOSED;
-    public int currentFloor = 0;
-    public int currentPosition = 0;
-    public int currentSpeed = 0;
-    public int currentWeight = 0;
-    public int capacity = 0;
-    public List<Boolean> servicedFloors = new ArrayList<>();
-    public int targetFloor = 0;
-}
-
-class FloorInfo {
-    public boolean buttonDown = false;
-    public boolean buttonUp = false;
-}
-
 
 public class ElevatorRMIMock implements IElevatorRMI {
+
+    private class ElevatorInfo {
+        public int committedDirection = IElevatorRMI.ELEVATOR_DIRECTION_UNCOMMITTED;
+        public int elevatorAccel = 0;
+        public List<Boolean> elevatorButtons = new ArrayList<>();
+        public int doorStatus = IElevatorRMI.ELEVATOR_DOORS_CLOSED;
+        public int currentFloor = 0;
+        public int currentPosition = 0;
+        public int currentSpeed = 0;
+        public int currentWeight = 0;
+        public int capacity = 0;
+        public List<Boolean> servicedFloors = new ArrayList<>();
+        public int targetFloor = 0;
+    }
+
+    private class FloorInfo {
+        public boolean buttonDown = false;
+        public boolean buttonUp = false;
+    }
+
 
     private final List<ElevatorInfo> elevators = new ArrayList<>();
     private final List<FloorInfo> floors = new ArrayList<>();
