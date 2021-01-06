@@ -26,6 +26,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
@@ -66,6 +67,8 @@ public class ECCController implements Initializable {
 	@FXML private ImageView ivGElvDirDown;
 	@FXML private Label lElvCurFloor;
 	@FXML private Rectangle recElevator;
+	
+	@FXML private Group groupElevator;
 
 	private class FloorState {
 		public BooleanProperty requestUp = new SimpleBooleanProperty(false);
@@ -240,7 +243,7 @@ public class ECCController implements Initializable {
 		lDirection.visibleProperty().bind(anyElevatorSelected);
 
 		position.addListener((observableValue, oldVal, newVal) ->
-				translateElevator(100 * newVal.intValue()/(info.getNrOfFloors() * info.getFloorHeight())));
+				translateElevator(100 * newVal.intValue()/((info.getNrOfFloors()-1) * info.getFloorHeight())));
 		targetFloor.addListener((observableValue, oldVal, newVal) ->
 				model.setTargetFloor(currentElevator.get(), newVal.intValue()));
 		isDirectionUp.addListener((observableValue, oldVal, newVal) ->
@@ -256,16 +259,10 @@ public class ECCController implements Initializable {
 	
 	private void translateElevator(Integer percentage) {
 		double maxHeight = gElevator.getHeight();
-		double rectangleHeight = recElevator.getHeight();
-		double yRect = -(maxHeight * percentage / 100.0);
-		double minTranslation = -(rectangleHeight + recMargin);
-		if(yRect <= minTranslation) {
-			yRect += minTranslation;
-		}
+		double elevatorHeight = groupElevator.getBoundsInLocal().getHeight();
+		double yRect = (maxHeight - elevatorHeight) * percentage / 100.0;
 		
-		ivGElvDirUp.translateYProperty().set(yRect);
-		ivGElvDirDown.translateYProperty().set(yRect);
-		lElvCurFloor.translateYProperty().set(yRect);
-		recElevator.translateYProperty().set(yRect);
+		groupElevator.translateYProperty().set(-yRect);
+
 	}
 }
