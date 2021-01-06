@@ -7,6 +7,7 @@ import java.util.*;
 import at.fhhagenberg.esd.sqe.ws20.model.*;
 import javafx.application.Platform;
 import javafx.beans.property.*;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -77,7 +78,8 @@ public class ECCController implements Initializable {
 	private static class FloorState {
 		public BooleanProperty requestUp = new SimpleBooleanProperty(false);
 		public BooleanProperty requestDown = new SimpleBooleanProperty(false);
-		public BooleanProperty targetRequest = new SimpleBooleanProperty(false);
+		public BooleanProperty stopRequest = new SimpleBooleanProperty(false);
+		public BooleanProperty isServiced = new SimpleBooleanProperty(false);
 	}
 	
 	final private BooleanProperty isDoorOpen = new SimpleBooleanProperty();
@@ -98,6 +100,19 @@ public class ECCController implements Initializable {
 
 	IElevator model;
 	GeneralInformation info;
+
+	static private ImageView createFloorImageView(String path, ObservableValue<Boolean> visible)
+	{
+		File file = new File(path);
+		Image image = new Image(file.toURI().toString());
+		ImageView iv = new ImageView();
+		iv.setPreserveRatio(true);
+		iv.setFitHeight(20);
+		iv.setImage(image);
+		iv.visibleProperty().bind(visible);
+
+		return iv;
+	}
 
 	public void setModel(IElevator model) {
 		this.model = model;
@@ -123,45 +138,24 @@ public class ECCController implements Initializable {
 			hb.setAlignment(Pos.CENTER_RIGHT);
 			hb.setSpacing(5);
 			hb.setPadding(new Insets(5, 5, 5, 5));
-
-			File fileDirUp = new File("images/arrowUp.png");
-			Image imageDirUp = new Image(fileDirUp.toURI().toString());
-			ImageView ivDirUp = new ImageView();
-			ivDirUp.setPreserveRatio(true);
-			ivDirUp.setFitHeight(20);
-			ivDirUp.setImage(imageDirUp);
-			ivDirUp.visibleProperty().bind(floors[i].requestUp);
-
-			File fileDirDown = new File("images/arrowDown.png");
-			Image imageDirDown = new Image(fileDirDown.toURI().toString());
-			ImageView ivDirDown = new ImageView();
-			ivDirDown.setPreserveRatio(true);
-			ivDirDown.setFitHeight(20);
-			ivDirDown.setImage(imageDirDown);
-			ivDirDown.visibleProperty().bind(floors[i].requestDown);
-
-			File fileHold = new File("images/hand.png");
-			Image imageHold = new Image(fileHold.toURI().toString());
-			ImageView ivHold = new ImageView();
-			ivHold.setPreserveRatio(true);
-			ivHold.setFitHeight(20);
-			ivHold.setImage(imageHold);
-			ivHold.visibleProperty().bind(floors[i].targetRequest);
-
-			File fileRequest = new File("images/filler.jpeg");
-			Image imageRequest = new Image(fileRequest.toURI().toString());
-			ImageView ivRequest = new ImageView();
-			ivRequest.setPreserveRatio(true);
-			ivRequest.setFitHeight(20);
-			ivRequest.setImage(imageRequest);
+			hb.translateXProperty().set(10);
 
 			Line line = new Line(0,0,10,0);
-			line.translateXProperty().set(5);
+			line.disableProperty().bind(floors[i].isServiced.not());
 
-			hb.getChildren().addAll(ivRequest, ivHold, ivDirUp, ivDirDown, line);
+			Label label = new Label(Integer.toString(i));
+			label.disableProperty().bind(floors[i].isServiced.not());
+
+			hb.getChildren().addAll(
+					createFloorImageView("images/arrowUp.png", floors[i].requestUp),
+					createFloorImageView("images/arrowDown.png", floors[i].requestDown),
+					createFloorImageView("images/hand.png", floors[i].stopRequest),
+					createFloorImageView("images/filler.jpeg", targetFloor.isEqualTo(i)),
+					label,
+					line);
 
 			gElevatorFloors.getRowConstraints().add(rCon);
-			gElevatorFloors.add(hb, 0, i);
+			gElevatorFloors.add(hb, 0, info.getNrOfFloors() - i - 1);
 		}
 
 		elevators.clear();
@@ -193,22 +187,27 @@ public class ECCController implements Initializable {
 			isDoorOpen.setValue(elevatorState.getCurrentDoorStatus() == DoorStatus.Open);
 			isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.Up);
 
+			var servicedFloors = elevatorState.getServicedFloors();
+
 			for (int i = 0; i < info.getNrOfFloors(); i++)
 			{
 				var state = model.queryFloorState(i);
 				floors[i].requestUp.set(state.isUpRequest());
 				floors[i].requestDown.set(state.isDownRequest());
-				floors[i].targetRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
+				floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
+				floors[i].isServiced.set(servicedFloors.get(i));
 			}
 		});
 	}
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		// Get 'selected index' properties from comboboxes
 		currentElevator = cbElevator.getSelectionModel().selectedIndexProperty();
 		selectedFloor = cbTargetFloor.getSelectionModel().selectedIndexProperty();
 		anyElevatorSelected.bind(currentElevator.greaterThanOrEqualTo(0));
 
+		// Bind properties to mode button (auto/manual)
 		tbtnOperationMode.selectedProperty().bindBidirectional(isAutomatic);
 		tbtnOperationMode.disableProperty().bind(anyElevatorSelected.not());
 
