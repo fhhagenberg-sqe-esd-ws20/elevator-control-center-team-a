@@ -243,6 +243,8 @@ public class ECCController implements Initializable {
 
 		lDirection.visibleProperty().bind(anyElevatorSelected);
 
+		lElvCurFloor.textProperty().bind(currentFloor.asString());
+
 		position.addListener((observableValue, oldVal, newVal) ->
 				translateElevator(100 * newVal.intValue()/((info.getNrOfFloors()-1) * info.getFloorHeight())));
 		targetFloor.addListener((observableValue, oldVal, newVal) ->
@@ -265,6 +267,5 @@ public class ECCController implements Initializable {
 		double yRect = (maxHeight - elevatorHeight) * percentage / 100.0;
 		
 		groupElevator.translateYProperty().set(-yRect);
-
 	}
 }
