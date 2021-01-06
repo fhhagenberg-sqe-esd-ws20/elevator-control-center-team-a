@@ -7,5 +7,5 @@ module at.fhhagenberg.sqe {
     requires java.rmi;
 
     exports at.fhhagenberg.esd.sqe.ws20.gui;
-    opens at.fhhagenberg.esd.sqe.ws20.gui to javafx.fxml;
+    opens at.fhhagenberg.esd.sqe.ws20.gui;
 }

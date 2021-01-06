@@ -83,7 +83,7 @@
                     <version>3.0.0-M3</version>
                     <configuration>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                        <argLine>--add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
+                        <argLine>@{argLine} --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
                     </configuration>
                 </plugin>
             </plugins>
@@ -97,6 +97,7 @@
                     <launcher>launcher</launcher>
                     <mainClass>at.fhhagenberg.esd.sqe.ws20.gui.ECC</mainClass>
                 </configuration>
+
             </plugin>
             <plugin>
 				<groupId>org.jacoco</groupId>
