@@ -2,34 +2,19 @@ package at.fhhagenberg.esd.sqe.ws20.gui;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.function.UnaryOperator;
-import java.util.regex.Pattern;
+import java.util.*;
 
-import at.fhhagenberg.esd.sqe.ws20.gui.Messages;
 import at.fhhagenberg.esd.sqe.ws20.model.*;
-import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
 import javafx.application.Platform;
-import javafx.beans.Observable;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableListBase;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -37,63 +22,80 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.transform.Translate;
-
-import static javafx.collections.FXCollections.observableArrayList;
 
 public class ECCController implements Initializable {
-	
+
+	@SuppressWarnings("unused")
 	@FXML private ComboBox<String> cbElevator;
+	@SuppressWarnings("unused")
 	@FXML private Label lCurFloor;
+	@SuppressWarnings("unused")
 	@FXML private Label lNextTarFloor;
+	@SuppressWarnings("unused")
 	@FXML private Label lDirection;
+	@SuppressWarnings("unused")
 	@FXML private Label lSpeed;
+	@SuppressWarnings("unused")
 	@FXML private Label lWeight;
+	@SuppressWarnings("unused")
 	@FXML private ImageView ivDoorStateClosed;
+	@SuppressWarnings("unused")
 	@FXML private ImageView ivDoorStateOpen;
+	@SuppressWarnings("unused")
 	@FXML private ToggleButton tbtnOperationMode;
+	@SuppressWarnings("unused")
 	@FXML private Label lTargetFloor;
+	@SuppressWarnings("unused")
 	@FXML private ComboBox<String> cbTargetFloor;
+	@SuppressWarnings("unused")
 	@FXML private Button btnGo;
-	@FXML private TextField tfErrorLog;	
-	
+	@SuppressWarnings("unused")
+	@FXML private TextField tfErrorLog;
+
+	@SuppressWarnings("unused")
 	@FXML private GridPane gElevator;
+	@SuppressWarnings("unused")
 	@FXML private GridPane gElevatorFloors;
-	
+
+	@SuppressWarnings("unused")
 	@FXML private Label lTopFloor;
+	@SuppressWarnings("unused")
 	@FXML private Label lGroundFloor;
-	
+
+	@SuppressWarnings("unused")
 	@FXML private ImageView ivGElvDirUp;
+	@SuppressWarnings("unused")
 	@FXML private ImageView ivGElvDirDown;
+	@SuppressWarnings("unused")
 	@FXML private Label lElvCurFloor;
+	@SuppressWarnings("unused")
 	@FXML private Rectangle recElevator;
-	
+
+	@SuppressWarnings("unused")
 	@FXML private Group groupElevator;
 
-	private class FloorState {
+	private static class FloorState {
 		public BooleanProperty requestUp = new SimpleBooleanProperty(false);
 		public BooleanProperty requestDown = new SimpleBooleanProperty(false);
 		public BooleanProperty targetRequest = new SimpleBooleanProperty(false);
 	}
 	
-	private BooleanProperty isDoorOpen = new SimpleBooleanProperty();
-	private BooleanProperty isDirectionUp = new SimpleBooleanProperty();
-	private BooleanProperty isAutomatic = new SimpleBooleanProperty();
-	private ListProperty elevators = new SimpleListProperty<String>();
-	private ListProperty floorNames = new SimpleListProperty<String>();
-	private FloorState floors[];
-	private IntegerProperty position = new SimpleIntegerProperty();
-	private IntegerProperty speed = new SimpleIntegerProperty();
-	private IntegerProperty currentFloor = new SimpleIntegerProperty();
-	private IntegerProperty targetFloor = new SimpleIntegerProperty();
-	private IntegerProperty weight = new SimpleIntegerProperty();
-	private BooleanProperty anyElevatorSelected = new SimpleBooleanProperty();
+	final private BooleanProperty isDoorOpen = new SimpleBooleanProperty();
+	final private BooleanProperty isDirectionUp = new SimpleBooleanProperty();
+	final private BooleanProperty isAutomatic = new SimpleBooleanProperty();
+	final private ListProperty<String> elevators = new SimpleListProperty<>();
+	final private ListProperty<String> floorNames = new SimpleListProperty<>();
+	private FloorState[] floors;
+	final private IntegerProperty position = new SimpleIntegerProperty();
+	final private IntegerProperty speed = new SimpleIntegerProperty();
+	final private IntegerProperty currentFloor = new SimpleIntegerProperty();
+	final private IntegerProperty targetFloor = new SimpleIntegerProperty();
+	final private IntegerProperty weight = new SimpleIntegerProperty();
+	final private BooleanProperty anyElevatorSelected = new SimpleBooleanProperty();
 	private ReadOnlyIntegerProperty currentElevator;
 	private ReadOnlyIntegerProperty selectedFloor;
-	private Timer timer = new Timer();
+	final private Timer timer = new Timer();
 
-	private static final double recMargin = 10.0;
-	
 	IElevator model;
 	GeneralInformation info;
 
@@ -115,7 +117,7 @@ public class ECCController implements Initializable {
 
 			RowConstraints rCon = new RowConstraints();
 			rCon.setMinHeight(20);
-			rCon.setPercentHeight(100/info.getNrOfFloors());
+			rCon.setPercentHeight(100.0/info.getNrOfFloors());
 
 			HBox hb = new HBox();
 			hb.setAlignment(Pos.CENTER_RIGHT);
@@ -165,7 +167,7 @@ public class ECCController implements Initializable {
 		elevators.clear();
 		for(int i = 0; i < info.getNrOfElevators(); i++)
 		{
-			elevators.add("Elevator " + Integer.toString(i));
+			elevators.add("Elevator " + i);
 		}
 
 		timer.schedule(new TimerTask() {
@@ -225,8 +227,8 @@ public class ECCController implements Initializable {
 		cbTargetFloor.itemsProperty().bind(floorNames);
 		cbElevator.itemsProperty().bind(elevators);
 
-		floorNames.setValue(FXCollections.observableArrayList(new ArrayList()));
-		elevators.setValue(FXCollections.observableArrayList(new ArrayList()));
+		floorNames.setValue(FXCollections.observableArrayList(new ArrayList<>()));
+		elevators.setValue(FXCollections.observableArrayList(new ArrayList<>()));
 
 		lCurFloor.textProperty().bind(currentFloor.asString());
 		lCurFloor.visibleProperty().bind(anyElevatorSelected);
@@ -251,7 +253,8 @@ public class ECCController implements Initializable {
 		tbtnOperationMode.selectedProperty().addListener((observableValue, oldVal, newVal) ->
 				tbtnOperationMode.setText(newVal ? "Automatic" : "Manual"));
 	}
-	
+
+	@SuppressWarnings("unused")
 	@FXML protected void gotoTargetFloor(ActionEvent event) {
 		if (currentElevator.get() >= 0 && selectedFloor.get() >= 0)	//TODO:
 			targetFloor.setValue(selectedFloor.get());
