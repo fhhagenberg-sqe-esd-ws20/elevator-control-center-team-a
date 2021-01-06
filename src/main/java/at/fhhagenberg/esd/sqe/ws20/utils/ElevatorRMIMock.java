@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ElevatorRMIMock implements IElevatorRMI {
 
-    private class ElevatorInfo {
+    public class ElevatorInfo {
         public int committedDirection = IElevatorRMI.ELEVATOR_DIRECTION_UNCOMMITTED;
         public int elevatorAccel = 0;
         public List<Boolean> elevatorButtons = new ArrayList<>();
@@ -23,7 +23,7 @@ public class ElevatorRMIMock implements IElevatorRMI {
         public int targetFloor = 0;
     }
 
-    private class FloorInfo {
+    public class FloorInfo {
         public boolean buttonDown = false;
         public boolean buttonUp = false;
     }
@@ -84,11 +84,15 @@ public class ElevatorRMIMock implements IElevatorRMI {
 
 
     private void validateElevatorNumber(int elevatorNumber) {
-        if(elevatorNumber < 0 || elevatorNumber >= elevators.size()) throw new RuntimeException("Invalid elevator number");
+        if (elevatorNumber < 0 || elevatorNumber >= elevators.size()) {
+            throw new IllegalArgumentException("Invalid elevator number");
+        }
     }
 
     private void validateFloorNumber(int floorNumber) {
-        if(floorNumber < 0 || floorNumber >= floors.size()) throw new RuntimeException("Invalid floor number");
+        if (floorNumber < 0 || floorNumber >= floors.size()) {
+            throw new IllegalArgumentException("Invalid floor number");
+        }
     }
 
 

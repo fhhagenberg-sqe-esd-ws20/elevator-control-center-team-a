@@ -3,10 +3,11 @@ package at.fhhagenberg.esd.sqe.ws20.model;
 import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
 import at.fhhagenberg.esd.sqe.ws20.utils.BoolGenerator;
 import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.rmi.RemoteException;
@@ -26,10 +27,16 @@ import static org.mockito.Mockito.*;
 public class ElevatorImplTest {
 
     @Mock
-    private IElevatorRMI mockedElevatorRMI;
+    public IElevatorRMI mockedElevatorRMI;
 
-    @InjectMocks
-    private ElevatorImpl uut;
+    public ElevatorImpl uut;
+
+
+    @BeforeEach
+    public void setupTest() {
+        MockitoAnnotations.openMocks(this);
+        uut = new ElevatorImpl(mockedElevatorRMI);
+    }
 
 
     @Test
@@ -100,6 +107,7 @@ public class ElevatorImplTest {
         verify(mockedElevatorRMI).getClockTick();
         verify(mockedElevatorRMI).getFloorNum();
         verify(mockedElevatorRMI).getElevatorNum();
+        verify(mockedElevatorRMI).getFloorHeight();
         verifyNoMoreInteractions(mockedElevatorRMI);
     }
 
@@ -220,6 +228,7 @@ public class ElevatorImplTest {
         verify(mockedElevatorRMI, times(4)).getElevatorCapacity(anyInt());
         verify(mockedElevatorRMI, times(4)).getElevatorAccel(anyInt());
         verify(mockedElevatorRMI, times(4)).getElevatorSpeed(anyInt());
+        verify(mockedElevatorRMI, times(4)).getCommittedDirection(anyInt());
         verify(mockedElevatorRMI, times(4)).getElevatorPosition(anyInt());
         verify(mockedElevatorRMI, times(4)).getElevatorFloor(anyInt());
         verify(mockedElevatorRMI, times(4)).getTarget(anyInt());
@@ -267,6 +276,7 @@ public class ElevatorImplTest {
 
         verify(mockedElevatorRMI, times(2)).getClockTick();
         verify(mockedElevatorRMI, times(1)).getElevatorCapacity(anyInt());
+        verify(mockedElevatorRMI, times(1)).getCommittedDirection(anyInt());
         verify(mockedElevatorRMI, times(1)).getElevatorAccel(anyInt());
         verify(mockedElevatorRMI, times(1)).getElevatorSpeed(anyInt());
         verify(mockedElevatorRMI, times(1)).getElevatorPosition(anyInt());
