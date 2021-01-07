@@ -1,9 +1,5 @@
 package at.fhhagenberg.esd.sqe.ws20.gui;
 
-import java.io.File;
-import java.net.URL;
-import java.util.*;
-
 import at.fhhagenberg.esd.sqe.ws20.model.*;
 import javafx.application.Platform;
 import javafx.beans.property.*;
@@ -24,248 +20,289 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class ECCController implements Initializable {
 
-	@SuppressWarnings("unused")
-	@FXML private ComboBox<String> cbElevator;
-	@SuppressWarnings("unused")
-	@FXML private Label lCurFloor;
-	@SuppressWarnings("unused")
-	@FXML private Label lNextTarFloor;
-	@SuppressWarnings("unused")
-	@FXML private Label lDirection;
-	@SuppressWarnings("unused")
-	@FXML private Label lSpeed;
-	@SuppressWarnings("unused")
-	@FXML private Label lWeight;
-	@SuppressWarnings("unused")
-	@FXML private ImageView ivDoorStateClosed;
-	@SuppressWarnings("unused")
-	@FXML private ImageView ivDoorStateOpen;
-	@SuppressWarnings("unused")
-	@FXML private ToggleButton tbtnOperationMode;
-	@SuppressWarnings("unused")
-	@FXML private Label lTargetFloor;
-	@SuppressWarnings("unused")
-	@FXML private ComboBox<String> cbTargetFloor;
-	@SuppressWarnings("unused")
-	@FXML private Button btnGo;
-	@SuppressWarnings("unused")
-	@FXML private TextField tfErrorLog;
+    final private BooleanProperty isDoorOpen = new SimpleBooleanProperty();
+    final private BooleanProperty isDirectionUp = new SimpleBooleanProperty();
+    final private BooleanProperty isAutomatic = new SimpleBooleanProperty();
+    final private ListProperty<String> elevators = new SimpleListProperty<>();
+    final private ListProperty<String> floorNames = new SimpleListProperty<>();
+    final private IntegerProperty position = new SimpleIntegerProperty();
+    final private IntegerProperty speed = new SimpleIntegerProperty();
+    final private IntegerProperty currentFloor = new SimpleIntegerProperty();
+    final private IntegerProperty targetFloor = new SimpleIntegerProperty();
+    final private IntegerProperty weight = new SimpleIntegerProperty();
+    final private BooleanProperty anyElevatorSelected = new SimpleBooleanProperty();
+    final private Timer timer = new Timer();
+    final private StringProperty errorText = new SimpleStringProperty();
+    @SuppressWarnings("unused")
+    @FXML
+    private ComboBox<String> cbElevator;
+    @SuppressWarnings("unused")
+    @FXML
+    private Label lCurFloor;
+    @SuppressWarnings("unused")
+    @FXML
+    private Label lNextTarFloor;
+    @SuppressWarnings("unused")
+    @FXML
+    private Label lDirection;
+    @SuppressWarnings("unused")
+    @FXML
+    private Label lSpeed;
+    @SuppressWarnings("unused")
+    @FXML
+    private Label lWeight;
+    @SuppressWarnings("unused")
+    @FXML
+    private ImageView ivDoorStateClosed;
+    @SuppressWarnings("unused")
+    @FXML
+    private ImageView ivDoorStateOpen;
+    @SuppressWarnings("unused")
+    @FXML
+    private ToggleButton tbtnOperationMode;
+    @SuppressWarnings("unused")
+    @FXML
+    private Label lTargetFloor;
+    @SuppressWarnings("unused")
+    @FXML
+    private ComboBox<String> cbTargetFloor;
+    @SuppressWarnings("unused")
+    @FXML
+    private Button btnGo;
+    @SuppressWarnings("unused")
+    @FXML
+    private TextField tfErrorLog;
+    @SuppressWarnings("unused")
+    @FXML
+    private GridPane gElevator;
+    @SuppressWarnings("unused")
+    @FXML
+    private GridPane gElevatorFloors;
+    @SuppressWarnings("unused")
+    @FXML
+    private Label lTopFloor;
+    @SuppressWarnings("unused")
+    @FXML
+    private Label lGroundFloor;
+    @SuppressWarnings("unused")
+    @FXML
+    private ImageView ivGElvDirUp;
+    @SuppressWarnings("unused")
+    @FXML
+    private ImageView ivGElvDirDown;
+    @SuppressWarnings("unused")
+    @FXML
+    private Label lElvCurFloor;
+    @SuppressWarnings("unused")
+    @FXML
+    private Rectangle recElevator;
+    @SuppressWarnings("unused")
+    @FXML
+    private Group groupElevator;
+    private FloorState[] floors;
+    private ReadOnlyIntegerProperty currentElevator;
+    private ReadOnlyIntegerProperty selectedFloor;
+    private IElevator model;
+    private GeneralInformation info;
 
-	@SuppressWarnings("unused")
-	@FXML private GridPane gElevator;
-	@SuppressWarnings("unused")
-	@FXML private GridPane gElevatorFloors;
+    static private ImageView createFloorImageView(String path, ObservableValue<Boolean> visible) {
+        File file = new File(path);
+        Image image = new Image(file.toURI().toString());
+        ImageView iv = new ImageView();
+        iv.setPreserveRatio(true);
+        iv.setFitHeight(20);
+        iv.setImage(image);
+        iv.visibleProperty().bind(visible);
 
-	@SuppressWarnings("unused")
-	@FXML private Label lTopFloor;
-	@SuppressWarnings("unused")
-	@FXML private Label lGroundFloor;
+        return iv;
+    }
 
-	@SuppressWarnings("unused")
-	@FXML private ImageView ivGElvDirUp;
-	@SuppressWarnings("unused")
-	@FXML private ImageView ivGElvDirDown;
-	@SuppressWarnings("unused")
-	@FXML private Label lElvCurFloor;
-	@SuppressWarnings("unused")
-	@FXML private Rectangle recElevator;
+    public void setModel(IElevator model) {
+        this.model = model;
 
-	@SuppressWarnings("unused")
-	@FXML private Group groupElevator;
+        //Init elevator floors
+        try {
+            info = model.queryGeneralInformation();
+        } catch (Exception e) {
+            errorText.concat(e.getMessage() + "\n");
+        }
 
-	private static class FloorState {
-		public BooleanProperty requestUp = new SimpleBooleanProperty(false);
-		public BooleanProperty requestDown = new SimpleBooleanProperty(false);
-		public BooleanProperty stopRequest = new SimpleBooleanProperty(false);
-		public BooleanProperty isServiced = new SimpleBooleanProperty(false);
-	}
-	
-	final private BooleanProperty isDoorOpen = new SimpleBooleanProperty();
-	final private BooleanProperty isDirectionUp = new SimpleBooleanProperty();
-	final private BooleanProperty isAutomatic = new SimpleBooleanProperty();
-	final private ListProperty<String> elevators = new SimpleListProperty<>();
-	final private ListProperty<String> floorNames = new SimpleListProperty<>();
-	private FloorState[] floors;
-	final private IntegerProperty position = new SimpleIntegerProperty();
-	final private IntegerProperty speed = new SimpleIntegerProperty();
-	final private IntegerProperty currentFloor = new SimpleIntegerProperty();
-	final private IntegerProperty targetFloor = new SimpleIntegerProperty();
-	final private IntegerProperty weight = new SimpleIntegerProperty();
-	final private BooleanProperty anyElevatorSelected = new SimpleBooleanProperty();
-	private ReadOnlyIntegerProperty currentElevator;
-	private ReadOnlyIntegerProperty selectedFloor;
-	final private Timer timer = new Timer();
+        floorNames.clear();
+        gElevatorFloors.getChildren().clear();
+        floors = new FloorState[info.getNrOfFloors()];
 
-	IElevator model;
-	GeneralInformation info;
+        lTopFloor.setText(((Integer) (info.getNrOfFloors() - 1)).toString());
 
-	static private ImageView createFloorImageView(String path, ObservableValue<Boolean> visible)
-	{
-		File file = new File(path);
-		Image image = new Image(file.toURI().toString());
-		ImageView iv = new ImageView();
-		iv.setPreserveRatio(true);
-		iv.setFitHeight(20);
-		iv.setImage(image);
-		iv.visibleProperty().bind(visible);
+        for (int i = 0; i < info.getNrOfFloors(); i++) {
+            floorNames.add("Floor " + i);
+            floors[i] = new FloorState();
 
-		return iv;
-	}
+            RowConstraints rCon = new RowConstraints();
+            rCon.setMinHeight(20);
+            rCon.setPercentHeight(100.0 / info.getNrOfFloors());
 
-	public void setModel(IElevator model) {
-		this.model = model;
+            HBox hb = new HBox();
+            hb.setAlignment(Pos.CENTER_RIGHT);
+            hb.setSpacing(5);
+            hb.setPadding(new Insets(5, 5, 5, 5));
+            hb.translateXProperty().set(10);
 
-		//Init elevator floors
-		info = model.queryGeneralInformation();
+            Line line = new Line(0, 0, 10, 0);
+            line.disableProperty().bind(floors[i].isServiced.not());
 
-		floorNames.clear();
-		gElevatorFloors.getChildren().clear();
-		floors = new FloorState[info.getNrOfFloors()];
-		
-		lTopFloor.setText(((Integer)(info.getNrOfFloors() - 1)).toString());
+            Label label = new Label(Integer.toString(i));
+            label.disableProperty().bind(floors[i].isServiced.not());
 
-		for(int i = 0; i < info.getNrOfFloors(); i++) {
-			floorNames.add("Floor " + i);
-			floors[i] = new FloorState();
+            hb.getChildren().addAll(
+                    createFloorImageView("images/arrowUp.png", floors[i].requestUp),
+                    createFloorImageView("images/arrowDown.png", floors[i].requestDown),
+                    createFloorImageView("images/hand.png", floors[i].stopRequest),
+                    createFloorImageView("images/filler.jpeg", targetFloor.isEqualTo(i)),
+                    label,
+                    line);
 
-			RowConstraints rCon = new RowConstraints();
-			rCon.setMinHeight(20);
-			rCon.setPercentHeight(100.0/info.getNrOfFloors());
+            gElevatorFloors.getRowConstraints().add(rCon);
+            gElevatorFloors.add(hb, 0, info.getNrOfFloors() - i - 1);
+        }
 
-			HBox hb = new HBox();
-			hb.setAlignment(Pos.CENTER_RIGHT);
-			hb.setSpacing(5);
-			hb.setPadding(new Insets(5, 5, 5, 5));
-			hb.translateXProperty().set(10);
+        elevators.clear();
+        for (int i = 0; i < info.getNrOfElevators(); i++) {
+            elevators.add("Elevator " + i);
+        }
 
-			Line line = new Line(0,0,10,0);
-			line.disableProperty().bind(floors[i].isServiced.not());
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                update();
+            }
+        }, 0, 100);
+    }
 
-			Label label = new Label(Integer.toString(i));
-			label.disableProperty().bind(floors[i].isServiced.not());
+    private void update() {
+        if (model == null || currentElevator.get() < 0) {
+            errorText.concat("Invalid model\n");
+            return;
+        }
 
-			hb.getChildren().addAll(
-					createFloorImageView("images/arrowUp.png", floors[i].requestUp),
-					createFloorImageView("images/arrowDown.png", floors[i].requestDown),
-					createFloorImageView("images/hand.png", floors[i].stopRequest),
-					createFloorImageView("images/filler.jpeg", targetFloor.isEqualTo(i)),
-					label,
-					line);
+        Platform.runLater(() -> {
+            ElevatorState elevatorState;
 
-			gElevatorFloors.getRowConstraints().add(rCon);
-			gElevatorFloors.add(hb, 0, info.getNrOfFloors() - i - 1);
-		}
+            try {
+                elevatorState = model.queryElevatorState(currentElevator.intValue());
+            } catch (Exception e) {
+                errorText.concat(e.getMessage() + "\n");
+                return;
+            }
 
-		elevators.clear();
-		for(int i = 0; i < info.getNrOfElevators(); i++)
-		{
-			elevators.add("Elevator " + i);
-		}
+            speed.setValue(elevatorState.getCurrentSpeed());
+            position.setValue(elevatorState.getCurrentPosition());
+            weight.setValue(elevatorState.getCurrentWeight());
+            currentFloor.setValue(elevatorState.getCurrentFloor());
+            isDoorOpen.setValue(elevatorState.getCurrentDoorStatus() == DoorStatus.Open);
+            isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.Up);
 
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				update();
-			}
-		}, 0, 100);
-	}
+            var servicedFloors = elevatorState.getServicedFloors();
 
-	private void update()
-	{
-		if (model == null || currentElevator.get() < 0)
-			return; 	//TODO: error handling
+            for (int i = 0; i < info.getNrOfFloors(); i++) {
+                try {
+                    var state = model.queryFloorState(i);
+                    floors[i].requestUp.set(state.isUpRequest());
+                    floors[i].requestDown.set(state.isDownRequest());
+                    floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
+                    floors[i].isServiced.set(servicedFloors.get(i));
+                } catch (Exception e) {
+                    errorText.concat(e.getMessage() + "\n");
+                }
+            }
+        });
+    }
 
-		Platform.runLater(() -> {
-			ElevatorState elevatorState = model.queryElevatorState(currentElevator.intValue());
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        // Get 'selected index' properties from comboboxes
+        currentElevator = cbElevator.getSelectionModel().selectedIndexProperty();
+        selectedFloor = cbTargetFloor.getSelectionModel().selectedIndexProperty();
+        anyElevatorSelected.bind(currentElevator.greaterThanOrEqualTo(0));
 
-			speed.setValue(elevatorState.getCurrentSpeed());
-			position.setValue(elevatorState.getCurrentPosition());
-			weight.setValue(elevatorState.getCurrentWeight());
-			currentFloor.setValue(elevatorState.getCurrentFloor());
-			isDoorOpen.setValue(elevatorState.getCurrentDoorStatus() == DoorStatus.Open);
-			isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.Up);
+        // Bind properties to mode button (auto/manual)
+        tbtnOperationMode.selectedProperty().bindBidirectional(isAutomatic);
+        tbtnOperationMode.disableProperty().bind(anyElevatorSelected.not());
 
-			var servicedFloors = elevatorState.getServicedFloors();
+        lTargetFloor.visibleProperty().bind(isAutomatic.not().and(anyElevatorSelected));
+        cbTargetFloor.disableProperty().bind(isAutomatic.or(anyElevatorSelected.not()));
+        btnGo.disableProperty().bind(isAutomatic
+                .or(anyElevatorSelected.not())
+                .or(cbTargetFloor.getSelectionModel().selectedIndexProperty().lessThan(0)));
 
-			for (int i = 0; i < info.getNrOfFloors(); i++)
-			{
-				var state = model.queryFloorState(i);
-				floors[i].requestUp.set(state.isUpRequest());
-				floors[i].requestDown.set(state.isDownRequest());
-				floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
-				floors[i].isServiced.set(servicedFloors.get(i));
-			}
-		});
-	}
+        ivDoorStateClosed.visibleProperty().bind(isDoorOpen.not().and(anyElevatorSelected));
+        ivDoorStateOpen.visibleProperty().bind(isDoorOpen.and(anyElevatorSelected));
 
-	@Override
-	public void initialize(URL location, ResourceBundle resources) {
-		// Get 'selected index' properties from comboboxes
-		currentElevator = cbElevator.getSelectionModel().selectedIndexProperty();
-		selectedFloor = cbTargetFloor.getSelectionModel().selectedIndexProperty();
-		anyElevatorSelected.bind(currentElevator.greaterThanOrEqualTo(0));
+        ivGElvDirUp.visibleProperty().bind(isDirectionUp.and(anyElevatorSelected));
+        ivGElvDirDown.visibleProperty().bind(isDirectionUp.not().and(anyElevatorSelected));
 
-		// Bind properties to mode button (auto/manual)
-		tbtnOperationMode.selectedProperty().bindBidirectional(isAutomatic);
-		tbtnOperationMode.disableProperty().bind(anyElevatorSelected.not());
+        cbTargetFloor.itemsProperty().bind(floorNames);
+        cbElevator.itemsProperty().bind(elevators);
 
-		lTargetFloor.visibleProperty().bind(isAutomatic.not().and(anyElevatorSelected));
-		cbTargetFloor.disableProperty().bind(isAutomatic.or(anyElevatorSelected.not()));
-		btnGo.disableProperty().bind(isAutomatic
-				.or(anyElevatorSelected.not())
-				.or(cbTargetFloor.getSelectionModel().selectedIndexProperty().lessThan(0)));
+        floorNames.setValue(FXCollections.observableArrayList(new ArrayList<>()));
+        elevators.setValue(FXCollections.observableArrayList(new ArrayList<>()));
 
-		ivDoorStateClosed.visibleProperty().bind(isDoorOpen.not().and(anyElevatorSelected));
-		ivDoorStateOpen.visibleProperty().bind(isDoorOpen.and(anyElevatorSelected));
+        lCurFloor.textProperty().bind(currentFloor.asString());
+        lCurFloor.visibleProperty().bind(anyElevatorSelected);
 
-		ivGElvDirUp.visibleProperty().bind(isDirectionUp.and(anyElevatorSelected));
-		ivGElvDirDown.visibleProperty().bind(isDirectionUp.not().and(anyElevatorSelected));
+        lWeight.textProperty().bind(weight.asString());
+        lWeight.visibleProperty().bind(anyElevatorSelected);
 
-		cbTargetFloor.itemsProperty().bind(floorNames);
-		cbElevator.itemsProperty().bind(elevators);
+        lSpeed.textProperty().bind(speed.asString());
+        lSpeed.visibleProperty().bind(anyElevatorSelected);
 
-		floorNames.setValue(FXCollections.observableArrayList(new ArrayList<>()));
-		elevators.setValue(FXCollections.observableArrayList(new ArrayList<>()));
+        lTargetFloor.textProperty().bind(targetFloor.asString());
+        lTargetFloor.visibleProperty().bind(anyElevatorSelected);
 
-		lCurFloor.textProperty().bind(currentFloor.asString());
-		lCurFloor.visibleProperty().bind(anyElevatorSelected);
+        lDirection.visibleProperty().bind(anyElevatorSelected);
 
-		lWeight.textProperty().bind(weight.asString());
-		lWeight.visibleProperty().bind(anyElevatorSelected);
+        lElvCurFloor.textProperty().bind(currentFloor.asString());
 
-		lSpeed.textProperty().bind(speed.asString());
-		lSpeed.visibleProperty().bind(anyElevatorSelected);
+        position.addListener((observableValue, oldVal, newVal) ->
+                translateElevator(100 * newVal.intValue() / ((info.getNrOfFloors() - 1) * info.getFloorHeight())));
+        targetFloor.addListener((observableValue, oldVal, newVal) ->
+                model.setTargetFloor(currentElevator.get(), newVal.intValue()));
+        isDirectionUp.addListener((observableValue, oldVal, newVal) ->
+                lDirection.setText(newVal == null ? "" : newVal == true ? "Up" : "Down"));
+        tbtnOperationMode.selectedProperty().addListener((observableValue, oldVal, newVal) ->
+                tbtnOperationMode.setText(newVal == null ? "" : newVal == true ? "Automatic" : "Manual"));
+        tfErrorLog.textProperty().bind(errorText);
+    }
 
-		lTargetFloor.textProperty().bind(targetFloor.asString());
-		lTargetFloor.visibleProperty().bind(anyElevatorSelected);
+    @SuppressWarnings("unused")
+    @FXML
+    protected void gotoTargetFloor(ActionEvent event) {
+        if (currentElevator.get() >= 0 && selectedFloor.get() >= 0)
+            targetFloor.setValue(selectedFloor.get());
+        else
+            errorText.concat("Invalid elevator or floor selected\n");
+    }
 
-		lDirection.visibleProperty().bind(anyElevatorSelected);
+    private void translateElevator(Integer percentage) {
+        double maxHeight = gElevator.getHeight();
+        double elevatorHeight = groupElevator.getBoundsInLocal().getHeight();
+        double yRect = (maxHeight - elevatorHeight) * percentage / 100.0;
 
-		lElvCurFloor.textProperty().bind(currentFloor.asString());
+        groupElevator.translateYProperty().set(-yRect);
+    }
 
-		position.addListener((observableValue, oldVal, newVal) ->
-				translateElevator(100 * newVal.intValue()/((info.getNrOfFloors()-1) * info.getFloorHeight())));
-		targetFloor.addListener((observableValue, oldVal, newVal) ->
-				model.setTargetFloor(currentElevator.get(), newVal.intValue()));
-		isDirectionUp.addListener((observableValue, oldVal, newVal) ->
-				lDirection.setText(newVal ? "Up" : "Down"));
-		tbtnOperationMode.selectedProperty().addListener((observableValue, oldVal, newVal) ->
-				tbtnOperationMode.setText(newVal ? "Automatic" : "Manual"));
-	}
-
-	@SuppressWarnings("unused")
-	@FXML protected void gotoTargetFloor(ActionEvent event) {
-		if (currentElevator.get() >= 0 && selectedFloor.get() >= 0)	//TODO:
-			targetFloor.setValue(selectedFloor.get());
-	}
-	
-	private void translateElevator(Integer percentage) {
-		double maxHeight = gElevator.getHeight();
-		double elevatorHeight = groupElevator.getBoundsInLocal().getHeight();
-		double yRect = (maxHeight - elevatorHeight) * percentage / 100.0;
-		
-		groupElevator.translateYProperty().set(-yRect);
-	}
+    private static class FloorState {
+        private final BooleanProperty requestUp = new SimpleBooleanProperty(false);
+        private final BooleanProperty requestDown = new SimpleBooleanProperty(false);
+        private final BooleanProperty stopRequest = new SimpleBooleanProperty(false);
+        private final BooleanProperty isServiced = new SimpleBooleanProperty(false);
+    }
 }
