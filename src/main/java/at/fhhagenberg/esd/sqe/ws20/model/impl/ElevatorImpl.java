@@ -212,7 +212,8 @@ public class ElevatorImpl implements IElevatorWrapper {
         }
 
         if (clockTickAfter != clockTickBefore) {
-            throw new TimeoutException("Maximum number of retries reached. Could not update elevator state consistently!");
+            // TODO: use localised strings as exception text!
+            throw new TimeoutException("Maximum number of retries reached!");
         }
 
         return result;

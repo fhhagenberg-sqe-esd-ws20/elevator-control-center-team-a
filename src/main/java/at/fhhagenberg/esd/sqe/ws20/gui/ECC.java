@@ -1,14 +1,9 @@
 package at.fhhagenberg.esd.sqe.ws20.gui;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.util.ResourceBundle;
 
 import at.fhhagenberg.esd.sqe.ws20.model.IElevatorWrapper;
-import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorRMIMock;
-import sqelevator.IElevator;
+import at.fhhagenberg.esd.sqe.ws20.utils.ManagedIElevator;
 import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -26,9 +21,9 @@ public class ECC extends Application {
     private final IElevatorWrapper elevatorModel;
 
 
-    public ECC() throws RemoteException, NotBoundException, MalformedURLException {
+    public ECC() {
 //        elevatorModel = new ElevatorImpl(new ElevatorRMIMock(5, 10, 10));
-        elevatorModel = new ElevatorImpl((IElevator)Naming.lookup("rmi://localhost/ElevatorSim"));
+        elevatorModel = new ElevatorImpl(new ManagedIElevator("rmi://localhost/ElevatorSim"));
     }
 
     public ECC(IElevatorWrapper model) {
