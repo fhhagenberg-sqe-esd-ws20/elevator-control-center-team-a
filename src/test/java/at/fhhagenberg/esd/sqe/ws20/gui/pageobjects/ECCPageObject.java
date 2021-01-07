@@ -47,6 +47,10 @@ public class ECCPageObject {
     }
 
 
+    // ----------------------------------------------------------------
+    // Public interface to alter the page state
+    // ----------------------------------------------------------------
+
     public void selectElevator(int elevatorIndex) {
         clickNthElementOfCb(elevatorComboBoxId, elevatorIndex);
         assertElevatorSelected(elevatorIndex);
@@ -82,6 +86,10 @@ public class ECCPageObject {
     }
 
 
+    // ----------------------------------------------------------------
+    // Public assertion methods
+    // ----------------------------------------------------------------
+
     public void assertAnyElevatorSelected() {
         ComboBox<?> eleCb = robot.lookup(elevatorComboBoxId).query();
         assertNotNull(eleCb.getSelectionModel().getSelectedItem());
@@ -107,7 +115,7 @@ public class ECCPageObject {
         FxAssert.verifyThat(targetFloorLabelId, LabeledMatchers.hasText(String.valueOf(expectedTargetFloor)));
     }
 
-    public void assertTargetFloorWithTimeout(int expectedTargetFloor) throws TimeoutException {
+    public void assertTargetFloorWithTimeout(int expectedTargetFloor) {
         waitUntilLabelTextChanged(targetFloorLabelId, String.valueOf(expectedTargetFloor));
         assertTargetFloor(expectedTargetFloor);
     }
@@ -117,7 +125,7 @@ public class ECCPageObject {
         FxAssert.verifyThat(currentFloorInElevatorLabelId, LabeledMatchers.hasText(String.valueOf(expectedCurrentFloor)));
     }
 
-    public void assertCurrentFloorWithTimeout(int expectedCurrentFloor) throws TimeoutException {
+    public void assertCurrentFloorWithTimeout(int expectedCurrentFloor) {
         waitUntilLabelTextChanged(currentFloorLabelId, String.valueOf(expectedCurrentFloor));
         waitUntilLabelTextChanged(currentFloorInElevatorLabelId, String.valueOf(expectedCurrentFloor));
         assertCurrentFloor(expectedCurrentFloor);
@@ -138,7 +146,7 @@ public class ECCPageObject {
         }
     }
 
-    public void assertCommittedDirectionWithTimeout(Direction expectedDirection) throws TimeoutException {
+    public void assertCommittedDirectionWithTimeout(Direction expectedDirection) {
         waitUntilLabelTextChanged(directionLabelId, expectedDirection.toString());
         waitUntilVisibilityChanged(directionUpImageId, expectedDirection == Direction.Up);
         waitUntilVisibilityChanged(directionDownImageId, expectedDirection == Direction.Down);
@@ -149,7 +157,7 @@ public class ECCPageObject {
         FxAssert.verifyThat(currentSpeedLabelId, LabeledMatchers.hasText(String.valueOf(expectedCurrentSpeed)));
     }
 
-    public void assertCurrentSpeedWithTimeout(int expectedCurrentSpeed) throws TimeoutException {
+    public void assertCurrentSpeedWithTimeout(int expectedCurrentSpeed) {
         waitUntilLabelTextChanged(currentSpeedLabelId, String.valueOf(expectedCurrentSpeed));
         assertCurrentSpeed(expectedCurrentSpeed);
     }
@@ -158,7 +166,7 @@ public class ECCPageObject {
         FxAssert.verifyThat(currentWeightLabelId, LabeledMatchers.hasText(String.valueOf(expectedCurrentWeight)));
     }
 
-    public void assertCurrentWeightWithTimeout(int expectedCurrentWeight) throws TimeoutException {
+    public void assertCurrentWeightWithTimeout(int expectedCurrentWeight) {
         waitUntilLabelTextChanged(currentWeightLabelId, String.valueOf(expectedCurrentWeight));
         assertCurrentWeight(expectedCurrentWeight);
     }
@@ -173,7 +181,7 @@ public class ECCPageObject {
         }
     }
 
-    public void assertDoorStateWithTimeout(DoorStatus expectedDoorState) throws TimeoutException {
+    public void assertDoorStateWithTimeout(DoorStatus expectedDoorState) {
         waitUntilVisibilityChanged(doorStateOpenId, expectedDoorState == DoorStatus.Open);
         waitUntilVisibilityChanged(doorStateClosedId, expectedDoorState == DoorStatus.Closed);
         assertDoorState(expectedDoorState);
@@ -194,18 +202,38 @@ public class ECCPageObject {
     }
 
 
-    private void waitUntilLabelTextChanged(String labelId, String expectedText) throws TimeoutException {
-        WaitForAsyncUtils.waitFor(DEFAULT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS, () -> {
-            Label label = robot.lookup(labelId).query();
-            return label.getText().equals(expectedText);
-        });
+    // ----------------------------------------------------------------
+    // Private helper methods
+    // ----------------------------------------------------------------
+
+    private void waitUntilLabelTextChanged(String query, String expectedText) {
+        try {
+            WaitForAsyncUtils.waitFor(DEFAULT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS, () -> {
+                Label label = robot.lookup(query).query();
+                return label.getText().equals(expectedText);
+            });
+        } catch (TimeoutException ex) {
+            Label label = robot.lookup(query).query();
+
+            throw new AssertionError("Text of Label '" + query + "' did not change as expected.\n" +
+                    "    Expected : '" + expectedText + "'\n" +
+                    "    Actual   : '" + label.getText() + "'", ex);
+        }
     }
 
-    private void waitUntilVisibilityChanged(String query, boolean expectedVisible) throws TimeoutException {
-        WaitForAsyncUtils.waitFor(DEFAULT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS, () -> {
+    private void waitUntilVisibilityChanged(String query, boolean expectedVisible) {
+        try {
+            WaitForAsyncUtils.waitFor(DEFAULT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS, () -> {
+                Node n = robot.lookup(query).query();
+                return n.isVisible() == expectedVisible;
+            });
+        } catch (TimeoutException ex) {
             Node n = robot.lookup(query).query();
-            return n.isVisible() == expectedVisible;
-        });
+
+            throw new AssertionError("Visibility of node '" + query + "' did not match expectation.\n" +
+                    "    Expected : '" + expectedVisible + "'\n" +
+                    "    Actual   : '" + n.isVisible() + "'", ex);
+        }
     }
 
     private void clickNthElementOfCb(String cbQuery, int itemIdx) {

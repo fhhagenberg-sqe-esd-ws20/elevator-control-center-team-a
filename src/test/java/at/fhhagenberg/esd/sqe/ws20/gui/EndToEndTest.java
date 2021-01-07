@@ -4,22 +4,15 @@ import at.fhhagenberg.esd.sqe.ws20.gui.pageobjects.ECCPageObject;
 import at.fhhagenberg.esd.sqe.ws20.model.IElevatorWrapper;
 import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
 import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorRMIMock;
-import javafx.application.Platform;
-import javafx.scene.control.ComboBox;
-import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.testfx.api.FxAssert;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
-import org.testfx.matcher.control.ComboBoxMatchers;
-import org.testfx.matcher.control.LabeledMatchers;
 
-import java.rmi.RemoteException;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,7 +32,7 @@ public class EndToEndTest {
 
 
     @Start
-    public void start(Stage stage) throws Exception {
+    private void start(Stage stage) throws Exception {
         Locale.setDefault(Locale.ENGLISH);
         new ECC(elevatorModel).start(stage);
     }
@@ -63,7 +56,7 @@ public class EndToEndTest {
     }
 
     @Test
-    public void testTargetFloorSelection(FxRobot robot) throws RemoteException {
+    public void testTargetFloorSelection() {
         page.selectElevator(1);
         page.selectTargetFloor(2);
         assertEquals(2, elevatorRMIMock.getTarget(1));

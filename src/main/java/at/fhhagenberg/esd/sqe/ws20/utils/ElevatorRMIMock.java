@@ -1,15 +1,15 @@
 package at.fhhagenberg.esd.sqe.ws20.utils;
 
+import at.fhhagenberg.esd.sqe.ws20.model.DoorStatus;
 import sqelevator.IElevator;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class ElevatorRMIMock implements IElevator {
 
-    public class ElevatorInfo {
+    public static class ElevatorInfo {
         public int committedDirection = IElevator.ELEVATOR_DIRECTION_UNCOMMITTED;
         public int elevatorAccel = 0;
         public List<Boolean> elevatorButtons = new ArrayList<>();
@@ -23,7 +23,7 @@ public class ElevatorRMIMock implements IElevator {
         public int targetFloor = 0;
     }
 
-    public class FloorInfo {
+    public static class FloorInfo {
         public boolean buttonDown = false;
         public boolean buttonUp = false;
     }
@@ -60,21 +60,45 @@ public class ElevatorRMIMock implements IElevator {
     // Public Getter and Setters
     // ----------------------------------------------------------------
 
-
+    @SuppressWarnings("unused")
     public void setClockTick(int clockTick) {
         this.clockTick = clockTick;
     }
 
+    @SuppressWarnings("unused")
     public void incClockTick() {
         clockTick++;
     }
 
+    @SuppressWarnings("unused")
     public List<ElevatorInfo> getElevators() {
         return elevators;
     }
 
+    @SuppressWarnings("unused")
     public List<FloorInfo> getFloors() {
         return floors;
+    }
+
+    public void setCurrentFloor(int elevatorIdx, int floorIdx) {
+        validateElevatorNumber(elevatorIdx);
+        validateFloorNumber(floorIdx);
+        elevators.get(elevatorIdx).currentFloor = floorIdx;
+    }
+
+    public void setCurrentSpeed(int elevatorIdx, int speed) {
+        validateElevatorNumber(elevatorIdx);
+        elevators.get(elevatorIdx).currentSpeed = speed;
+    }
+
+    public void setCurrentWeight(int elevatorIdx, int weight) {
+        validateElevatorNumber(elevatorIdx);
+        elevators.get(elevatorIdx).currentWeight = weight;
+    }
+
+    public void setDoorStatus(int elevatorIdx, DoorStatus doorStatus) {
+        validateElevatorNumber(elevatorIdx);
+        elevators.get(elevatorIdx).doorStatus = doorStatus.getValue();
     }
 
 
@@ -102,121 +126,121 @@ public class ElevatorRMIMock implements IElevator {
 
 
     @Override
-    public int getCommittedDirection(int elevatorNumber) throws RemoteException {
+    public int getCommittedDirection(int elevatorNumber) {
         validateElevatorNumber(elevatorNumber);
         return elevators.get(elevatorNumber).committedDirection;
     }
 
     @Override
-    public int getElevatorAccel(int elevatorNumber) throws RemoteException {
+    public int getElevatorAccel(int elevatorNumber) {
         validateElevatorNumber(elevatorNumber);
         return elevators.get(elevatorNumber).elevatorAccel;
     }
 
     @Override
-    public boolean getElevatorButton(int elevatorNumber, int floor) throws RemoteException {
+    public boolean getElevatorButton(int elevatorNumber, int floor) {
         validateElevatorNumber(elevatorNumber);
         validateFloorNumber(floor);
         return elevators.get(elevatorNumber).elevatorButtons.get(floor);
     }
 
     @Override
-    public int getElevatorDoorStatus(int elevatorNumber) throws RemoteException {
+    public int getElevatorDoorStatus(int elevatorNumber) {
         validateElevatorNumber(elevatorNumber);
         return elevators.get(elevatorNumber).doorStatus;
     }
 
     @Override
-    public int getElevatorFloor(int elevatorNumber) throws RemoteException {
+    public int getElevatorFloor(int elevatorNumber) {
         validateElevatorNumber(elevatorNumber);
         return elevators.get(elevatorNumber).currentFloor;
     }
 
     @Override
-    public int getElevatorNum() throws RemoteException {
+    public int getElevatorNum() {
         return elevators.size();
     }
 
     @Override
-    public int getElevatorPosition(int elevatorNumber) throws RemoteException {
+    public int getElevatorPosition(int elevatorNumber) {
         validateElevatorNumber(elevatorNumber);
         return elevators.get(elevatorNumber).currentPosition;
     }
 
     @Override
-    public int getElevatorSpeed(int elevatorNumber) throws RemoteException {
+    public int getElevatorSpeed(int elevatorNumber) {
         validateElevatorNumber(elevatorNumber);
         return elevators.get(elevatorNumber).currentSpeed;
     }
 
     @Override
-    public int getElevatorWeight(int elevatorNumber) throws RemoteException {
+    public int getElevatorWeight(int elevatorNumber) {
         validateElevatorNumber(elevatorNumber);
         return elevators.get(elevatorNumber).currentWeight;
     }
 
     @Override
-    public int getElevatorCapacity(int elevatorNumber) throws RemoteException {
+    public int getElevatorCapacity(int elevatorNumber) {
         validateElevatorNumber(elevatorNumber);
         return elevators.get(elevatorNumber).capacity;
     }
 
     @Override
-    public boolean getFloorButtonDown(int floor) throws RemoteException {
+    public boolean getFloorButtonDown(int floor) {
         validateFloorNumber(floor);
         return floors.get(floor).buttonDown;
     }
 
     @Override
-    public boolean getFloorButtonUp(int floor) throws RemoteException {
+    public boolean getFloorButtonUp(int floor) {
         validateFloorNumber(floor);
         return floors.get(floor).buttonUp;
     }
 
     @Override
-    public int getFloorHeight() throws RemoteException {
+    public int getFloorHeight() {
         return floorHeight;
     }
 
     @Override
-    public int getFloorNum() throws RemoteException {
+    public int getFloorNum() {
         return floors.size();
     }
 
     @Override
-    public boolean getServicesFloors(int elevatorNumber, int floor) throws RemoteException {
+    public boolean getServicesFloors(int elevatorNumber, int floor) {
         validateElevatorNumber(elevatorNumber);
         validateFloorNumber(floor);
         return elevators.get(elevatorNumber).servicedFloors.get(floor);
     }
 
     @Override
-    public int getTarget(int elevatorNumber) throws RemoteException {
+    public int getTarget(int elevatorNumber) {
         validateElevatorNumber(elevatorNumber);
         return elevators.get(elevatorNumber).targetFloor;
     }
 
     @Override
-    public void setCommittedDirection(int elevatorNumber, int direction) throws RemoteException {
+    public void setCommittedDirection(int elevatorNumber, int direction) {
         validateElevatorNumber(elevatorNumber);
         elevators.get(elevatorNumber).committedDirection = direction;
     }
 
     @Override
-    public void setServicesFloors(int elevatorNumber, int floor, boolean service) throws RemoteException {
+    public void setServicesFloors(int elevatorNumber, int floor, boolean service) {
         validateElevatorNumber(elevatorNumber);
         validateFloorNumber(floor);
         elevators.get(elevatorNumber).servicedFloors.set(floor, service);
     }
 
     @Override
-    public void setTarget(int elevatorNumber, int target) throws RemoteException {
+    public void setTarget(int elevatorNumber, int target) {
         validateElevatorNumber(elevatorNumber);
         elevators.get(elevatorNumber).targetFloor = target;
     }
 
     @Override
-    public long getClockTick() throws RemoteException {
+    public long getClockTick() {
         return clockTick;
     }
 }
