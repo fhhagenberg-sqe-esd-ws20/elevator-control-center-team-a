@@ -29,19 +29,19 @@ import java.util.TimerTask;
 
 public class ECCController implements Initializable {
 
-    final private BooleanProperty isDoorOpen = new SimpleBooleanProperty();
-    final private BooleanProperty isDirectionUp = new SimpleBooleanProperty();
-    final private BooleanProperty isAutomatic = new SimpleBooleanProperty();
-    final private ListProperty<String> elevators = new SimpleListProperty<>();
-    final private ListProperty<String> floorNames = new SimpleListProperty<>();
-    final private IntegerProperty position = new SimpleIntegerProperty();
-    final private IntegerProperty speed = new SimpleIntegerProperty();
-    final private IntegerProperty currentFloor = new SimpleIntegerProperty();
-    final private IntegerProperty targetFloor = new SimpleIntegerProperty();
-    final private IntegerProperty weight = new SimpleIntegerProperty();
-    final private BooleanProperty anyElevatorSelected = new SimpleBooleanProperty();
-    final private Timer timer = new Timer();
-    final private StringProperty errorText = new SimpleStringProperty();
+    private final BooleanProperty isDoorOpen = new SimpleBooleanProperty();
+    private final BooleanProperty isDirectionUp = new SimpleBooleanProperty();
+    private final BooleanProperty isAutomatic = new SimpleBooleanProperty();
+    private final ListProperty<String> elevators = new SimpleListProperty<>();
+    private final ListProperty<String> floorNames = new SimpleListProperty<>();
+    private final IntegerProperty position = new SimpleIntegerProperty();
+    private final IntegerProperty speed = new SimpleIntegerProperty();
+    private final IntegerProperty currentFloor = new SimpleIntegerProperty();
+    private final IntegerProperty targetFloor = new SimpleIntegerProperty();
+    private final IntegerProperty weight = new SimpleIntegerProperty();
+    private final BooleanProperty anyElevatorSelected = new SimpleBooleanProperty();
+    private final Timer timer = new Timer();
+    private final StringProperty errorText = new SimpleStringProperty();
     @SuppressWarnings("unused")
     @FXML
     private ComboBox<String> cbElevator;
@@ -114,7 +114,7 @@ public class ECCController implements Initializable {
     private IElevator model;
     private GeneralInformation info;
 
-    static private ImageView createFloorImageView(String path, ObservableValue<Boolean> visible) {
+    private static ImageView createFloorImageView(String path, ObservableValue<Boolean> visible) {
         File file = new File(path);
         Image image = new Image(file.toURI().toString());
         ImageView iv = new ImageView();
@@ -276,9 +276,9 @@ public class ECCController implements Initializable {
         targetFloor.addListener((observableValue, oldVal, newVal) ->
                 model.setTargetFloor(currentElevator.get(), newVal.intValue()));
         isDirectionUp.addListener((observableValue, oldVal, newVal) ->
-                lDirection.setText(newVal == null ? "" : newVal == true ? "Up" : "Down"));
+                lDirection.setText(Boolean.TRUE.equals(newVal) ? "Up" : "Down"));
         tbtnOperationMode.selectedProperty().addListener((observableValue, oldVal, newVal) ->
-                tbtnOperationMode.setText(newVal == null ? "" : newVal == true ? "Automatic" : "Manual"));
+                tbtnOperationMode.setText(Boolean.TRUE.equals(newVal) ? "Automatic" : "Manual"));
         tfErrorLog.textProperty().bind(errorText);
     }
 
