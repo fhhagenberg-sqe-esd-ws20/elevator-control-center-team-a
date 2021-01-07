@@ -9,14 +9,17 @@ import java.rmi.RemoteException;
 
 public class ManagedIElevator implements IElevator {
 
-    private final String url;
-
+    private final ManagedIElevatorConnector connector;
     private IElevator elevatorRmi;
     private boolean connected;
 
+
     public ManagedIElevator(String url) {
-        this.url = url;
-        this.connected = false;
+        connector = new ManagedIElevatorConnector(url);
+    }
+
+    public ManagedIElevator(IElevator elevator) {
+        connector = new ManagedIElevatorConnector(elevator);
     }
 
 
@@ -29,16 +32,9 @@ public class ManagedIElevator implements IElevator {
             return;
         }
 
-        try {
-            elevatorRmi = (IElevator) Naming.lookup(url);
-            connected = true;
-        } catch (RemoteException | NotBoundException e) {
-            // TODO: use localised strings as exception text!
-            throw new RMIConnectionException("Failed to connect to RMI URL '" + url + "'.", e);
-        } catch (MalformedURLException e) {
-            // TODO: use localised strings as exception text!
-            throw new RMIConnectionException("Malformed RMI URL '" + url + "'.", e);
-        }
+        connector.connect();
+        connected = true;
+        elevatorRmi = connector.getElevatorRmi();
     }
 
 
@@ -73,7 +69,7 @@ public class ManagedIElevator implements IElevator {
     @Override
     public int getElevatorFloor(int elevatorNumber) throws RemoteException {
         reconnectIfNeeded();
-        return disconnectOnError(() -> elevatorRmi.getElevatorDoorStatus(elevatorNumber));
+        return disconnectOnError(() -> elevatorRmi.getElevatorFloor(elevatorNumber));
     }
 
     @Override
@@ -127,7 +123,7 @@ public class ManagedIElevator implements IElevator {
     @Override
     public int getFloorNum() throws RemoteException {
         reconnectIfNeeded();
-        return disconnectOnError(() -> elevatorRmi.getFloorHeight());
+        return disconnectOnError(() -> elevatorRmi.getFloorNum());
     }
 
     @Override
@@ -195,5 +191,38 @@ public class ManagedIElevator implements IElevator {
             c.call();
             return null;
         });
+    }
+
+    static class ManagedIElevatorConnector {
+        private final String url;
+        private IElevator elevatorRmi;
+
+        public ManagedIElevatorConnector(String url) {
+            this.url = url;
+            this.elevatorRmi = null;
+        }
+
+        public ManagedIElevatorConnector(IElevator elevator) {
+            this.elevatorRmi = elevator;
+            this.url = null;
+        }
+
+        public void connect(){
+            if (url != null) {
+                try {
+                    elevatorRmi = (IElevator) Naming.lookup(url);
+                } catch (RemoteException | NotBoundException e) {
+                    // TODO: use localised strings as exception text!
+                    throw new RMIConnectionException("Failed to connect to RMI URL '" + url + "'.", e);
+                } catch (MalformedURLException e) {
+                    // TODO: use localised strings as exception text!
+                    throw new RMIConnectionException("Malformed RMI URL '" + url + "'.", e);
+                }
+            }
+        }
+
+        public IElevator getElevatorRmi() {
+            return elevatorRmi;
+        }
     }
 }

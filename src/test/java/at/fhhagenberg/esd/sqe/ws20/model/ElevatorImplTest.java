@@ -1,6 +1,7 @@
 package at.fhhagenberg.esd.sqe.ws20.model;
 
 import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
+import at.fhhagenberg.esd.sqe.ws20.utils.ManagedIElevator;
 import sqelevator.IElevator;
 import at.fhhagenberg.esd.sqe.ws20.utils.BoolGenerator;
 import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorException;
@@ -36,7 +37,7 @@ public class ElevatorImplTest {
     @BeforeEach
     public void setupTest() {
         MockitoAnnotations.openMocks(this);
-        uut = new ElevatorImpl(mockedElevatorRMI);
+        uut = new ElevatorImpl(new ManagedIElevator(mockedElevatorRMI));
     }
 
 
