@@ -81,7 +81,7 @@ public class ECCController implements Initializable {
 		public BooleanProperty stopRequest = new SimpleBooleanProperty(false);
 		public BooleanProperty isServiced = new SimpleBooleanProperty(false);
 	}
-	
+
 	final private BooleanProperty isDoorOpen = new SimpleBooleanProperty();
 	final private BooleanProperty isDirectionUp = new SimpleBooleanProperty();
 	final private BooleanProperty isAutomatic = new SimpleBooleanProperty();
@@ -98,7 +98,7 @@ public class ECCController implements Initializable {
 	private ReadOnlyIntegerProperty selectedFloor;
 	final private Timer timer = new Timer();
 
-	IElevator model;
+	IElevatorWrapper model;
 	GeneralInformation info;
 
 	static private ImageView createFloorImageView(String path, ObservableValue<Boolean> visible)
@@ -114,7 +114,7 @@ public class ECCController implements Initializable {
 		return iv;
 	}
 
-	public void setModel(IElevator model) {
+	public void setModel(IElevatorWrapper model) {
 		this.model = model;
 
 		//Init elevator floors
@@ -123,7 +123,7 @@ public class ECCController implements Initializable {
 		floorNames.clear();
 		gElevatorFloors.getChildren().clear();
 		floors = new FloorState[info.getNrOfFloors()];
-		
+
 		lTopFloor.setText(((Integer)(info.getNrOfFloors() - 1)).toString());
 
 		for(int i = 0; i < info.getNrOfFloors(); i++) {
@@ -184,8 +184,8 @@ public class ECCController implements Initializable {
 			position.setValue(elevatorState.getCurrentPosition());
 			weight.setValue(elevatorState.getCurrentWeight());
 			currentFloor.setValue(elevatorState.getCurrentFloor());
-			isDoorOpen.setValue(elevatorState.getCurrentDoorStatus() == DoorStatus.Open);
-			isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.Up);
+			isDoorOpen.setValue(elevatorState.getCurrentDoorStatus() == DoorStatus.OPEN);
+			isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.UP);
 
 			var servicedFloors = elevatorState.getServicedFloors();
 
@@ -260,12 +260,12 @@ public class ECCController implements Initializable {
 		if (currentElevator.get() >= 0 && selectedFloor.get() >= 0)	//TODO:
 			targetFloor.setValue(selectedFloor.get());
 	}
-	
+
 	private void translateElevator(Integer percentage) {
 		double maxHeight = gElevator.getHeight();
 		double elevatorHeight = groupElevator.getBoundsInLocal().getHeight();
 		double yRect = (maxHeight - elevatorHeight) * percentage / 100.0;
-		
+
 		groupElevator.translateYProperty().set(-yRect);
 	}
 }

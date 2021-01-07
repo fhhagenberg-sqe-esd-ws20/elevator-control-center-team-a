@@ -1,6 +1,8 @@
 package at.fhhagenberg.esd.sqe.ws20.model;
 
 import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
+import at.fhhagenberg.esd.sqe.ws20.utils.ManagedIElevator;
+import sqelevator.IElevator;
 import at.fhhagenberg.esd.sqe.ws20.utils.BoolGenerator;
 import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorException;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +29,7 @@ import static org.mockito.Mockito.*;
 public class ElevatorImplTest {
 
     @Mock
-    public IElevatorRMI mockedElevatorRMI;
+    public IElevator mockedElevatorRMI;
 
     public ElevatorImpl uut;
 
@@ -35,7 +37,7 @@ public class ElevatorImplTest {
     @BeforeEach
     public void setupTest() {
         MockitoAnnotations.openMocks(this);
-        uut = new ElevatorImpl(mockedElevatorRMI);
+        uut = new ElevatorImpl(new ManagedIElevator(mockedElevatorRMI));
     }
 
 
@@ -206,7 +208,7 @@ public class ElevatorImplTest {
         when(mockedElevatorRMI.getClockTick()).thenReturn(1L, 0L, 0L, 1L, 1L, 1L, 0L, 0L);
         when(mockedElevatorRMI.getFloorNum()).thenReturn(3);
 
-        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(IElevatorRMI.ELEVATOR_DIRECTION_DOWN);
+        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(IElevator.ELEVATOR_DIRECTION_DOWN);
         when(mockedElevatorRMI.getElevatorCapacity(anyInt())).thenReturn(10);
         when(mockedElevatorRMI.getElevatorAccel(anyInt())).thenReturn(11);
         when(mockedElevatorRMI.getElevatorSpeed(anyInt())).thenReturn(12);
@@ -214,7 +216,7 @@ public class ElevatorImplTest {
         when(mockedElevatorRMI.getElevatorFloor(anyInt())).thenReturn(14);
         when(mockedElevatorRMI.getTarget(anyInt())).thenReturn(15);
         when(mockedElevatorRMI.getElevatorWeight(anyInt())).thenReturn(16);
-        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevatorRMI.ELEVATOR_DOORS_CLOSED);
+        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
 
         when(mockedElevatorRMI.getElevatorButton(anyInt(), anyInt())).thenAnswer(inv -> elevatorButtonGen.getNext());
         when(mockedElevatorRMI.getServicesFloors(anyInt(), anyInt())).thenAnswer(inv -> serviceFloorGen.getNext());
@@ -241,8 +243,8 @@ public class ElevatorImplTest {
 
         assertEquals(10, elevatorState0.getNumber());
         assertEquals(17, elevatorState1.getNumber());
-        assertEquals(Direction.Down, elevatorState0.getCurrentDirection());
-        assertEquals(Direction.Down, elevatorState1.getCurrentDirection());
+        assertEquals(Direction.DOWN, elevatorState0.getCurrentDirection());
+        assertEquals(Direction.DOWN, elevatorState1.getCurrentDirection());
         assertEquals(10, elevatorState0.getCapacity());
         assertEquals(10, elevatorState1.getCapacity());
         assertEquals(11, elevatorState0.getCurrentAcceleration());
@@ -257,8 +259,8 @@ public class ElevatorImplTest {
         assertEquals(15, elevatorState1.getTargetFloor());
         assertEquals(16, elevatorState0.getCurrentWeight());
         assertEquals(16, elevatorState1.getCurrentWeight());
-        assertEquals(DoorStatus.Closed, elevatorState0.getCurrentDoorStatus());
-        assertEquals(DoorStatus.Closed, elevatorState1.getCurrentDoorStatus());
+        assertEquals(DoorStatus.CLOSED, elevatorState0.getCurrentDoorStatus());
+        assertEquals(DoorStatus.CLOSED, elevatorState1.getCurrentDoorStatus());
         assertEquals(Arrays.asList(true, false, true), elevatorState0.getCurrentFloorButtonsPressed());
         assertEquals(Arrays.asList(false, true, false), elevatorState1.getCurrentFloorButtonsPressed());
         assertEquals(Arrays.asList(false, true, false), elevatorState0.getServicedFloors());
@@ -269,8 +271,8 @@ public class ElevatorImplTest {
     public void testThrowingQueryElevatorState() throws RemoteException {
         when(mockedElevatorRMI.getClockTick()).thenReturn(1234L, 0L);
         when(mockedElevatorRMI.getFloorNum()).thenReturn(4);
-        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(IElevatorRMI.ELEVATOR_DIRECTION_DOWN);
-        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevatorRMI.ELEVATOR_DOORS_CLOSED);
+        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(IElevator.ELEVATOR_DIRECTION_DOWN);
+        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
 
         assertThrows(ElevatorException.class, () -> uut.queryElevatorState(0, 0));
 
@@ -330,7 +332,7 @@ public class ElevatorImplTest {
         uut.setTargetFloor(12, 11);
 
         verify(mockedElevatorRMI).getElevatorFloor(12);
-        verify(mockedElevatorRMI).setCommittedDirection(12, IElevatorRMI.ELEVATOR_DIRECTION_UP);
+        verify(mockedElevatorRMI).setCommittedDirection(12, IElevator.ELEVATOR_DIRECTION_UP);
         verify(mockedElevatorRMI).setTarget(12, 11);
         verifyNoMoreInteractions(mockedElevatorRMI);
     }
@@ -341,7 +343,7 @@ public class ElevatorImplTest {
         uut.setTargetFloor(13, 9);
 
         verify(mockedElevatorRMI).getElevatorFloor(13);
-        verify(mockedElevatorRMI).setCommittedDirection(13, IElevatorRMI.ELEVATOR_DIRECTION_DOWN);
+        verify(mockedElevatorRMI).setCommittedDirection(13, IElevator.ELEVATOR_DIRECTION_DOWN);
         verify(mockedElevatorRMI).setTarget(13, 9);
         verifyNoMoreInteractions(mockedElevatorRMI);
     }
@@ -352,7 +354,7 @@ public class ElevatorImplTest {
         uut.setTargetFloor(8, 10);
 
         verify(mockedElevatorRMI).getElevatorFloor(8);
-        verify(mockedElevatorRMI).setCommittedDirection(8, IElevatorRMI.ELEVATOR_DIRECTION_UNCOMMITTED);
+        verify(mockedElevatorRMI).setCommittedDirection(8, IElevator.ELEVATOR_DIRECTION_UNCOMMITTED);
         verify(mockedElevatorRMI).setTarget(8, 10);
         verifyNoMoreInteractions(mockedElevatorRMI);
     }
