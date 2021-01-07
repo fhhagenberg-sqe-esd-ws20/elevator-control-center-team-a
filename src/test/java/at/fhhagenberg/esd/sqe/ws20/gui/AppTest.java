@@ -21,7 +21,7 @@ public class AppTest {
      * @param stage - Will be injected by the test runner.
      */
     @Start
-    public void start(Stage stage) {
+    public void start(Stage stage) throws Exception {
         var app = new ECC();
         app.start(stage);
     }

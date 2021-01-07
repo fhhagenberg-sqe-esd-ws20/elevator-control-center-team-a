@@ -39,22 +39,18 @@ public class ECC extends Application {
      */
     @SuppressWarnings("exports")
     @Override
-    public void start(Stage stage) {
-        try {
-            ResourceBundle resources = ResourceBundle.getBundle(Messages.getString("ECC.0"));
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(Messages.getString("ECC.1")), resources);
-            Parent root = loader.load();
-            ECCController controller = loader.getController();
-            controller.setModel(elevatorModel);
+    public void start(Stage stage) throws Exception {
+        ResourceBundle resources = ResourceBundle.getBundle(Messages.getString("ECC.0"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(Messages.getString("ECC.1")), resources);
+        Parent root = loader.load();
+        ECCController controller = loader.getController();
+        controller.setModel(elevatorModel);
 
-            Scene scene = new Scene(root);
+        Scene scene = new Scene(root);
 
-            stage.setTitle(Messages.getString("ECC.2"));
-            stage.setScene(scene);
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        stage.setTitle(Messages.getString("ECC.2"));
+        stage.setScene(scene);
+        stage.show();
     }
 
     /**

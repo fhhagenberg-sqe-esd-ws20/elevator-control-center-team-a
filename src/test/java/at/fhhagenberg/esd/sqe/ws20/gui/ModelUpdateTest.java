@@ -31,7 +31,7 @@ public class ModelUpdateTest {
 
 
     @Start
-    public void start(Stage stage) {
+    public void start(Stage stage) throws Exception {
         new ECC(elevatorModel).start(stage);
     }
 
