@@ -2,9 +2,9 @@ package at.fhhagenberg.esd.sqe.ws20.gui;
 
 import java.util.ResourceBundle;
 
-import at.fhhagenberg.esd.sqe.ws20.model.IElevator;
+import at.fhhagenberg.esd.sqe.ws20.model.IElevatorWrapper;
+import at.fhhagenberg.esd.sqe.ws20.utils.ManagedIElevator;
 import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
-import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorRMIMock;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Parent;
@@ -18,14 +18,15 @@ import javafx.fxml.FXMLLoader;
  */
 public class ECC extends Application {
 
-    private final IElevator elevatorModel;
+    private final IElevatorWrapper elevatorModel;
 
 
     public ECC() {
-        elevatorModel = new ElevatorImpl(new ElevatorRMIMock(5, 25, 10));
+//        elevatorModel = new ElevatorImpl(new ElevatorRMIMock(5, 10, 10));
+        elevatorModel = new ElevatorImpl(new ManagedIElevator("rmi://localhost/ElevatorSim"));
     }
 
-    public ECC(IElevator model) {
+    public ECC(IElevatorWrapper model) {
         elevatorModel = model;
     }
 

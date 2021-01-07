@@ -111,7 +111,7 @@ public class ECCController implements Initializable {
     private FloorState[] floors;
     private ReadOnlyIntegerProperty currentElevator;
     private ReadOnlyIntegerProperty selectedFloor;
-    private IElevator model;
+    private IElevatorWrapper model;
     private GeneralInformation info;
 
     private static ImageView createFloorImageView(String path, ObservableValue<Boolean> visible) {
@@ -126,7 +126,7 @@ public class ECCController implements Initializable {
         return iv;
     }
 
-    public void setModel(IElevator model) {
+    public void setModel(IElevatorWrapper model) {
         this.model = model;
 
         //Init elevator floors
@@ -208,8 +208,8 @@ public class ECCController implements Initializable {
             position.setValue(elevatorState.getCurrentPosition());
             weight.setValue(elevatorState.getCurrentWeight());
             currentFloor.setValue(elevatorState.getCurrentFloor());
-            isDoorOpen.setValue(elevatorState.getCurrentDoorStatus() == DoorStatus.Open);
-            isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.Up);
+            isDoorOpen.setValue(elevatorState.getCurrentDoorStatus() == DoorStatus.OPEN);
+            isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.UP);
 
             var servicedFloors = elevatorState.getServicedFloors();
 

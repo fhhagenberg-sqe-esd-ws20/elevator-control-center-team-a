@@ -1,6 +1,7 @@
 package at.fhhagenberg.esd.sqe.ws20.model.impl;
 
 import at.fhhagenberg.esd.sqe.ws20.model.*;
+import sqelevator.IElevator;
 import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorException;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,13 +11,13 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 
-public class ElevatorImpl implements IElevator {
+public class ElevatorImpl implements IElevatorWrapper {
     public static int DEFAULT_MAXIMUM_RETRIES = 10;
 
-    private final IElevatorRMI rmiInterface;
+    private final IElevator rmiInterface;
 
 
-    public ElevatorImpl(@NotNull IElevatorRMI rmiInterface) {
+    public ElevatorImpl(@NotNull IElevator rmiInterface) {
         this.rmiInterface = rmiInterface;
     }
 
@@ -52,7 +53,7 @@ public class ElevatorImpl implements IElevator {
     @NotNull
     public ElevatorState queryElevatorState(int elevatorNumber, int maximumRetries) {
         try {
-           return runSupplierChecked(() -> queryElevatorStateInternalUnchecked(elevatorNumber), maximumRetries);
+            return runSupplierChecked(() -> queryElevatorStateInternalUnchecked(elevatorNumber), maximumRetries);
         } catch (RemoteException | TimeoutException ex) {
             // TODO: use localised strings as exception text!
             throw new ElevatorException("Failed to query elevator state!", ex);
@@ -97,11 +98,11 @@ public class ElevatorImpl implements IElevator {
     public void setTargetFloor(int elevatorNr, int targetFloor) {
         try {
             int currentFloor = rmiInterface.getElevatorFloor(elevatorNr);
-            Direction direction = Direction.Uncommitted;
+            Direction direction = Direction.UNCOMMITTED;
             if (targetFloor > currentFloor) {
-                direction = Direction.Up;
+                direction = Direction.UP;
             } else if (targetFloor < currentFloor) {
-                direction = Direction.Down;
+                direction = Direction.DOWN;
             } else {
                 // TODO: getElevatorFloor() gives the nearest floor number meaning that the elevator still has to move,
                 //       if it equals the target floor numbers. Should this be resolved by calculating floor positions?
@@ -211,7 +212,8 @@ public class ElevatorImpl implements IElevator {
         }
 
         if (clockTickAfter != clockTickBefore) {
-            throw new TimeoutException("Maximum number of retries reached. Could not update elevator state consistently!");
+            // TODO: use localised strings as exception text!
+            throw new TimeoutException("Maximum number of retries reached!");
         }
 
         return result;
