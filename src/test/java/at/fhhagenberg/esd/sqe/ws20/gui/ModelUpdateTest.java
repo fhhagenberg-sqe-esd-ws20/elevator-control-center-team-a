@@ -6,6 +6,7 @@ import at.fhhagenberg.esd.sqe.ws20.model.DoorStatus;
 import at.fhhagenberg.esd.sqe.ws20.model.IElevatorWrapper;
 import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
 import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorRMIMock;
+import at.fhhagenberg.esd.sqe.ws20.utils.ManagedIElevator;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -15,7 +16,6 @@ import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import java.rmi.RemoteException;
 import java.util.Locale;
 
 
@@ -26,7 +26,7 @@ public class ModelUpdateTest {
     // --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
 
     private final ElevatorRMIMock elevatorRMIMock = new ElevatorRMIMock(2, 3, 10);
-    private final IElevatorWrapper elevatorModel = new ElevatorImpl(elevatorRMIMock);
+    private final IElevatorWrapper elevatorModel = new ElevatorImpl(new ManagedIElevator(elevatorRMIMock));
 
     private ECCPageObject page;
 
@@ -44,9 +44,9 @@ public class ModelUpdateTest {
     }
 
 
-    @Disabled
+    @Disabled("The GUI behaviour does not yet match the behaviour described in this test.")
     @Test
-    public void testTargetFloorUpdating() {
+    void testTargetFloorUpdating() {
         // TODO: fix the GUI behaviour for this test to work!
         elevatorRMIMock.setTarget(0, 1);
         elevatorRMIMock.setTarget(1, 2);
@@ -60,7 +60,7 @@ public class ModelUpdateTest {
 
 
     @Test
-    public void testCurrentFloorUpdating() {
+    void testCurrentFloorUpdating() {
         elevatorRMIMock.setCurrentFloor(0, 1);
         elevatorRMIMock.setCurrentFloor(1, 2);
 
@@ -73,20 +73,20 @@ public class ModelUpdateTest {
 
 
     @Test
-    public void testDirectionUpdating() {
-        elevatorRMIMock.setCommittedDirection(0, Direction.Up.getValue());
-        elevatorRMIMock.setCommittedDirection(1, Direction.Down.getValue());
+    void testDirectionUpdating() {
+        elevatorRMIMock.setCommittedDirection(0, Direction.UP.getValue());
+        elevatorRMIMock.setCommittedDirection(1, Direction.DOWN.getValue());
 
         page.selectElevator(0);
-        page.assertCommittedDirectionWithTimeout(Direction.Up);
+        page.assertCommittedDirectionWithTimeout(Direction.UP);
 
         page.selectElevator(1);
-        page.assertCommittedDirectionWithTimeout(Direction.Down);
+        page.assertCommittedDirectionWithTimeout(Direction.DOWN);
     }
 
 
     @Test
-    public void testSpeedUpdating() {
+    void testSpeedUpdating() {
         elevatorRMIMock.setCurrentSpeed(0, 654);
         elevatorRMIMock.setCurrentSpeed(1, 123);
 
@@ -99,7 +99,7 @@ public class ModelUpdateTest {
 
 
     @Test
-    public void testWeightUpdating() {
+    void testWeightUpdating() {
         elevatorRMIMock.setCurrentWeight(0, 1149);
         elevatorRMIMock.setCurrentWeight(1, 4711);
 
@@ -112,19 +112,19 @@ public class ModelUpdateTest {
 
 
     @Test
-    public void testDoorStateUpdating() {
-        elevatorRMIMock.setDoorStatus(0, DoorStatus.Closed);
-        elevatorRMIMock.setDoorStatus(1, DoorStatus.Open);
+    void testDoorStateUpdating() {
+        elevatorRMIMock.setDoorStatus(0, DoorStatus.CLOSED);
+        elevatorRMIMock.setDoorStatus(1, DoorStatus.OPEN);
 
         page.selectElevator(0);
-        page.assertDoorStateWithTimeout(DoorStatus.Closed);
+        page.assertDoorStateWithTimeout(DoorStatus.CLOSED);
 
         page.selectElevator(1);
-        page.assertDoorStateWithTimeout(DoorStatus.Open);
+        page.assertDoorStateWithTimeout(DoorStatus.OPEN);
     }
 
     @Test
-    public void testAutomaticModeDisablesFloorSelection() {
+    void testAutomaticModeDisablesFloorSelection() {
         page.selectElevator(0);
         page.assertIsManualMode();
         page.enableAutomaticMode();
@@ -134,7 +134,7 @@ public class ModelUpdateTest {
     }
 
     @Test
-    public void testTopFloorSet() {
+    void testTopFloorSet() {
         page.assertTopFloor(2);
     }
 

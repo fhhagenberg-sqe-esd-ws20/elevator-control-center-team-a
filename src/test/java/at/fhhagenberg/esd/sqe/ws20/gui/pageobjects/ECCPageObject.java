@@ -132,11 +132,11 @@ public class ECCPageObject {
     }
 
     public void assertCommittedDirection(Direction expectedDirection) {
-        if (expectedDirection == Direction.Up) {
+        if (expectedDirection == Direction.UP) {
             FxAssert.verifyThat(directionLabelId, LabeledMatchers.hasText("Up"));
             FxAssert.verifyThat(directionUpImageId, NodeMatchers.isVisible());
             FxAssert.verifyThat(directionDownImageId, NodeMatchers.isInvisible());
-        } else if (expectedDirection == Direction.Down) {
+        } else if (expectedDirection == Direction.DOWN) {
             FxAssert.verifyThat(directionLabelId, LabeledMatchers.hasText("Down"));
             FxAssert.verifyThat(directionUpImageId, NodeMatchers.isInvisible());
             FxAssert.verifyThat(directionDownImageId, NodeMatchers.isVisible());
@@ -147,9 +147,17 @@ public class ECCPageObject {
     }
 
     public void assertCommittedDirectionWithTimeout(Direction expectedDirection) {
-        waitUntilLabelTextChanged(directionLabelId, expectedDirection.toString());
-        waitUntilVisibilityChanged(directionUpImageId, expectedDirection == Direction.Up);
-        waitUntilVisibilityChanged(directionDownImageId, expectedDirection == Direction.Down);
+        // TODO: use localized strings to represent directions
+        String expectedString = "Uncommitted";
+        if (expectedDirection == Direction.UP) {
+            expectedString = "Up";
+        } else if (expectedDirection == Direction.DOWN) {
+            expectedString = "Down";
+        }
+
+        waitUntilLabelTextChanged(directionLabelId, expectedString);
+        waitUntilVisibilityChanged(directionUpImageId, expectedDirection == Direction.UP);
+        waitUntilVisibilityChanged(directionDownImageId, expectedDirection == Direction.DOWN);
         assertCommittedDirection(expectedDirection);
     }
 
@@ -172,18 +180,18 @@ public class ECCPageObject {
     }
 
     public void assertDoorState(DoorStatus expectedDoorState) {
-        if (expectedDoorState == DoorStatus.Open || expectedDoorState == DoorStatus.Closing) {
+        if (expectedDoorState == DoorStatus.OPEN || expectedDoorState == DoorStatus.CLOSING) {
             FxAssert.verifyThat(doorStateOpenId, NodeMatchers.isVisible());
             FxAssert.verifyThat(doorStateClosedId, NodeMatchers.isInvisible());
-        } else if (expectedDoorState == DoorStatus.Closed || expectedDoorState == DoorStatus.Opening) {
+        } else if (expectedDoorState == DoorStatus.CLOSED || expectedDoorState == DoorStatus.OPENING) {
             FxAssert.verifyThat(doorStateOpenId, NodeMatchers.isInvisible());
             FxAssert.verifyThat(doorStateClosedId, NodeMatchers.isVisible());
         }
     }
 
     public void assertDoorStateWithTimeout(DoorStatus expectedDoorState) {
-        waitUntilVisibilityChanged(doorStateOpenId, expectedDoorState == DoorStatus.Open);
-        waitUntilVisibilityChanged(doorStateClosedId, expectedDoorState == DoorStatus.Closed);
+        waitUntilVisibilityChanged(doorStateOpenId, expectedDoorState == DoorStatus.OPEN);
+        waitUntilVisibilityChanged(doorStateClosedId, expectedDoorState == DoorStatus.CLOSED);
         assertDoorState(expectedDoorState);
     }
 

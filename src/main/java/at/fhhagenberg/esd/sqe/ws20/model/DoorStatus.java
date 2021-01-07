@@ -3,10 +3,10 @@ package at.fhhagenberg.esd.sqe.ws20.model;
 import sqelevator.IElevator;
 
 public enum DoorStatus {
-    Open(IElevator.ELEVATOR_DOORS_OPEN),
-    Closed(IElevator.ELEVATOR_DOORS_CLOSED),
-    Opening(IElevator.ELEVATOR_DOORS_OPENING),
-    Closing(IElevator.ELEVATOR_DOORS_CLOSING);
+    OPEN(IElevator.ELEVATOR_DOORS_OPEN),
+    CLOSED(IElevator.ELEVATOR_DOORS_CLOSED),
+    OPENING(IElevator.ELEVATOR_DOORS_OPENING),
+    CLOSING(IElevator.ELEVATOR_DOORS_CLOSING);
 
 
     private final int value;
@@ -20,10 +20,10 @@ public enum DoorStatus {
     }
 
     public static DoorStatus fromInt(int status) {
-        if (status == Open.getValue() || status == Closing.getValue()) {
-            return Open;
-        } else if (status == Closed.getValue() || status == Opening.getValue()) {
-            return Closed;
+        if (status == OPEN.getValue() || status == CLOSING.getValue()) {
+            return OPEN;
+        } else if (status == CLOSED.getValue() || status == OPENING.getValue()) {
+            return CLOSED;
         }
 
         // Note: IElevatorRMI.java specifies more constants for different door status but the method

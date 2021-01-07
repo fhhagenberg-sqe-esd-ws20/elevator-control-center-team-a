@@ -243,8 +243,8 @@ public class ElevatorImplTest {
 
         assertEquals(10, elevatorState0.getNumber());
         assertEquals(17, elevatorState1.getNumber());
-        assertEquals(Direction.Down, elevatorState0.getCurrentDirection());
-        assertEquals(Direction.Down, elevatorState1.getCurrentDirection());
+        assertEquals(Direction.DOWN, elevatorState0.getCurrentDirection());
+        assertEquals(Direction.DOWN, elevatorState1.getCurrentDirection());
         assertEquals(10, elevatorState0.getCapacity());
         assertEquals(10, elevatorState1.getCapacity());
         assertEquals(11, elevatorState0.getCurrentAcceleration());
@@ -259,8 +259,8 @@ public class ElevatorImplTest {
         assertEquals(15, elevatorState1.getTargetFloor());
         assertEquals(16, elevatorState0.getCurrentWeight());
         assertEquals(16, elevatorState1.getCurrentWeight());
-        assertEquals(DoorStatus.Closed, elevatorState0.getCurrentDoorStatus());
-        assertEquals(DoorStatus.Closed, elevatorState1.getCurrentDoorStatus());
+        assertEquals(DoorStatus.CLOSED, elevatorState0.getCurrentDoorStatus());
+        assertEquals(DoorStatus.CLOSED, elevatorState1.getCurrentDoorStatus());
         assertEquals(Arrays.asList(true, false, true), elevatorState0.getCurrentFloorButtonsPressed());
         assertEquals(Arrays.asList(false, true, false), elevatorState1.getCurrentFloorButtonsPressed());
         assertEquals(Arrays.asList(false, true, false), elevatorState0.getServicedFloors());

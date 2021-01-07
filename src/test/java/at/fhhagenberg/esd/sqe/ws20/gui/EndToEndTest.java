@@ -4,6 +4,7 @@ import at.fhhagenberg.esd.sqe.ws20.gui.pageobjects.ECCPageObject;
 import at.fhhagenberg.esd.sqe.ws20.model.IElevatorWrapper;
 import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
 import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorRMIMock;
+import at.fhhagenberg.esd.sqe.ws20.utils.ManagedIElevator;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ public class EndToEndTest {
     // --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
 
     private final ElevatorRMIMock elevatorRMIMock = new ElevatorRMIMock(2, 3, 10);
-    private final IElevatorWrapper elevatorModel = new ElevatorImpl(elevatorRMIMock);
+    private final IElevatorWrapper elevatorModel = new ElevatorImpl(new ManagedIElevator(elevatorRMIMock));
 
     private ECCPageObject page;
 
@@ -44,19 +45,19 @@ public class EndToEndTest {
 
 
     @Test
-    public void testComboBoxItems() {
+    void testComboBoxItems() {
         page.assertNumberOfElevators(2);
         page.assertNumberOfFloors(3);
     }
 
     @Test
-    public void testElevatorSelection() {
+    void testElevatorSelection() {
         page.selectElevator(1);
         page.assertElevatorSelected(1);
     }
 
     @Test
-    public void testTargetFloorSelection() {
+    void testTargetFloorSelection() {
         page.selectElevator(1);
         page.selectTargetFloor(2);
         assertEquals(2, elevatorRMIMock.getTarget(1));

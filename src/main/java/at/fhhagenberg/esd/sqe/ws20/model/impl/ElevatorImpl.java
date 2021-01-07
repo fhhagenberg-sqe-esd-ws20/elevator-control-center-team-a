@@ -53,7 +53,7 @@ public class ElevatorImpl implements IElevatorWrapper {
     @NotNull
     public ElevatorState queryElevatorState(int elevatorNumber, int maximumRetries) {
         try {
-           return runSupplierChecked(() -> queryElevatorStateInternalUnchecked(elevatorNumber), maximumRetries);
+            return runSupplierChecked(() -> queryElevatorStateInternalUnchecked(elevatorNumber), maximumRetries);
         } catch (RemoteException | TimeoutException ex) {
             // TODO: use localised strings as exception text!
             throw new ElevatorException("Failed to query elevator state!", ex);
@@ -98,11 +98,11 @@ public class ElevatorImpl implements IElevatorWrapper {
     public void setTargetFloor(int elevatorNr, int targetFloor) {
         try {
             int currentFloor = rmiInterface.getElevatorFloor(elevatorNr);
-            Direction direction = Direction.Uncommitted;
+            Direction direction = Direction.UNCOMMITTED;
             if (targetFloor > currentFloor) {
-                direction = Direction.Up;
+                direction = Direction.UP;
             } else if (targetFloor < currentFloor) {
-                direction = Direction.Down;
+                direction = Direction.DOWN;
             } else {
                 // TODO: getElevatorFloor() gives the nearest floor number meaning that the elevator still has to move,
                 //       if it equals the target floor numbers. Should this be resolved by calculating floor positions?

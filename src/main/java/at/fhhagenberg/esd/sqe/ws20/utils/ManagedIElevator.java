@@ -187,7 +187,7 @@ public class ManagedIElevator implements IElevator {
     }
 
     private void disconnectOnError(RMICallerVoid c) throws RemoteException {
-        disconnectOnError((RMICaller<Void>) () -> {
+        disconnectOnError(() -> {
             c.call();
             return null;
         });
