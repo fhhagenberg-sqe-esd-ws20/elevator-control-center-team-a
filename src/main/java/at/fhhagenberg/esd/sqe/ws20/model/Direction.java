@@ -1,9 +1,11 @@
 package at.fhhagenberg.esd.sqe.ws20.model;
 
+import sqelevator.IElevator;
+
 public enum Direction {
-    Up(IElevatorRMI.ELEVATOR_DIRECTION_UP),
-    Down(IElevatorRMI.ELEVATOR_DIRECTION_DOWN),
-    Uncommitted(IElevatorRMI.ELEVATOR_DIRECTION_UNCOMMITTED);
+    Up(IElevator.ELEVATOR_DIRECTION_UP),
+    Down(IElevator.ELEVATOR_DIRECTION_DOWN),
+    Uncommitted(IElevator.ELEVATOR_DIRECTION_UNCOMMITTED);
 
 
     private final int value;

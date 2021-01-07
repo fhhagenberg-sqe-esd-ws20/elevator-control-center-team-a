@@ -1,19 +1,19 @@
 package at.fhhagenberg.esd.sqe.ws20.utils;
 
-import at.fhhagenberg.esd.sqe.ws20.model.IElevatorRMI;
+import sqelevator.IElevator;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class ElevatorRMIMock implements IElevatorRMI {
+public class ElevatorRMIMock implements IElevator {
 
     public class ElevatorInfo {
-        public int committedDirection = IElevatorRMI.ELEVATOR_DIRECTION_UNCOMMITTED;
+        public int committedDirection = IElevator.ELEVATOR_DIRECTION_UNCOMMITTED;
         public int elevatorAccel = 0;
         public List<Boolean> elevatorButtons = new ArrayList<>();
-        public int doorStatus = IElevatorRMI.ELEVATOR_DOORS_CLOSED;
+        public int doorStatus = IElevator.ELEVATOR_DOORS_CLOSED;
         public int currentFloor = 0;
         public int currentPosition = 0;
         public int currentSpeed = 0;

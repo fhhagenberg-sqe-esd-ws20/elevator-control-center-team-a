@@ -1,12 +1,16 @@
 package at.fhhagenberg.esd.sqe.ws20.gui;
 
-import at.fhhagenberg.esd.sqe.ws20.model.IElevator;
+import at.fhhagenberg.esd.sqe.ws20.gui.pageobjects.ECCPageObject;
+import at.fhhagenberg.esd.sqe.ws20.model.IElevatorWrapper;
 import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
 import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorRMIMock;
+import javafx.application.Platform;
 import javafx.scene.control.ComboBox;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxAssert;
 import org.testfx.api.FxRobot;
@@ -15,67 +19,53 @@ import org.testfx.framework.junit5.Start;
 import org.testfx.matcher.control.ComboBoxMatchers;
 import org.testfx.matcher.control.LabeledMatchers;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.rmi.RemoteException;
+import java.util.Locale;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(ApplicationExtension.class)
 public class EndToEndTest {
 
     // TestFX may need additional VM options:
     // --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
 
-    private final IElevator elevatorModel = new ElevatorImpl(new ElevatorRMIMock(2, 3, 10));
+    private final ElevatorRMIMock elevatorRMIMock = new ElevatorRMIMock(2, 3, 10);
+    private final IElevatorWrapper elevatorModel = new ElevatorImpl(elevatorRMIMock);
+
+    private ECCPageObject page;
 
 
     @Start
     public void start(Stage stage) throws Exception {
+        Locale.setDefault(Locale.ENGLISH);
         new ECC(elevatorModel).start(stage);
     }
 
-
-    public void clickNthElementOfCb(FxRobot robot, String cbQuery, int itemIdx) {
-        ComboBox<?> cb = robot.lookup(cbQuery).query();
-        robot.clickOn(cb);
-
-        assertTrue(itemIdx < cb.getItems().size(), "Given item index is out of range!");
-        robot.type(KeyCode.DOWN);
-        for (int i = 0; i < itemIdx; ++i) {
-            robot.type(KeyCode.DOWN);
-        }
-        robot.type(KeyCode.ENTER);
+    @BeforeEach
+    public void setup(FxRobot robot) {
+        page = new ECCPageObject(robot);
     }
 
 
     @Test
-    public void testComboboxItems(FxRobot robot) {
-        FxAssert.verifyThat("#cbElevator", ComboBoxMatchers.hasItems(2));
-        FxAssert.verifyThat("#cbTargetFloor", ComboBoxMatchers.hasItems(3));
+    public void testComboBoxItems() {
+        page.assertNumberOfElevators(2);
+        page.assertNumberOfFloors(3);
     }
 
     @Test
-    public void testElevatorSelection(FxRobot robot) {
-        var cb = robot.lookup("#cbElevator").<ComboBox<?>>query();
-        assertNull(cb.getSelectionModel().getSelectedItem());
-
-        clickNthElementOfCb(robot, "#cbElevator", 1);
-
-        // TODO: replace prompt text with localized string
-        FxAssert.verifyThat("#cbElevator", ComboBoxMatchers.hasSelectedItem("Elevator 1"));
+    public void testElevatorSelection() {
+        page.selectElevator(1);
+        page.assertElevatorSelected(1);
     }
 
     @Test
-    public void testTargetFloorSelection(FxRobot robot) {
-        clickNthElementOfCb(robot, "#cbElevator", 1);
-
-        var cb = robot.lookup("#cbTargetFloor").<ComboBox<?>>query();
-        assertNull(cb.getSelectionModel().getSelectedItem());
-
-        clickNthElementOfCb(robot, "#cbTargetFloor", 2);
-        robot.clickOn("#btnGo");
-
-        // TODO: replace prompt text with localized string
-        FxAssert.verifyThat("#cbTargetFloor", ComboBoxMatchers.hasSelectedItem("Floor 2"));
-        FxAssert.verifyThat("#lTargetFloor", LabeledMatchers.hasText("2"));
+    public void testTargetFloorSelection(FxRobot robot) throws RemoteException {
+        page.selectElevator(1);
+        page.selectTargetFloor(2);
+        assertEquals(2, elevatorRMIMock.getTarget(1));
     }
 }

@@ -1,13 +1,15 @@
 package at.fhhagenberg.esd.sqe.ws20.gui;
 
+import at.fhhagenberg.esd.sqe.ws20.gui.pageobjects.ECCPageObject;
 import at.fhhagenberg.esd.sqe.ws20.model.Direction;
 import at.fhhagenberg.esd.sqe.ws20.model.DoorStatus;
-import at.fhhagenberg.esd.sqe.ws20.model.IElevator;
+import at.fhhagenberg.esd.sqe.ws20.model.IElevatorWrapper;
 import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
 import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorRMIMock;
-import javafx.scene.control.ComboBox;
-import javafx.scene.input.KeyCode;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxAssert;
@@ -16,8 +18,11 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 import org.testfx.matcher.base.NodeMatchers;
 import org.testfx.matcher.control.LabeledMatchers;
+import org.testfx.util.WaitForAsyncUtils;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 
 @ExtendWith(ApplicationExtension.class)
@@ -27,163 +32,130 @@ public class ModelUpdateTest {
     // --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
 
     private final ElevatorRMIMock elevatorRMIMock = new ElevatorRMIMock(2, 3, 10);
-    private final IElevator elevatorModel = new ElevatorImpl(elevatorRMIMock);
+    private final IElevatorWrapper elevatorModel = new ElevatorImpl(elevatorRMIMock);
+
+    private ECCPageObject page;
 
 
     @Start
     public void start(Stage stage) throws Exception {
+        Locale.setDefault(Locale.ENGLISH);
         new ECC(elevatorModel).start(stage);
     }
 
 
-    public void clickNthElementOfCb(FxRobot robot, String cbQuery, int itemIdx) {
-        ComboBox<?> cb = robot.lookup(cbQuery).query();
-        robot.clickOn(cb);
+    @BeforeEach
+    public void setup(FxRobot robot) {
+        page = new ECCPageObject(robot);
+    }
 
-        assertTrue(itemIdx < cb.getItems().size(), "Given item index is out of range!");
-        robot.type(KeyCode.DOWN);
-        for (int i = 0; i < itemIdx; ++i) {
-            robot.type(KeyCode.DOWN);
-        }
-        robot.type(KeyCode.ENTER);
+
+    @Disabled
+    @Test
+    public void testTargetFloorUpdating(FxRobot robot) throws TimeoutException {
+        // TODO: fix the GUI behaviour for this test to work!
+        page.selectElevator(0);
+        page.assertTargetFloor(0);
+
+        var elevators = elevatorRMIMock.getElevators();
+        elevators.get(0).targetFloor = 1;
+        elevators.get(1).targetFloor = 2;
+
+        page.assertTargetFloorWithTimeout(1);
+
+        page.selectElevator(1);
+        page.assertTargetFloorWithTimeout(2);
     }
 
 
     @Test
-    public void testCurrentFloorUpdating(FxRobot robot) throws InterruptedException {
-        clickNthElementOfCb(robot, "#cbElevator", 0);
-        FxAssert.verifyThat("#lCurFloor", LabeledMatchers.hasText("0"));
-        FxAssert.verifyThat("#lElvCurFloor", LabeledMatchers.hasText("0"));
+    public void testCurrentFloorUpdating(FxRobot robot) throws TimeoutException {
+        page.selectElevator(0);
+        page.assertCurrentFloor(0);
 
         var elevators = elevatorRMIMock.getElevators();
         elevators.get(0).currentFloor = 1;
         elevators.get(1).currentFloor = 2;
 
-        // TODO: can the values be updated using a data binding instead of a timer?
-        Thread.sleep(150);
+        page.assertCurrentFloorWithTimeout(1);
 
-        FxAssert.verifyThat("#lCurFloor", LabeledMatchers.hasText("1"));
-        FxAssert.verifyThat("#lElvCurFloor", LabeledMatchers.hasText("1"));
-
-        clickNthElementOfCb(robot, "#cbElevator", 1);
-        // TODO: can the values be updated using a data binding instead of a timer?
-        Thread.sleep(150);
-
-        FxAssert.verifyThat("#lCurFloor", LabeledMatchers.hasText("2"));
-        FxAssert.verifyThat("#lElvCurFloor", LabeledMatchers.hasText("2"));
+        page.selectElevator(1);
+        page.assertCurrentFloorWithTimeout(2);
     }
 
 
     @Test
-    public void testDirectionUpdating(FxRobot robot) throws InterruptedException {
-        clickNthElementOfCb(robot, "#cbElevator", 0);
+    public void testDirectionUpdating(FxRobot robot) throws TimeoutException {
+        page.selectElevator(0);
 
         var elevators = elevatorRMIMock.getElevators();
         elevators.get(0).committedDirection = Direction.Up.getValue();
         elevators.get(1).committedDirection = Direction.Down.getValue();
 
-        // TODO: can the values be updated using a data binding instead of a timer?
-        Thread.sleep(150);
+        page.assertCommittedDirectionWithTimeout(Direction.Up);
 
-        FxAssert.verifyThat("#lDirection", LabeledMatchers.hasText("Up"));
-        FxAssert.verifyThat("#ivGElvDirUp", NodeMatchers.isVisible());
-        FxAssert.verifyThat("#ivGElvDirDown", NodeMatchers.isInvisible());
-
-        clickNthElementOfCb(robot, "#cbElevator", 1);
-        // TODO: can the values be updated using a data binding instead of a timer?
-        Thread.sleep(150);
-
-        FxAssert.verifyThat("#lDirection", LabeledMatchers.hasText("Down"));
-        FxAssert.verifyThat("#ivGElvDirUp", NodeMatchers.isInvisible());
-        FxAssert.verifyThat("#ivGElvDirDown", NodeMatchers.isVisible());
+        page.selectElevator(1);
+        page.assertCommittedDirectionWithTimeout(Direction.Down);
     }
 
 
     @Test
-    public void testSpeedUpdating(FxRobot robot) throws InterruptedException {
-        clickNthElementOfCb(robot, "#cbElevator", 0);
+    public void testSpeedUpdating(FxRobot robot) throws InterruptedException, TimeoutException {
+        page.selectElevator(0);
 
         var elevators = elevatorRMIMock.getElevators();
         elevators.get(0).currentSpeed = 654;
         elevators.get(1).currentSpeed = 123;
 
-        // TODO: can the values be updated using a data binding instead of a timer?
-        Thread.sleep(150);
+        page.assertCurrentSpeedWithTimeout(654);
 
-        FxAssert.verifyThat("#lSpeed", LabeledMatchers.hasText("654"));
-
-        clickNthElementOfCb(robot, "#cbElevator", 1);
-        // TODO: can the values be updated using a data binding instead of a timer?
-        Thread.sleep(150);
-
-        FxAssert.verifyThat("#lSpeed", LabeledMatchers.hasText("123"));
+        page.selectElevator(1);
+        page.assertCurrentSpeedWithTimeout(123);
     }
 
 
     @Test
-    public void testWeightUpdating(FxRobot robot) throws InterruptedException {
-        clickNthElementOfCb(robot, "#cbElevator", 0);
+    public void testWeightUpdating(FxRobot robot) throws InterruptedException, TimeoutException {
+        page.selectElevator(0);
 
         var elevators = elevatorRMIMock.getElevators();
         elevators.get(0).currentWeight = 1149;
         elevators.get(1).currentWeight = 4711;
 
-        // TODO: can the values be updated using a data binding instead of a timer?
-        Thread.sleep(150);
+        page.assertCurrentWeightWithTimeout(1149);
 
-        FxAssert.verifyThat("#lWeight", LabeledMatchers.hasText("1149"));
-
-        clickNthElementOfCb(robot, "#cbElevator", 1);
-        // TODO: can the values be updated using a data binding instead of a timer?
-        Thread.sleep(150);
-
-        FxAssert.verifyThat("#lWeight", LabeledMatchers.hasText("4711"));
+        page.selectElevator(1);
+        page.assertCurrentWeightWithTimeout(4711);
     }
 
 
     @Test
-    public void testDoorStateUpdating(FxRobot robot) throws InterruptedException {
-        clickNthElementOfCb(robot, "#cbElevator", 0);
+    public void testDoorStateUpdating(FxRobot robot) throws TimeoutException {
+        page.selectElevator(0);
 
         var elevators = elevatorRMIMock.getElevators();
         elevators.get(0).doorStatus = DoorStatus.Closed.getValue();
         elevators.get(1).doorStatus = DoorStatus.Open.getValue();
 
-        // TODO: can the values be updated using a data binding instead of a timer?
-        Thread.sleep(150);
+        page.assertDoorStateWithTimeout(DoorStatus.Closed);
 
-        FxAssert.verifyThat("#ivDoorStateClosed", NodeMatchers.isVisible());
-        FxAssert.verifyThat("#ivDoorStateOpen", NodeMatchers.isInvisible());
-
-        clickNthElementOfCb(robot, "#cbElevator", 1);
-        // TODO: can the values be updated using a data binding instead of a timer?
-        Thread.sleep(150);
-
-        FxAssert.verifyThat("#ivDoorStateClosed", NodeMatchers.isInvisible());
-        FxAssert.verifyThat("#ivDoorStateOpen", NodeMatchers.isVisible());
+        page.selectElevator(1);
+        page.assertDoorStateWithTimeout(DoorStatus.Open);
     }
 
     @Test
     public void testAutomaticModeDisablesFloorSelection(FxRobot robot) {
-        clickNthElementOfCb(robot, "#cbElevator", 0);
-
-        FxAssert.verifyThat("#tbtnOperationMode", LabeledMatchers.hasText("Manual"));
-        FxAssert.verifyThat("#cbTargetFloor", NodeMatchers.isEnabled());
-
-        robot.clickOn("#tbtnOperationMode");
-
-        FxAssert.verifyThat("#tbtnOperationMode", LabeledMatchers.hasText("Automatic"));
-        FxAssert.verifyThat("#cbTargetFloor", NodeMatchers.isDisabled());
-
-        robot.clickOn("#tbtnOperationMode");
-
-        FxAssert.verifyThat("#tbtnOperationMode", LabeledMatchers.hasText("Manual"));
-        FxAssert.verifyThat("#cbTargetFloor", NodeMatchers.isEnabled());
+        page.selectElevator(0);
+        page.assertIsManualMode();
+        page.enableAutomaticMode();
+        page.assertIsAutomaticMode();
+        page.enableManualMode();
+        page.assertIsManualMode();
     }
 
     @Test
     public void testTopFloorSet(FxRobot robot) {
-        FxAssert.verifyThat("#lTopFloor", LabeledMatchers.hasText("2"));
+        page.assertTopFloor(2);
     }
 
 

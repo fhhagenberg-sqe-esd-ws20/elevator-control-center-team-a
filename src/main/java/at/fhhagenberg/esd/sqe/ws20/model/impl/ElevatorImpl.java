@@ -1,6 +1,7 @@
 package at.fhhagenberg.esd.sqe.ws20.model.impl;
 
 import at.fhhagenberg.esd.sqe.ws20.model.*;
+import sqelevator.IElevator;
 import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorException;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,13 +11,13 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 
-public class ElevatorImpl implements IElevator {
+public class ElevatorImpl implements IElevatorWrapper {
     public static int DEFAULT_MAXIMUM_RETRIES = 10;
 
-    private final IElevatorRMI rmiInterface;
+    private final IElevator rmiInterface;
 
 
-    public ElevatorImpl(@NotNull IElevatorRMI rmiInterface) {
+    public ElevatorImpl(@NotNull IElevator rmiInterface) {
         this.rmiInterface = rmiInterface;
     }
 

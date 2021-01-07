@@ -98,7 +98,7 @@ public class ECCController implements Initializable {
 	private ReadOnlyIntegerProperty selectedFloor;
 	final private Timer timer = new Timer();
 
-	IElevator model;
+	IElevatorWrapper model;
 	GeneralInformation info;
 
 	static private ImageView createFloorImageView(String path, ObservableValue<Boolean> visible)
@@ -114,7 +114,7 @@ public class ECCController implements Initializable {
 		return iv;
 	}
 
-	public void setModel(IElevator model) {
+	public void setModel(IElevatorWrapper model) {
 		this.model = model;
 
 		//Init elevator floors

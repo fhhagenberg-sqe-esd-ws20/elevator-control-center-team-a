@@ -1,8 +1,12 @@
 package at.fhhagenberg.esd.sqe.ws20.model;
 
+import sqelevator.IElevator;
+
 public enum DoorStatus {
-    Open(IElevatorRMI.ELEVATOR_DOORS_OPEN),
-    Closed(IElevatorRMI.ELEVATOR_DOORS_CLOSED);
+    Open(IElevator.ELEVATOR_DOORS_OPEN),
+    Closed(IElevator.ELEVATOR_DOORS_CLOSED),
+    Opening(IElevator.ELEVATOR_DOORS_OPENING),
+    Closing(IElevator.ELEVATOR_DOORS_CLOSING);
 
 
     private final int value;
@@ -16,9 +20,9 @@ public enum DoorStatus {
     }
 
     public static DoorStatus fromInt(int status) {
-        if (status == Open.getValue()) {
+        if (status == Open.getValue() || status == Closing.getValue()) {
             return Open;
-        } else if (status == Closed.getValue()) {
+        } else if (status == Closed.getValue() || status == Opening.getValue()) {
             return Closed;
         }
 

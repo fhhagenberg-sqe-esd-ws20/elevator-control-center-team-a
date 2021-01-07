@@ -2,7 +2,7 @@ package at.fhhagenberg.esd.sqe.ws20.model;
 
 import java.util.List;
 
-public interface IElevator {
+public interface IElevatorWrapper {
     GeneralInformation queryGeneralInformation();
 
     GeneralInformation queryGeneralInformation(int maximumRetries);

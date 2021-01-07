@@ -1,4 +1,4 @@
-package at.fhhagenberg.esd.sqe.ws20.model;
+package sqelevator;
 
 
 /**
@@ -74,7 +74,7 @@ package at.fhhagenberg.esd.sqe.ws20.model;
  * @version 0.1
  */
 
-public interface IElevatorRMI extends java.rmi.Remote {
+public interface IElevator extends java.rmi.Remote {
 
     /**
      * State variable for elevator doors open.
