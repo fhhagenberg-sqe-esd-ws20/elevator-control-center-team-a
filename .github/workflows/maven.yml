@@ -37,8 +37,3 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: xvfb-run --server-args="-screen 0, 800x600x8" mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar --file pom.xml
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2.2.1
-      with:
-        name: Jacoco Report
-        path: target/site/jacoco
