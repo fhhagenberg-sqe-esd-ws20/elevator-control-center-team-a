@@ -41,7 +41,7 @@ public class ECCController implements Initializable {
     private final IntegerProperty weight = new SimpleIntegerProperty();
     private final BooleanProperty anyElevatorSelected = new SimpleBooleanProperty();
     private final Timer timer = new Timer();
-    private final StringProperty errorText = new SimpleStringProperty();
+    private final StringProperty errorText = new SimpleStringProperty("");
     @SuppressWarnings("unused")
     @FXML
     private ComboBox<String> cbElevator;
@@ -188,10 +188,11 @@ public class ECCController implements Initializable {
     }
 
     private void update() {
-        if (model == null || currentElevator.get() < 0) {
-            errorText.concat("Invalid model\n");
+        if (model == null) {
+            errorText.set(errorText.get() + "Invalid model\n");
             return;
-        }
+        } else if (currentElevator.get() < 0)
+            return;
 
         Platform.runLater(() -> {
             ElevatorState elevatorState;
@@ -199,7 +200,7 @@ public class ECCController implements Initializable {
             try {
                 elevatorState = model.queryElevatorState(currentElevator.intValue());
             } catch (Exception e) {
-                errorText.concat(e.getMessage() + "\n");
+                errorText.set(errorText.get() + e.getMessage() + "\n");
                 return;
             }
 
@@ -220,7 +221,7 @@ public class ECCController implements Initializable {
                     floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
                     floors[i].isServiced.set(servicedFloors.get(i));
                 } catch (Exception e) {
-                    errorText.concat(e.getMessage() + "\n");
+                    errorText.set(errorText.get() + e.getMessage() + "\n");
                 }
             }
         });
@@ -279,7 +280,7 @@ public class ECCController implements Initializable {
                 lDirection.setText(Boolean.TRUE.equals(newVal) ? "Up" : "Down"));
         tbtnOperationMode.selectedProperty().addListener((observableValue, oldVal, newVal) ->
                 tbtnOperationMode.setText(Boolean.TRUE.equals(newVal) ? "Automatic" : "Manual"));
-        tfErrorLog.textProperty().bind(errorText);
+        taErrorLog.textProperty().bind(errorText);
     }
 
     @SuppressWarnings("unused")
@@ -288,7 +289,7 @@ public class ECCController implements Initializable {
         if (currentElevator.get() >= 0 && selectedFloor.get() >= 0)
             targetFloor.setValue(selectedFloor.get());
         else
-            errorText.concat("Invalid elevator or floor selected\n");
+            errorText.set(errorText.get() + "Invalid elevator or floor selected\n");
     }
 
     private void translateElevator(Integer percentage) {
