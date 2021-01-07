@@ -34,10 +34,26 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+		    <groupId>org.openjfx</groupId>
+		    <artifactId>javafx-fxml</artifactId>
+		    <version>13</version>
+		</dependency>
+        <dependency>
             <groupId>org.testfx</groupId>
             <artifactId>testfx-junit5</artifactId>
             <version>4.0.16-alpha</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>3.5.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>20.1.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -53,9 +69,22 @@
                     </configuration>
                 </plugin>
                 <plugin>
+	                <groupId>org.openjfx</groupId>
+	                <artifactId>javafx-maven-plugin</artifactId>
+	                <version>0.0.4</version>
+	                <configuration>
+	                    <launcher>launcher</launcher>
+	                    <mainClass>at.fhhagenberg.esd.sqe.ws20.gui.ECC</mainClass>
+	                </configuration>
+	            </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.0.0-M3</version>
+                    <configuration>
+                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <argLine>@{argLine} --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -66,8 +95,9 @@
                 <version>0.0.3</version>
                 <configuration>
                     <launcher>launcher</launcher>
-                    <mainClass>at.fhhagenberg.esd.sqe.ws20.App</mainClass>
+                    <mainClass>at.fhhagenberg.esd.sqe.ws20.gui.ECC</mainClass>
                 </configuration>
+
             </plugin>
             <plugin>
 				<groupId>org.jacoco</groupId>
