@@ -80,7 +80,7 @@ public class ECCController implements Initializable {
     private Button btnGo;
     @SuppressWarnings("unused")
     @FXML
-    private TextField tfErrorLog;
+    private TextArea taErrorLog;
     @SuppressWarnings("unused")
     @FXML
     private GridPane gElevator;
