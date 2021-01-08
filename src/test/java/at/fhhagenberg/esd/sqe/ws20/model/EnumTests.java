@@ -10,27 +10,27 @@ public class EnumTests {
 
     @Test
     public void testDoorStatusFromIntOpen() {
-        assertEquals(DoorStatus.OPEN, DoorStatus.fromInt(IElevator.ELEVATOR_DOORS_OPEN));
+        assertEquals(DoorState.OPEN, DoorState.fromInt(IElevator.ELEVATOR_DOORS_OPEN));
     }
 
     @Test
     public void testDoorStatusFromIntClosed() {
-        assertEquals(DoorStatus.CLOSED, DoorStatus.fromInt(IElevator.ELEVATOR_DOORS_CLOSED));
+        assertEquals(DoorState.CLOSED, DoorState.fromInt(IElevator.ELEVATOR_DOORS_CLOSED));
     }
 
     @Test
     public void testDoorStatusFromIntOpening() {
-        assertEquals(DoorStatus.CLOSED, DoorStatus.fromInt(IElevator.ELEVATOR_DOORS_OPENING));
+        assertEquals(DoorState.OPENING, DoorState.fromInt(IElevator.ELEVATOR_DOORS_OPENING));
     }
 
     @Test
     public void testDoorStatusFromIntClosing() {
-        assertEquals(DoorStatus.OPEN, DoorStatus.fromInt(IElevator.ELEVATOR_DOORS_CLOSING));
+        assertEquals(DoorState.CLOSING, DoorState.fromInt(IElevator.ELEVATOR_DOORS_CLOSING));
     }
 
     @Test
     public void testDoorStatusUnknown() {
-        assertThrows(IllegalArgumentException.class, () -> DoorStatus.fromInt(123));
+        assertThrows(IllegalArgumentException.class, () -> DoorState.fromInt(123));
     }
 
 

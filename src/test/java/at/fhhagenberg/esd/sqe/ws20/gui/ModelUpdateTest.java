@@ -2,7 +2,7 @@ package at.fhhagenberg.esd.sqe.ws20.gui;
 
 import at.fhhagenberg.esd.sqe.ws20.gui.pageobjects.ECCPageObject;
 import at.fhhagenberg.esd.sqe.ws20.model.Direction;
-import at.fhhagenberg.esd.sqe.ws20.model.DoorStatus;
+import at.fhhagenberg.esd.sqe.ws20.model.DoorState;
 import at.fhhagenberg.esd.sqe.ws20.model.IElevatorWrapper;
 import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
 import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorRMIMock;
@@ -31,6 +31,7 @@ public class ModelUpdateTest {
     private ECCPageObject page;
 
 
+    @SuppressWarnings("unused")
     @Start
     private void start(Stage stage) throws Exception {
         Locale.setDefault(Locale.ENGLISH);
@@ -113,14 +114,14 @@ public class ModelUpdateTest {
 
     @Test
     void testDoorStateUpdating() {
-        elevatorRMIMock.setDoorStatus(0, DoorStatus.CLOSED);
-        elevatorRMIMock.setDoorStatus(1, DoorStatus.OPEN);
+        elevatorRMIMock.setDoorStatus(0, DoorState.CLOSED);
+        elevatorRMIMock.setDoorStatus(1, DoorState.OPEN);
 
         page.selectElevator(0);
-        page.assertDoorStateWithTimeout(DoorStatus.CLOSED);
+        page.assertDoorStateWithTimeout(DoorState.CLOSED);
 
         page.selectElevator(1);
-        page.assertDoorStateWithTimeout(DoorStatus.OPEN);
+        page.assertDoorStateWithTimeout(DoorState.OPEN);
     }
 
     @Test

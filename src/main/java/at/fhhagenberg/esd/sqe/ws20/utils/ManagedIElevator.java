@@ -1,5 +1,6 @@
 package at.fhhagenberg.esd.sqe.ws20.utils;
 
+import at.fhhagenberg.esd.sqe.ws20.model.ModelMessages;
 import sqelevator.IElevator;
 
 import java.net.MalformedURLException;
@@ -7,8 +8,8 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
-public class ManagedIElevator implements IElevator {
 
+public class ManagedIElevator implements IElevator {
     private final ManagedIElevatorConnector connector;
     private IElevator elevatorRmi;
     private boolean connected;
@@ -207,16 +208,14 @@ public class ManagedIElevator implements IElevator {
             this.url = null;
         }
 
-        public void connect(){
+        public void connect() {
             if (url != null) {
                 try {
                     elevatorRmi = (IElevator) Naming.lookup(url);
                 } catch (RemoteException | NotBoundException e) {
-                    // TODO: use localised strings as exception text!
-                    throw new RMIConnectionException("Failed to connect to RMI URL '" + url + "'.", e);
+                    throw new ConnectionError(ModelMessages.getString("failedToConnectToUrl", url), e);
                 } catch (MalformedURLException e) {
-                    // TODO: use localised strings as exception text!
-                    throw new RMIConnectionException("Malformed RMI URL '" + url + "'.", e);
+                    throw new ConnectionError(ModelMessages.getString("malformedUrl", url), e);
                 }
             }
         }

@@ -184,7 +184,7 @@ public class ECCController implements Initializable {
 			position.setValue(elevatorState.getCurrentPosition());
 			weight.setValue(elevatorState.getCurrentWeight());
 			currentFloor.setValue(elevatorState.getCurrentFloor());
-			isDoorOpen.setValue(elevatorState.getCurrentDoorStatus() == DoorStatus.OPEN);
+			isDoorOpen.setValue(elevatorState.getCurrentDoorState() == DoorState.OPEN);
 			isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.UP);
 
 			var servicedFloors = elevatorState.getServicedFloors();

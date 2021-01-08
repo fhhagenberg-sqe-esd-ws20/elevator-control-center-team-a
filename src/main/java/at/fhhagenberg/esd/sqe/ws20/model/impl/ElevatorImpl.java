@@ -2,7 +2,7 @@ package at.fhhagenberg.esd.sqe.ws20.model.impl;
 
 import at.fhhagenberg.esd.sqe.ws20.model.*;
 import sqelevator.IElevator;
-import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorException;
+import at.fhhagenberg.esd.sqe.ws20.utils.CommunicationError;
 import org.jetbrains.annotations.NotNull;
 
 import java.rmi.RemoteException;
@@ -38,8 +38,7 @@ public class ElevatorImpl implements IElevatorWrapper {
         try {
             return runSupplierChecked(this::queryGeneralInformationInternalUnchecked, maximumRetries);
         } catch (RemoteException | TimeoutException ex) {
-            // TODO: use localised strings as exception text!
-            throw new ElevatorException("Failed to query general information!", ex);
+            throw new CommunicationError(ModelMessages.getString("generalInfoQueryFailed"), ex);
         }
     }
 
@@ -55,8 +54,7 @@ public class ElevatorImpl implements IElevatorWrapper {
         try {
             return runSupplierChecked(() -> queryElevatorStateInternalUnchecked(elevatorNumber), maximumRetries);
         } catch (RemoteException | TimeoutException ex) {
-            // TODO: use localised strings as exception text!
-            throw new ElevatorException("Failed to query elevator state!", ex);
+            throw new CommunicationError(ModelMessages.getString("elevatorStateQueryFailed"), ex);
         }
     }
 
@@ -72,8 +70,7 @@ public class ElevatorImpl implements IElevatorWrapper {
         try {
             return runSupplierChecked(() -> queryFloorStateInternalUnchecked(floorNr), maximumRetries);
         } catch (RemoteException | TimeoutException ex) {
-            // TODO: use localised strings as exception text!
-            throw new ElevatorException("Failed to query floor state!", ex);
+            throw new CommunicationError(ModelMessages.getString("floorStateQueryFailed"), ex);
         }
     }
 
@@ -83,7 +80,7 @@ public class ElevatorImpl implements IElevatorWrapper {
             rmiInterface.setServicesFloors(elevatorNr, servicedFloor, isServiced);
         } catch (RemoteException ex) {
             // TODO: use localised strings as exception text!
-            throw new ElevatorException("Failed to set serviced floor!", ex);
+            throw new CommunicationError(ModelMessages.getString("setServicedFloorsFailed"), ex);
         }
     }
 
@@ -103,16 +100,12 @@ public class ElevatorImpl implements IElevatorWrapper {
                 direction = Direction.UP;
             } else if (targetFloor < currentFloor) {
                 direction = Direction.DOWN;
-            } else {
-                // TODO: getElevatorFloor() gives the nearest floor number meaning that the elevator still has to move,
-                //       if it equals the target floor numbers. Should this be resolved by calculating floor positions?
             }
 
             rmiInterface.setCommittedDirection(elevatorNr, direction.getValue());
             rmiInterface.setTarget(elevatorNr, targetFloor);
         } catch (RemoteException ex) {
-            // TODO: use localised strings as exception text!
-            throw new ElevatorException("Failed to set serviced floor!", ex);
+            throw new CommunicationError(ModelMessages.getString("setTargetFloorFailed"), ex);
         }
 
     }
@@ -159,7 +152,7 @@ public class ElevatorImpl implements IElevatorWrapper {
         state.setTargetFloor(rmiInterface.getTarget(elevatorNumber));
 
         state.setCurrentWeight(rmiInterface.getElevatorWeight(elevatorNumber));
-        state.setCurrentDoorStatus(DoorStatus.fromInt(rmiInterface.getElevatorDoorStatus(elevatorNumber)));
+        state.setCurrentDoorState(DoorState.fromInt(rmiInterface.getElevatorDoorStatus(elevatorNumber)));
 
         final int nrOfFloors = rmiInterface.getFloorNum();
         List<Boolean> floorButtonsPressed = new ArrayList<>();
@@ -182,7 +175,7 @@ public class ElevatorImpl implements IElevatorWrapper {
     // ----------------------------------------------------------------
 
     @FunctionalInterface
-    interface ThrowingSupplier<T, E extends Exception> {
+    private interface ThrowingSupplier<T, E extends Exception> {
         T get() throws E;
     }
 
@@ -192,7 +185,7 @@ public class ElevatorImpl implements IElevatorWrapper {
         long clockTickBefore = -1;
         long clockTickAfter = -1;
 
-        ElevatorException storedEx;
+        CommunicationError storedEx;
         int retries = maximumRetries;
 
         do {
@@ -202,7 +195,7 @@ public class ElevatorImpl implements IElevatorWrapper {
                 clockTickBefore = rmiInterface.getClockTick();
                 result = supplier.get();
                 clockTickAfter = rmiInterface.getClockTick();
-            } catch (ElevatorException ex) {
+            } catch (CommunicationError ex) {
                 storedEx = ex;
             }
         } while (retries-- > 0 && (storedEx != null || clockTickAfter != clockTickBefore));
@@ -212,8 +205,7 @@ public class ElevatorImpl implements IElevatorWrapper {
         }
 
         if (clockTickAfter != clockTickBefore) {
-            // TODO: use localised strings as exception text!
-            throw new TimeoutException("Maximum number of retries reached!");
+            throw new TimeoutException(ModelMessages.getString("maximumRetriesReached"));
         }
 
         return result;

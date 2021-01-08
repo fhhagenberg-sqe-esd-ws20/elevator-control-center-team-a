@@ -1,7 +1,7 @@
 package at.fhhagenberg.esd.sqe.ws20.gui.pageobjects;
 
 import at.fhhagenberg.esd.sqe.ws20.model.Direction;
-import at.fhhagenberg.esd.sqe.ws20.model.DoorStatus;
+import at.fhhagenberg.esd.sqe.ws20.model.DoorState;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -179,19 +179,19 @@ public class ECCPageObject {
         assertCurrentWeight(expectedCurrentWeight);
     }
 
-    public void assertDoorState(DoorStatus expectedDoorState) {
-        if (expectedDoorState == DoorStatus.OPEN || expectedDoorState == DoorStatus.CLOSING) {
+    public void assertDoorState(DoorState expectedDoorState) {
+        if (expectedDoorState == DoorState.OPEN || expectedDoorState == DoorState.CLOSING) {
             FxAssert.verifyThat(doorStateOpenId, NodeMatchers.isVisible());
             FxAssert.verifyThat(doorStateClosedId, NodeMatchers.isInvisible());
-        } else if (expectedDoorState == DoorStatus.CLOSED || expectedDoorState == DoorStatus.OPENING) {
+        } else if (expectedDoorState == DoorState.CLOSED || expectedDoorState == DoorState.OPENING) {
             FxAssert.verifyThat(doorStateOpenId, NodeMatchers.isInvisible());
             FxAssert.verifyThat(doorStateClosedId, NodeMatchers.isVisible());
         }
     }
 
-    public void assertDoorStateWithTimeout(DoorStatus expectedDoorState) {
-        waitUntilVisibilityChanged(doorStateOpenId, expectedDoorState == DoorStatus.OPEN);
-        waitUntilVisibilityChanged(doorStateClosedId, expectedDoorState == DoorStatus.CLOSED);
+    public void assertDoorStateWithTimeout(DoorState expectedDoorState) {
+        waitUntilVisibilityChanged(doorStateOpenId, expectedDoorState == DoorState.OPEN);
+        waitUntilVisibilityChanged(doorStateClosedId, expectedDoorState == DoorState.CLOSED);
         assertDoorState(expectedDoorState);
     }
 
