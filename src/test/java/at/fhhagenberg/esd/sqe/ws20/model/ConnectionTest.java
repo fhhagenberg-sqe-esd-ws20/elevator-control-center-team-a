@@ -19,16 +19,16 @@ import static org.mockito.Mockito.*;
 public class ConnectionTest {
 
     @Mock
-    private ManagedIElevatorConnector mockConnector;
+    public ManagedIElevatorConnector mockConnector;
     @Mock
-    private IElevator mockElevator;
+    public IElevator mockElevator;
 
-    private ManagedIElevator managedElevator;
-    private IElevatorWrapper elevatorWrapper;
+    public ManagedIElevator managedElevator;
+    public IElevatorWrapper elevatorWrapper;
 
 
     @BeforeEach
-    private void setup() throws RemoteException {
+    public void setup() throws RemoteException {
         MockitoAnnotations.openMocks(this);
         when(mockConnector.getElevatorRmi()).thenReturn(mockElevator);
         when(mockElevator.getElevatorDoorStatus(anyInt())).thenReturn(DoorState.OPEN.getValue());
