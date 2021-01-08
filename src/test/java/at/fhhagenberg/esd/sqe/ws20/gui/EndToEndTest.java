@@ -14,8 +14,6 @@ import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import java.util.Locale;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -32,9 +30,9 @@ public class EndToEndTest {
     private ECCPageObject page;
 
 
+    @SuppressWarnings("unused")
     @Start
     private void start(Stage stage) throws Exception {
-        Locale.setDefault(Locale.ENGLISH);
         new ECC(elevatorModel).start(stage);
     }
 

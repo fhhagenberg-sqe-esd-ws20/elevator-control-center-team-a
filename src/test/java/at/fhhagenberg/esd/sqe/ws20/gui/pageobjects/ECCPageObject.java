@@ -3,10 +3,9 @@ package at.fhhagenberg.esd.sqe.ws20.gui.pageobjects;
 import at.fhhagenberg.esd.sqe.ws20.model.Direction;
 import at.fhhagenberg.esd.sqe.ws20.model.DoorState;
 import javafx.scene.Node;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import org.opentest4j.AssertionFailedError;
 import org.testfx.api.FxAssert;
 import org.testfx.api.FxRobot;
 import org.testfx.matcher.base.NodeMatchers;
@@ -14,6 +13,7 @@ import org.testfx.matcher.control.ComboBoxMatchers;
 import org.testfx.matcher.control.LabeledMatchers;
 import org.testfx.util.WaitForAsyncUtils;
 
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -38,12 +38,14 @@ public class ECCPageObject {
     private static final String doorStateClosedId = "#ivDoorStateClosed";
     private static final String doorStateOpenId = "#ivDoorStateOpen";
     private static final String topFloorLabelId = "#lTopFloor";
+    private static final String errorTextAreaId = "#tfErrorLog";
 
 
     private final FxRobot robot;
 
     public ECCPageObject(FxRobot robot) {
         this.robot = robot;
+        Locale.setDefault(Locale.ENGLISH);
     }
 
 
@@ -67,9 +69,11 @@ public class ECCPageObject {
         assertAnyElevatorSelected();
 
         ToggleButton btn = robot.lookup(operationModeButtonId).query();
-        assertFalse(btn.isSelected());
+        if (btn.isSelected()) {
+            return;
+        }
         robot.clickOn(btn);
-        assertTrue(btn.isSelected());
+        assertTrue(btn.isSelected(), "Automatic mode could not be enabled!");
 
         assertIsAutomaticMode();
     }
@@ -78,11 +82,18 @@ public class ECCPageObject {
         assertAnyElevatorSelected();
 
         ToggleButton btn = robot.lookup(operationModeButtonId).query();
-        assertTrue(btn.isSelected());
+        if (!btn.isSelected()) {
+            return;
+        }
         robot.clickOn(btn);
-        assertFalse(btn.isSelected());
+        assertFalse(btn.isSelected(), "Manual mode could not be enabled!");
 
         assertIsManualMode();
+    }
+
+    public void clearErrorLog() {
+        TextField errorLog = robot.lookup(errorTextAreaId).query();
+        errorLog.clear();
     }
 
 
@@ -92,7 +103,7 @@ public class ECCPageObject {
 
     public void assertAnyElevatorSelected() {
         ComboBox<?> eleCb = robot.lookup(elevatorComboBoxId).query();
-        assertNotNull(eleCb.getSelectionModel().getSelectedItem());
+        assertNotNull(eleCb.getSelectionModel().getSelectedItem(), "No valid elevator selected!");
     }
 
     public void assertElevatorSelected(int expectedElevatorIdx) {
@@ -147,7 +158,6 @@ public class ECCPageObject {
     }
 
     public void assertCommittedDirectionWithTimeout(Direction expectedDirection) {
-        // TODO: use localized strings to represent directions
         String expectedString = "Uncommitted";
         if (expectedDirection == Direction.UP) {
             expectedString = "Up";
@@ -209,10 +219,38 @@ public class ECCPageObject {
         FxAssert.verifyThat(topFloorLabelId, LabeledMatchers.hasText(String.valueOf(expectedTopFloor)));
     }
 
+    public void assertEmptyErrorLog() {
+        TextField errorLog = robot.lookup(errorTextAreaId).query();
+        assertTrue(errorLog.getText().isEmpty(), "Error log is not empty!");
+    }
+
+    public void assertNonEmptyErrorLog() {
+        TextInputControl errorLog = robot.lookup(errorTextAreaId).query();
+        assertFalse(errorLog.getText().isEmpty(), "Error log is empty!");
+    }
+
+    public void assertNonEmptyErrorLogWithTimeout() {
+        waitUntilTextInputNotEmpty(errorTextAreaId);
+        assertNonEmptyErrorLog();
+    }
+
 
     // ----------------------------------------------------------------
     // Private helper methods
     // ----------------------------------------------------------------
+
+    private void waitUntilTextInputNotEmpty(String query) {
+        try {
+            WaitForAsyncUtils.waitFor(DEFAULT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS, () -> {
+                TextInputControl textInput = robot.lookup(query).query();
+                return !textInput.getText().isEmpty();
+            });
+        } catch (TimeoutException ex) {
+            TextInputControl textInput = robot.lookup(query).query();
+            throw new AssertionFailedError("Text of TextInputControl '" + query + "' did not contain text as expected.",
+                    "", textInput.getText(), ex);
+        }
+    }
 
     private void waitUntilLabelTextChanged(String query, String expectedText) {
         try {
@@ -222,10 +260,8 @@ public class ECCPageObject {
             });
         } catch (TimeoutException ex) {
             Label label = robot.lookup(query).query();
-
-            throw new AssertionError("Text of Label '" + query + "' did not change as expected.\n" +
-                    "    Expected : '" + expectedText + "'\n" +
-                    "    Actual   : '" + label.getText() + "'", ex);
+            throw new AssertionFailedError("Text of Label '" + query + "' did not change as expected!",
+                    expectedText, label.getText(), ex);
         }
     }
 
@@ -237,10 +273,8 @@ public class ECCPageObject {
             });
         } catch (TimeoutException ex) {
             Node n = robot.lookup(query).query();
-
-            throw new AssertionError("Visibility of node '" + query + "' did not match expectation.\n" +
-                    "    Expected : '" + expectedVisible + "'\n" +
-                    "    Actual   : '" + n.isVisible() + "'", ex);
+            throw new AssertionFailedError("Visibility of node '" + query + "' did not match expectation!",
+                    expectedVisible, n.isVisible(), ex);
         }
     }
 

@@ -9,14 +9,11 @@ import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorRMIMock;
 import at.fhhagenberg.esd.sqe.ws20.utils.ManagedIElevator;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
-
-import java.util.Locale;
 
 
 @ExtendWith(ApplicationExtension.class)
@@ -34,7 +31,6 @@ public class ModelUpdateTest {
     @SuppressWarnings("unused")
     @Start
     private void start(Stage stage) throws Exception {
-        Locale.setDefault(Locale.ENGLISH);
         new ECC(elevatorModel).start(stage);
     }
 
@@ -45,10 +41,8 @@ public class ModelUpdateTest {
     }
 
 
-    @Disabled("The GUI behaviour does not yet match the behaviour described in this test.")
     @Test
     void testTargetFloorUpdating() {
-        // TODO: fix the GUI behaviour for this test to work!
         elevatorRMIMock.setTarget(0, 1);
         elevatorRMIMock.setTarget(1, 2);
 
