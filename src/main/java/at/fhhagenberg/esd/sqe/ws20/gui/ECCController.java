@@ -134,6 +134,8 @@ public class ECCController implements Initializable {
             info = model.queryGeneralInformation();
         } catch (Exception e) {
             errorText.concat(e.getMessage() + "\n");
+            model = null;
+            return;
         }
 
         floorNames.clear();
