@@ -145,7 +145,10 @@ public class ECCController implements Initializable {
     }
 
     public void setModel(IElevatorWrapper model) {
-        assert(model != null);
+        if (model == null)
+        {
+            return;
+        }
         this.model = model;
 
         //Init elevator floors
