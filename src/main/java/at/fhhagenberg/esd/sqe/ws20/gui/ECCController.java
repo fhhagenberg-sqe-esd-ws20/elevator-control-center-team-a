@@ -126,14 +126,33 @@ public class ECCController implements Initializable {
         return iv;
     }
 
+    private void log(String message)
+    {
+        errorText.set(errorText.get() + message + "\n");
+    }
+
+    private void log(Throwable e, int level)
+    {
+        final String indent = "  ".repeat(level);
+        log(indent + e.getMessage().replace("\n", "\n" + indent));
+        if (e.getCause() != null)
+            log(e.getCause(), level+1);
+    }
+
+    private void log(Throwable e)
+    {
+        log(e, 0);
+    }
+
     public void setModel(IElevatorWrapper model) {
+        assert(model != null);
         this.model = model;
 
         //Init elevator floors
         try {
             info = model.queryGeneralInformation();
         } catch (Exception e) {
-            errorText.concat(e.getMessage() + "\n");
+            log(new RuntimeException("Failed to query model!", e));
             model = null;
             return;
         }
@@ -191,7 +210,7 @@ public class ECCController implements Initializable {
 
     private void update() {
         if (model == null) {
-            errorText.set(errorText.get() + "Invalid model\n");
+            log(new RuntimeException("Invalid model"));
             return;
         } else if (currentElevator.get() < 0)
             return;
@@ -202,7 +221,7 @@ public class ECCController implements Initializable {
             try {
                 elevatorState = model.queryElevatorState(currentElevator.intValue());
             } catch (Exception e) {
-                errorText.set(errorText.get() + e.getMessage() + "\n");
+                log(new RuntimeException("Failed to query model!", e));
                 return;
             }
 
@@ -223,7 +242,7 @@ public class ECCController implements Initializable {
                     floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
                     floors[i].isServiced.set(servicedFloors.get(i));
                 } catch (Exception e) {
-                    errorText.set(errorText.get() + e.getMessage() + "\n");
+                    log(new RuntimeException("Failed to query floor state of model!", e));
                 }
             }
         });
@@ -291,7 +310,7 @@ public class ECCController implements Initializable {
         if (currentElevator.get() >= 0 && selectedFloor.get() >= 0)
             targetFloor.setValue(selectedFloor.get());
         else
-            errorText.set(errorText.get() + "Invalid elevator or floor selected\n");
+            log(new RuntimeException("Invalid elevator or floor selected"));
     }
 
     private void translateElevator(Integer percentage) {
