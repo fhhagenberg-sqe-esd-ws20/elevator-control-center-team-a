@@ -153,7 +153,7 @@ public class ECCController implements Initializable {
             info = model.queryGeneralInformation();
         } catch (Exception e) {
             log(new RuntimeException("Failed to query model!", e));
-            model = null;
+            this.model = null;
             return;
         }
 
