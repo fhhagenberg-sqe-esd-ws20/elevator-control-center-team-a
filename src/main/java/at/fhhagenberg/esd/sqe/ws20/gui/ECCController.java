@@ -213,7 +213,7 @@ public class ECCController implements Initializable {
 
     private void update() {
         if (model == null) {
-            log(new RuntimeException(Messages.getString("modelInvalid")));
+            log(Messages.getString("modelInvalid"));
             return;
         } else if (currentElevator.get() < 0)
             return;
@@ -313,7 +313,7 @@ public class ECCController implements Initializable {
         if (currentElevator.get() >= 0 && selectedFloor.get() >= 0)
             targetFloor.setValue(selectedFloor.get());
         else
-            log(new RuntimeException(Messages.getString("invalidSelection")));
+            log(Messages.getString("invalidSelection"));
     }
 
     private void translateElevator(Integer percentage) {
