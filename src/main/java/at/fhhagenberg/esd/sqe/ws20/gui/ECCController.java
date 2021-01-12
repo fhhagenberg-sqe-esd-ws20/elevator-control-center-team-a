@@ -1,6 +1,7 @@
 package at.fhhagenberg.esd.sqe.ws20.gui;
 
 import at.fhhagenberg.esd.sqe.ws20.model.*;
+import at.fhhagenberg.esd.sqe.ws20.utils.RMIConnectionException;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
@@ -42,6 +43,7 @@ public class ECCController implements Initializable {
     private final BooleanProperty anyElevatorSelected = new SimpleBooleanProperty();
     private final Timer timer = new Timer();
     private final StringProperty errorText = new SimpleStringProperty("");
+    private final BooleanProperty isConnected = new SimpleBooleanProperty(false);
     @SuppressWarnings("unused")
     @FXML
     private ComboBox<String> cbElevator;
@@ -144,19 +146,21 @@ public class ECCController implements Initializable {
         log(e, 0);
     }
 
-    public void setModel(IElevatorWrapper model) {
+    private void connect() {
         if (model == null)
         {
+            disconnect();
+            log(Messages.getString("connectFailed.NoModelSet"));
             return;
         }
-        this.model = model;
 
         //Init elevator floors
         try {
             info = model.queryGeneralInformation();
         } catch (Exception e) {
+            if (e instanceof RMIConnectionException)
+                disconnect();
             log(e);
-            this.model = null;
             return;
         }
 
@@ -203,6 +207,23 @@ public class ECCController implements Initializable {
             elevators.add("Elevator " + i);
         }
 
+        isConnected.set(true);
+    }
+
+    private void disconnect()
+    {
+        isConnected.set(false);
+    }
+
+    public void setModel(IElevatorWrapper model) {
+        if (model == null)
+        {
+            return;
+        }
+        this.model = model;
+
+        connect();
+
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -214,6 +235,7 @@ public class ECCController implements Initializable {
     private void update() {
         if (model == null) {
             log(Messages.getString("modelInvalid"));
+            disconnect();
             return;
         } else if (currentElevator.get() < 0)
             return;
@@ -224,9 +246,18 @@ public class ECCController implements Initializable {
             try {
                 elevatorState = model.queryElevatorState(currentElevator.intValue());
             } catch (Exception e) {
+                if (e instanceof RMIConnectionException) {
+                    if (isConnected.get())
+                        disconnect();
+                    else
+                        return;
+                }
                 log(e);
                 return;
             }
+
+            if (!isConnected.get())
+                connect();
 
             speed.setValue(elevatorState.getCurrentSpeed());
             position.setValue(elevatorState.getCurrentPosition());
@@ -245,6 +276,10 @@ public class ECCController implements Initializable {
                     floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
                     floors[i].isServiced.set(servicedFloors.get(i));
                 } catch (Exception e) {
+                    if (e instanceof RMIConnectionException) {
+                        disconnect();
+                        return;
+                    }
                     log(e);
                 }
             }
@@ -258,21 +293,27 @@ public class ECCController implements Initializable {
         selectedFloor = cbTargetFloor.getSelectionModel().selectedIndexProperty();
         anyElevatorSelected.bind(currentElevator.greaterThanOrEqualTo(0));
 
+        cbElevator.disableProperty().bind(isConnected.not());
+
         // Bind properties to mode button (auto/manual)
         tbtnOperationMode.selectedProperty().bindBidirectional(isAutomatic);
-        tbtnOperationMode.disableProperty().bind(anyElevatorSelected.not());
+        tbtnOperationMode.disableProperty().bind(anyElevatorSelected.not().or(isConnected.not()));
 
         lTargetFloor.visibleProperty().bind(isAutomatic.not().and(anyElevatorSelected));
-        cbTargetFloor.disableProperty().bind(isAutomatic.or(anyElevatorSelected.not()));
+        lTargetFloor.disableProperty().bind(isConnected.not());
+        cbTargetFloor.disableProperty().bind(isAutomatic.or(anyElevatorSelected.not()).or(isConnected.not()));
         btnGo.disableProperty().bind(isAutomatic
                 .or(anyElevatorSelected.not())
-                .or(cbTargetFloor.getSelectionModel().selectedIndexProperty().lessThan(0)));
+                .or(cbTargetFloor.getSelectionModel().selectedIndexProperty().lessThan(0))
+                .or(isConnected.not()));
 
-        ivDoorStateClosed.visibleProperty().bind(isDoorOpen.not().and(anyElevatorSelected));
-        ivDoorStateOpen.visibleProperty().bind(isDoorOpen.and(anyElevatorSelected));
+        ivDoorStateClosed.visibleProperty().bind(isDoorOpen.not().and(anyElevatorSelected).and(isConnected));
+        ivDoorStateOpen.visibleProperty().bind(isDoorOpen.and(anyElevatorSelected).and(isConnected));
 
         ivGElvDirUp.visibleProperty().bind(isDirectionUp.and(anyElevatorSelected));
-        ivGElvDirDown.visibleProperty().bind(isDirectionUp.not().and(anyElevatorSelected));
+        ivGElvDirUp.disableProperty().bind(isConnected.not());
+        ivGElvDirDown.visibleProperty().bind(isDirectionUp.not().and(anyElevatorSelected).and(isConnected));
+        ivGElvDirDown.disableProperty().bind(isConnected.not());
 
         cbTargetFloor.itemsProperty().bind(floorNames);
         cbElevator.itemsProperty().bind(elevators);
@@ -282,17 +323,22 @@ public class ECCController implements Initializable {
 
         lCurFloor.textProperty().bind(currentFloor.asString());
         lCurFloor.visibleProperty().bind(anyElevatorSelected);
+        lCurFloor.disableProperty().bind(isConnected.not());
 
         lWeight.textProperty().bind(weight.asString());
         lWeight.visibleProperty().bind(anyElevatorSelected);
+        lWeight.disableProperty().bind(isConnected.not());
 
         lSpeed.textProperty().bind(speed.asString());
         lSpeed.visibleProperty().bind(anyElevatorSelected);
+        lSpeed.disableProperty().bind(isConnected.not());
 
         lTargetFloor.textProperty().bind(targetFloor.asString());
         lTargetFloor.visibleProperty().bind(anyElevatorSelected);
+        lTargetFloor.disableProperty().bind(isConnected.not());
 
         lDirection.visibleProperty().bind(anyElevatorSelected);
+        lDirection.disableProperty().bind(isConnected.not());
 
         lElvCurFloor.textProperty().bind(currentFloor.asString());
 
