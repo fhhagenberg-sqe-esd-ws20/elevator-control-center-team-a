@@ -155,7 +155,7 @@ public class ECCController implements Initializable {
         try {
             info = model.queryGeneralInformation();
         } catch (Exception e) {
-            log(new RuntimeException("Failed to query model!", e));
+            log(e);
             this.model = null;
             return;
         }
@@ -213,7 +213,7 @@ public class ECCController implements Initializable {
 
     private void update() {
         if (model == null) {
-            log(new RuntimeException("Invalid model"));
+            log(new RuntimeException(Messages.getString("modelInvalid")));
             return;
         } else if (currentElevator.get() < 0)
             return;
@@ -224,7 +224,7 @@ public class ECCController implements Initializable {
             try {
                 elevatorState = model.queryElevatorState(currentElevator.intValue());
             } catch (Exception e) {
-                log(new RuntimeException("Failed to query model!", e));
+                log(e);
                 return;
             }
 
@@ -245,7 +245,7 @@ public class ECCController implements Initializable {
                     floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
                     floors[i].isServiced.set(servicedFloors.get(i));
                 } catch (Exception e) {
-                    log(new RuntimeException("Failed to query floor state of model!", e));
+                    log(e);
                 }
             }
         });
@@ -313,7 +313,7 @@ public class ECCController implements Initializable {
         if (currentElevator.get() >= 0 && selectedFloor.get() >= 0)
             targetFloor.setValue(selectedFloor.get());
         else
-            log(new RuntimeException("Invalid elevator or floor selected"));
+            log(new RuntimeException(Messages.getString("invalidSelection")));
     }
 
     private void translateElevator(Integer percentage) {
