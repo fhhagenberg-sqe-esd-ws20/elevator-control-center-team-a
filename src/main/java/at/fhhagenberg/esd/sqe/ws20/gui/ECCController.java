@@ -269,19 +269,21 @@ public class ECCController implements Initializable {
             var servicedFloors = elevatorState.getServicedFloors();
 
             for (int i = 0; i < info.getNrOfFloors(); i++) {
+                at.fhhagenberg.esd.sqe.ws20.model.FloorState state;
                 try {
-                    var state = model.queryFloorState(i);
-                    floors[i].requestUp.set(state.isUpRequest());
-                    floors[i].requestDown.set(state.isDownRequest());
-                    floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
-                    floors[i].isServiced.set(servicedFloors.get(i));
+                    state = model.queryFloorState(i);
                 } catch (Exception e) {
                     if (e instanceof RMIConnectionException) {
                         disconnect();
                         return;
                     }
                     log(e);
+                    continue;
                 }
+                floors[i].requestUp.set(state.isUpRequest());
+                floors[i].requestDown.set(state.isDownRequest());
+                floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
+                floors[i].isServiced.set(servicedFloors.get(i));
             }
         });
     }
