@@ -232,6 +232,44 @@ public class ECCController implements Initializable {
         }, 0, 100);
     }
 
+    private ElevatorState getElevatorState()
+    {
+        ElevatorState elevatorState;
+        try {
+            elevatorState = model.queryElevatorState(currentElevator.intValue());
+        } catch (Exception e) {
+            if (e instanceof RMIConnectionException) {
+                if (isConnected.get())
+                    disconnect();
+                else
+                    return null;
+            }
+            log(e);
+            return null;
+        }
+
+        if (!isConnected.get())
+            connect();
+
+        return elevatorState;
+    }
+
+    private at.fhhagenberg.esd.sqe.ws20.model.FloorState getFloorState(int i)
+    {
+        at.fhhagenberg.esd.sqe.ws20.model.FloorState state;
+        try {
+            state = model.queryFloorState(i);
+        } catch (Exception e) {
+            if (e instanceof RMIConnectionException) {
+                disconnect();
+                return null;
+            }
+            log(e);
+            return null;
+        }
+        return state;
+    }
+
     private void update() {
         if (model == null) {
             log(Messages.getString("modelInvalid"));
@@ -240,25 +278,11 @@ public class ECCController implements Initializable {
         } else if (currentElevator.get() < 0)
             return;
 
+        var elevatorState = getElevatorState();
+        if (elevatorState == null)
+            return;
+
         Platform.runLater(() -> {
-            ElevatorState elevatorState;
-
-            try {
-                elevatorState = model.queryElevatorState(currentElevator.intValue());
-            } catch (Exception e) {
-                if (e instanceof RMIConnectionException) {
-                    if (isConnected.get())
-                        disconnect();
-                    else
-                        return;
-                }
-                log(e);
-                return;
-            }
-
-            if (!isConnected.get())
-                connect();
-
             speed.setValue(elevatorState.getCurrentSpeed());
             position.setValue(elevatorState.getCurrentPosition());
             weight.setValue(elevatorState.getCurrentWeight());
@@ -269,17 +293,7 @@ public class ECCController implements Initializable {
             var servicedFloors = elevatorState.getServicedFloors();
 
             for (int i = 0; i < info.getNrOfFloors(); i++) {
-                at.fhhagenberg.esd.sqe.ws20.model.FloorState state;
-                try {
-                    state = model.queryFloorState(i);
-                } catch (Exception e) {
-                    if (e instanceof RMIConnectionException) {
-                        disconnect();
-                        return;
-                    }
-                    log(e);
-                    continue;
-                }
+                var state = getFloorState(i);
                 floors[i].requestUp.set(state.isUpRequest());
                 floors[i].requestDown.set(state.isDownRequest());
                 floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
