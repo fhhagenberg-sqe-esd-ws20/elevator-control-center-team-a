@@ -129,7 +129,7 @@ public class ECCController implements Initializable {
     }
 
     private void log(String message) {
-        errorText.set(errorText.get() + message + "\n");
+        Platform.runLater(() -> errorText.set(errorText.get() + message + "\n"));
     }
 
     private void log(Throwable e, int level) {
