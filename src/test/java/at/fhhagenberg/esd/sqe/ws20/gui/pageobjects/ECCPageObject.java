@@ -92,7 +92,7 @@ public class ECCPageObject {
     }
 
     public void clearErrorLog() {
-        TextField errorLog = robot.lookup(errorTextAreaId).query();
+        TextInputControl errorLog = robot.lookup(errorTextAreaId).query();
         errorLog.clear();
     }
 
@@ -220,7 +220,7 @@ public class ECCPageObject {
     }
 
     public void assertEmptyErrorLog() {
-        TextField errorLog = robot.lookup(errorTextAreaId).query();
+        TextInputControl errorLog = robot.lookup(errorTextAreaId).query();
         assertTrue(errorLog.getText().isEmpty(), "Error log is not empty!");
     }
 
@@ -246,9 +246,7 @@ public class ECCPageObject {
                 return !textInput.getText().isEmpty();
             });
         } catch (TimeoutException ex) {
-            TextInputControl textInput = robot.lookup(query).query();
-            throw new AssertionFailedError("Text of TextInputControl '" + query + "' did not contain text as expected.",
-                    "", textInput.getText(), ex);
+            throw new AssertionFailedError("Text of TextInputControl '" + query + "' did not contain text as expected.", ex);
         }
     }
 

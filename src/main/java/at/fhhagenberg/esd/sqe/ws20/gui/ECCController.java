@@ -2,7 +2,6 @@ package at.fhhagenberg.esd.sqe.ws20.gui;
 
 import at.fhhagenberg.esd.sqe.ws20.model.*;
 import at.fhhagenberg.esd.sqe.ws20.utils.ConnectionError;
-import at.fhhagenberg.esd.sqe.ws20.utils.ConnectionError;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
@@ -135,9 +134,11 @@ public class ECCController implements Initializable {
 
     private void log(Throwable e, int level) {
         final String indent = "  ".repeat(level);
-        log(indent + e.getMessage().replace("\n", "\n" + indent));
-        if (e.getCause() != null)
-            log(e.getCause(), level + 1);
+        if (e.getMessage() != null) {
+            log(indent + e.getMessage().replace("\n", "\n" + indent));
+            if (e.getCause() != null)
+                log(e.getCause(), level + 1);
+        }
     }
 
     private void log(Throwable e) {
@@ -238,6 +239,7 @@ public class ECCController implements Initializable {
                 else
                     return null;
             }
+
             log(e);
             return null;
         }
@@ -280,6 +282,7 @@ public class ECCController implements Initializable {
             position.setValue(elevatorState.getCurrentPosition());
             weight.setValue(elevatorState.getCurrentWeight());
             currentFloor.setValue(elevatorState.getCurrentFloor());
+
             isDoorOpen.setValue(elevatorState.getCurrentDoorState() == DoorState.OPEN);
             isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.UP);
             targetFloor.setValue(elevatorState.getTargetFloor());

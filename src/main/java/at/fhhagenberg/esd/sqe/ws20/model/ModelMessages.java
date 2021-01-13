@@ -13,8 +13,6 @@ public class ModelMessages {
     }
 
     public static String getString(String key, Object... args) {
-        MessageFormat formatter = new MessageFormat("");
-        formatter.applyPattern(RESOURCE_BUNDLE.getString(key));
-        return formatter.format(args);
+        return MessageFormat.format(RESOURCE_BUNDLE.getString(key), args);
     }
 }
