@@ -289,6 +289,7 @@ public class ECCController implements Initializable {
             currentFloor.setValue(elevatorState.getCurrentFloor());
             isDoorOpen.setValue(elevatorState.getCurrentDoorStatus() == DoorStatus.OPEN);
             isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.UP);
+            targetFloor.setValue(elevatorState.getTargetFloor());
 
             var servicedFloors = elevatorState.getServicedFloors();
 
@@ -360,8 +361,6 @@ public class ECCController implements Initializable {
 
         position.addListener((observableValue, oldVal, newVal) ->
                 translateElevator(100 * newVal.intValue() / ((info.getNrOfFloors() - 1) * info.getFloorHeight())));
-        targetFloor.addListener((observableValue, oldVal, newVal) ->
-                model.setTargetFloor(currentElevator.get(), newVal.intValue()));
         isDirectionUp.addListener((observableValue, oldVal, newVal) ->
                 lDirection.setText(Boolean.TRUE.equals(newVal) ? "Up" : "Down"));
         tbtnOperationMode.selectedProperty().addListener((observableValue, oldVal, newVal) ->
@@ -373,7 +372,7 @@ public class ECCController implements Initializable {
     @FXML
     protected void gotoTargetFloor(ActionEvent event) {
         if (currentElevator.get() >= 0 && selectedFloor.get() >= 0)
-            targetFloor.setValue(selectedFloor.get());
+            model.setTargetFloor(currentElevator.get(), selectedFloor.get());
         else
             log(Messages.getString("invalidSelection"));
     }
