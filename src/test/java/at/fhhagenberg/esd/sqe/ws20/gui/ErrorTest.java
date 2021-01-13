@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(ApplicationExtension.class)
-public class ErrorTest {
+class ErrorTest {
 
     // TestFX may need additional VM options:
     // --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED

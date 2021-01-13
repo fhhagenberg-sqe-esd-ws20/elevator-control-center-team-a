@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ConnectionTest {
+class ConnectionTest {
 
     @Mock
     public ManagedIElevatorConnector mockConnector;
@@ -40,7 +40,7 @@ public class ConnectionTest {
 
 
     @Test
-    public void testConnectingAtFirstRequest() {
+    void testConnectingAtFirstRequest() {
         assertFalse(managedElevator.isConnected());
 
         assertDoesNotThrow(() -> elevatorWrapper.queryElevatorState(0));
@@ -50,7 +50,7 @@ public class ConnectionTest {
     }
 
     @Test
-    public void testDisconnectingAfterFirstError() throws RemoteException {
+    void testDisconnectingAfterFirstError() throws RemoteException {
         elevatorWrapper.queryElevatorState(0);
         clearInvocations(mockConnector);
 
@@ -62,7 +62,7 @@ public class ConnectionTest {
     }
 
     @Test
-    public void testReconnectingAfterError() throws RemoteException {
+    void testReconnectingAfterError() throws RemoteException {
         elevatorWrapper.queryElevatorState(0);
         when(mockElevator.getClockTick()).thenThrow(RemoteException.class);
         assertThrows(CommunicationError.class, () -> elevatorWrapper.queryElevatorState(0));
