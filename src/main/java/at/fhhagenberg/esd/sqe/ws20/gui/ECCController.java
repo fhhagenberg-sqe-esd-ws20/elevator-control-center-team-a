@@ -116,6 +116,7 @@ public class ECCController implements Initializable {
     private IElevatorWrapper model;
     private GeneralInformation info;
 
+    private Integer oldPercentage = 0;
     private static ImageView createFloorImageView(String path, ObservableValue<Boolean> visible) {
         File file = new File(path);
         Image image = new Image(file.toURI().toString());
@@ -386,12 +387,21 @@ public class ECCController implements Initializable {
         double yRect = (maxHeight - elevatorHeight) * percentage / 100.0;
 
         groupElevator.translateYProperty().set(-yRect);
-    }
+        oldPercentage = percentage;
+    }   
 
     private static class FloorState {
         private final BooleanProperty requestUp = new SimpleBooleanProperty(false);
         private final BooleanProperty requestDown = new SimpleBooleanProperty(false);
         private final BooleanProperty stopRequest = new SimpleBooleanProperty(false);
         private final BooleanProperty isServiced = new SimpleBooleanProperty(false);
+    }
+    
+    public void resizeElevator() {
+    	double maxHeight = gElevator.getHeight();
+        double elevatorHeight = groupElevator.getBoundsInLocal().getHeight();
+        double yRect = (maxHeight - elevatorHeight) * oldPercentage / 100.0;
+
+        groupElevator.translateYProperty().set(-yRect);
     }
 }

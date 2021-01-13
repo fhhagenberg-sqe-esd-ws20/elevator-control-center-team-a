@@ -51,6 +51,11 @@ public class ECC extends Application {
 
         stage.setTitle(Messages.getString("ECC.2"));
         stage.setScene(scene);
+        
+        stage.heightProperty().addListener((obs, oldVal, newVal) -> {
+            controller.resizeElevator();
+       });
+        
         stage.show();
     }
 
