@@ -38,7 +38,7 @@ public class ECCPageObject {
     private static final String doorStateClosedId = "#ivDoorStateClosed";
     private static final String doorStateOpenId = "#ivDoorStateOpen";
     private static final String topFloorLabelId = "#lTopFloor";
-    private static final String errorTextAreaId = "#tfErrorLog";
+    private static final String errorTextAreaId = "#taErrorLog";
 
 
     private final FxRobot robot;
