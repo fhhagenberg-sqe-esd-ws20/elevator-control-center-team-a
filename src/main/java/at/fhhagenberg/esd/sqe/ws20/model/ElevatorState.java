@@ -17,7 +17,7 @@ public class ElevatorState {
 
     // Non-movement related properties
     private int currentWeight;
-    private DoorStatus currentDoorStatus;
+    private DoorState currentDoorState;
     private List<Boolean> currentFloorButtonsPressed;
     private List<Boolean> servicedFloors;
 
@@ -99,12 +99,12 @@ public class ElevatorState {
         this.currentWeight = currentWeight;
     }
 
-    public DoorStatus getCurrentDoorStatus() {
-        return currentDoorStatus;
+    public DoorState getCurrentDoorState() {
+        return currentDoorState;
     }
 
-    public void setCurrentDoorStatus(DoorStatus currentDoorStatus) {
-        this.currentDoorStatus = currentDoorStatus;
+    public void setCurrentDoorState(DoorState currentDoorState) {
+        this.currentDoorState = currentDoorState;
     }
 
     public List<Boolean> getCurrentFloorButtonsPressed() {

@@ -8,4 +8,5 @@ module at.fhhagenberg.sqe {
 
     exports at.fhhagenberg.esd.sqe.ws20.gui;
     opens at.fhhagenberg.esd.sqe.ws20.gui;
+    opens at.fhhagenberg.esd.sqe.ws20.model;
 }

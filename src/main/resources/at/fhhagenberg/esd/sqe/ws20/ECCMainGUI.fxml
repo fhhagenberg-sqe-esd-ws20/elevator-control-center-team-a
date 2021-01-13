@@ -228,7 +228,7 @@
             <VBox VBox.vgrow="ALWAYS">
             	<children>
             		<Label text="%ECC.14" VBox.vgrow="ALWAYS" />
-            		<TextField fx:id="tfErrorLog" editable="False" minHeight="150.0" VBox.vgrow="ALWAYS" />
+            		<TextArea fx:id="taErrorLog" editable="False" minHeight="150.0" VBox.vgrow="ALWAYS" />
             	</children>
             </VBox>
          </children>
