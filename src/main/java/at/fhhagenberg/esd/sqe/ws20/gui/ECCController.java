@@ -128,27 +128,23 @@ public class ECCController implements Initializable {
         return iv;
     }
 
-    private void log(String message)
-    {
+    private void log(String message) {
         errorText.set(errorText.get() + message + "\n");
     }
 
-    private void log(Throwable e, int level)
-    {
+    private void log(Throwable e, int level) {
         final String indent = "  ".repeat(level);
         log(indent + e.getMessage().replace("\n", "\n" + indent));
         if (e.getCause() != null)
-            log(e.getCause(), level+1);
+            log(e.getCause(), level + 1);
     }
 
-    private void log(Throwable e)
-    {
+    private void log(Throwable e) {
         log(e, 0);
     }
 
     private void connect() {
-        if (model == null)
-        {
+        if (model == null) {
             disconnect();
             log(Messages.getString("connectFailed.NoModelSet"));
             return;
@@ -210,14 +206,12 @@ public class ECCController implements Initializable {
         isConnected.set(true);
     }
 
-    private void disconnect()
-    {
+    private void disconnect() {
         isConnected.set(false);
     }
 
     public void setModel(IElevatorWrapper model) {
-        if (model == null)
-        {
+        if (model == null) {
             return;
         }
         this.model = model;
@@ -232,8 +226,7 @@ public class ECCController implements Initializable {
         }, 0, 100);
     }
 
-    private ElevatorState getElevatorState()
-    {
+    private ElevatorState getElevatorState() {
         ElevatorState elevatorState;
         try {
             elevatorState = model.queryElevatorState(currentElevator.intValue());
@@ -254,8 +247,7 @@ public class ECCController implements Initializable {
         return elevatorState;
     }
 
-    private at.fhhagenberg.esd.sqe.ws20.model.FloorState getFloorState(int i)
-    {
+    private at.fhhagenberg.esd.sqe.ws20.model.FloorState getFloorState(int i) {
         at.fhhagenberg.esd.sqe.ws20.model.FloorState state;
         try {
             state = model.queryFloorState(i);
@@ -374,15 +366,13 @@ public class ECCController implements Initializable {
         if (currentElevator.get() >= 0 && selectedFloor.get() >= 0) {
             try {
                 model.setTargetFloor(currentElevator.get(), selectedFloor.get());
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 if (e instanceof RMIConnectionException) {
                     disconnect();
                 }
                 log(e);
             }
-        }
-        else
+        } else
             log(Messages.getString("invalidSelection"));
     }
 
