@@ -371,8 +371,17 @@ public class ECCController implements Initializable {
     @SuppressWarnings("unused")
     @FXML
     protected void gotoTargetFloor(ActionEvent event) {
-        if (currentElevator.get() >= 0 && selectedFloor.get() >= 0)
-            model.setTargetFloor(currentElevator.get(), selectedFloor.get());
+        if (currentElevator.get() >= 0 && selectedFloor.get() >= 0) {
+            try {
+                model.setTargetFloor(currentElevator.get(), selectedFloor.get());
+            } catch (Exception e)
+            {
+                if (e instanceof RMIConnectionException) {
+                    disconnect();
+                }
+                log(e);
+            }
+        }
         else
             log(Messages.getString("invalidSelection"));
     }
