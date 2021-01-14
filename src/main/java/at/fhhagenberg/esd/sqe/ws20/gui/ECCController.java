@@ -44,6 +44,7 @@ public class ECCController implements Initializable {
     private final Timer timer = new Timer();
     private final StringProperty errorText = new SimpleStringProperty("");
     private final BooleanProperty isConnected = new SimpleBooleanProperty(false);
+    private final BooleanProperty isOnTargetFloor = new SimpleBooleanProperty(false);
     @SuppressWarnings("unused")
     @FXML
     private ComboBox<String> cbElevator;
@@ -287,6 +288,7 @@ public class ECCController implements Initializable {
             isDoorOpen.setValue(elevatorState.getCurrentDoorState() == DoorState.OPEN);
             isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.UP);
             targetFloor.setValue(elevatorState.getTargetFloor());
+            isOnTargetFloor.setValue(elevatorState.getCurrentFloor() == elevatorState.getTargetFloor());
 
             var servicedFloors = elevatorState.getServicedFloors();
 
@@ -327,9 +329,9 @@ public class ECCController implements Initializable {
         ivDoorStateClosed.visibleProperty().bind(isDoorOpen.not().and(anyElevatorSelected).and(isConnected));
         ivDoorStateOpen.visibleProperty().bind(isDoorOpen.and(anyElevatorSelected).and(isConnected));
 
-        ivGElvDirUp.visibleProperty().bind(isDirectionUp.and(anyElevatorSelected));
+        ivGElvDirUp.visibleProperty().bind(isDirectionUp.and(anyElevatorSelected).and(isOnTargetFloor.not()));
         ivGElvDirUp.disableProperty().bind(isConnected.not());
-        ivGElvDirDown.visibleProperty().bind(isDirectionUp.not().and(anyElevatorSelected).and(isConnected));
+        ivGElvDirDown.visibleProperty().bind(isDirectionUp.not().and(anyElevatorSelected).and(isConnected).and(isOnTargetFloor.not()));
         ivGElvDirDown.disableProperty().bind(isConnected.not());
 
         cbTargetFloor.itemsProperty().bind(floorNames);
