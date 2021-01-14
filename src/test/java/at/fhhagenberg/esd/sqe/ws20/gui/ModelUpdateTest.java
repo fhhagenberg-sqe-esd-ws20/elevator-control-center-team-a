@@ -22,7 +22,7 @@ public class ModelUpdateTest {
     // TestFX may need additional VM options:
     // --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
 
-    private final ElevatorRMIMock elevatorRMIMock = new ElevatorRMIMock(2, 3, 10);
+    private final ElevatorRMIMock elevatorRMIMock = new ElevatorRMIMock(3, 3, 10);
     private final IElevatorWrapper elevatorModel = new ElevatorImpl(new ManagedIElevator(elevatorRMIMock));
 
     private ECCPageObject page;
@@ -71,12 +71,16 @@ public class ModelUpdateTest {
     void testDirectionUpdating() {
         elevatorRMIMock.setCommittedDirection(0, Direction.UP.getValue());
         elevatorRMIMock.setCommittedDirection(1, Direction.DOWN.getValue());
+        elevatorRMIMock.setCommittedDirection(2, Direction.UNCOMMITTED.getValue());
 
         page.selectElevator(0);
         page.assertCommittedDirectionWithTimeout(Direction.UP);
 
         page.selectElevator(1);
         page.assertCommittedDirectionWithTimeout(Direction.DOWN);
+
+        page.selectElevator(2);
+        page.assertCommittedDirectionWithTimeout(Direction.UNCOMMITTED);
     }
 
 
