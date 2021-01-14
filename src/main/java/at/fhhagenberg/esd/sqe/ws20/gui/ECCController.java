@@ -417,8 +417,6 @@ public class ECCController implements Initializable {
     }
     
     public void setStageAndSetUpListeners(Stage mainStage) {
-    	mainStage.heightProperty().addListener((obs, oldVal, newVal) -> {
-    		translateElevator();
-    	});
+    	mainStage.heightProperty().addListener((obs, oldVal, newVal) -> translateElevator());
     }
 }
