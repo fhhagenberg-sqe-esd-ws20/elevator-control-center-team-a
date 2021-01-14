@@ -168,6 +168,7 @@ public class ECCController implements Initializable {
 
         floorNames.clear();
         gElevatorFloors.getChildren().clear();
+        gElevatorFloors.getRowConstraints().clear();
         floors = new FloorState[info.getNrOfFloors()];
 
         lTopFloor.setText(((Integer) (info.getNrOfFloors() - 1)).toString());
