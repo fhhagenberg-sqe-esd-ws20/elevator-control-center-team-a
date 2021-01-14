@@ -33,7 +33,7 @@ import javafx.stage.Stage;
 public class ECCController implements Initializable {
 
     private final BooleanProperty isDoorOpen = new SimpleBooleanProperty();
-    private final BooleanProperty isDirectionUp = new SimpleBooleanProperty();
+    private final IntegerProperty ipDirection = new SimpleIntegerProperty(Direction.UNCOMMITTED.getValue());
     private final BooleanProperty isAutomatic = new SimpleBooleanProperty();
     private final ListProperty<String> elevators = new SimpleListProperty<>();
     private final ListProperty<String> floorNames = new SimpleListProperty<>();
@@ -46,7 +46,6 @@ public class ECCController implements Initializable {
     private final Timer timer = new Timer();
     private final StringProperty errorText = new SimpleStringProperty("");
     private final BooleanProperty isConnected = new SimpleBooleanProperty(false);
-    private final BooleanProperty isUncommitedDirection = new SimpleBooleanProperty(false);
     @SuppressWarnings("unused")
     @FXML
     private ComboBox<String> cbElevator;
@@ -118,7 +117,7 @@ public class ECCController implements Initializable {
     private ReadOnlyIntegerProperty selectedFloor;
     private IElevatorWrapper model;
     private GeneralInformation info;
-
+    
     private Integer oldPercentage = 0;
     private static ImageView createFloorImageView(String path, ObservableValue<Boolean> visible) {
         File file = new File(path);
@@ -289,9 +288,9 @@ public class ECCController implements Initializable {
             currentFloor.setValue(elevatorState.getCurrentFloor());
 
             isDoorOpen.setValue(elevatorState.getCurrentDoorState() == DoorState.OPEN);
-            isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.UP);
+            ipDirection.setValue(elevatorState.getCurrentDirection().getValue());
+            
             targetFloor.setValue(elevatorState.getTargetFloor());
-            isUncommitedDirection.setValue(elevatorState.getCurrentDirection() == Direction.UNCOMMITTED);
 
             var servicedFloors = elevatorState.getServicedFloors();
 
@@ -332,9 +331,9 @@ public class ECCController implements Initializable {
         ivDoorStateClosed.visibleProperty().bind(isDoorOpen.not().and(anyElevatorSelected).and(isConnected));
         ivDoorStateOpen.visibleProperty().bind(isDoorOpen.and(anyElevatorSelected).and(isConnected));
 
-        ivGElvDirUp.visibleProperty().bind(isDirectionUp.and(anyElevatorSelected).and(isUncommitedDirection.not()));
+        ivGElvDirUp.visibleProperty().bind(ipDirection.isEqualTo(Direction.UP.getValue()).and(anyElevatorSelected));
         ivGElvDirUp.disableProperty().bind(isConnected.not());
-        ivGElvDirDown.visibleProperty().bind(isDirectionUp.not().and(anyElevatorSelected).and(isConnected).and(isUncommitedDirection.not()));
+        ivGElvDirDown.visibleProperty().bind(ipDirection.isEqualTo(Direction.DOWN.getValue()).and(anyElevatorSelected).and(isConnected));
         ivGElvDirDown.disableProperty().bind(isConnected.not());
 
         cbTargetFloor.itemsProperty().bind(floorNames);
@@ -366,8 +365,16 @@ public class ECCController implements Initializable {
 
         position.addListener((observableValue, oldVal, newVal) ->
                 translateElevator(100 * newVal.intValue() / ((info.getNrOfFloors() - 1) * info.getFloorHeight())));
-        isDirectionUp.addListener((observableValue, oldVal, newVal) ->
-                lDirection.setText(Boolean.TRUE.equals(newVal) ? "Up" : "Down"));
+        ipDirection.addListener((observableValue, oldVal, newVal) -> {
+	    		if((Integer)newVal == Direction.UP.getValue()) {
+	    			lDirection.setText("Up");
+	    		} else if((Integer)newVal == Direction.DOWN.getValue()) {
+	    			lDirection.setText("Down");
+	    		}else {
+	    			lDirection.setText("Uncomitted");
+	    		}
+			});
+                
         tbtnOperationMode.selectedProperty().addListener((observableValue, oldVal, newVal) ->
                 tbtnOperationMode.setText(Boolean.TRUE.equals(newVal) ? "Automatic" : "Manual"));
         taErrorLog.textProperty().bind(errorText);
