@@ -1,6 +1,6 @@
 package at.fhhagenberg.esd.sqe.ws20.utils;
 
-import at.fhhagenberg.esd.sqe.ws20.model.DoorStatus;
+import at.fhhagenberg.esd.sqe.ws20.model.DoorState;
 import sqelevator.IElevator;
 
 import java.util.ArrayList;
@@ -96,9 +96,9 @@ public class ElevatorRMIMock implements IElevator {
         elevators.get(elevatorIdx).currentWeight = weight;
     }
 
-    public void setDoorStatus(int elevatorIdx, DoorStatus doorStatus) {
+    public void setDoorStatus(int elevatorIdx, DoorState doorState) {
         validateElevatorNumber(elevatorIdx);
-        elevators.get(elevatorIdx).doorStatus = doorStatus.getValue();
+        elevators.get(elevatorIdx).doorStatus = doorState.getValue();
     }
 
 

@@ -4,7 +4,7 @@ import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
 import at.fhhagenberg.esd.sqe.ws20.utils.ManagedIElevator;
 import sqelevator.IElevator;
 import at.fhhagenberg.esd.sqe.ws20.utils.BoolGenerator;
-import at.fhhagenberg.esd.sqe.ws20.utils.ElevatorException;
+import at.fhhagenberg.esd.sqe.ws20.utils.CommunicationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,7 +68,7 @@ public class ElevatorImplTest {
         when(mockedElevatorRMI.getElevatorNum()).thenReturn(5);
         when(mockedElevatorRMI.getFloorHeight()).thenReturn(1);
 
-        assertThrows(ElevatorException.class, () -> uut.queryGeneralInformation(0));
+        assertThrows(CommunicationError.class, () -> uut.queryGeneralInformation(0));
 
         verify(mockedElevatorRMI, times(2)).getClockTick();
         verify(mockedElevatorRMI).getFloorNum();
@@ -102,9 +102,9 @@ public class ElevatorImplTest {
         when(mockedElevatorRMI.getClockTick()).thenReturn(1L, 1L);
         when(mockedElevatorRMI.getFloorNum()).thenReturn(20);
         when(mockedElevatorRMI.getElevatorNum()).thenReturn(5);
-        when(mockedElevatorRMI.getFloorHeight()).thenThrow(ElevatorException.class);
+        when(mockedElevatorRMI.getFloorHeight()).thenThrow(CommunicationError.class);
 
-        assertThrows(ElevatorException.class, () -> uut.queryGeneralInformation(0));
+        assertThrows(CommunicationError.class, () -> uut.queryGeneralInformation(0));
 
         verify(mockedElevatorRMI).getClockTick();
         verify(mockedElevatorRMI).getFloorNum();
@@ -118,7 +118,7 @@ public class ElevatorImplTest {
         when(mockedElevatorRMI.getClockTick()).thenReturn(1L, 1L, 1L);
         when(mockedElevatorRMI.getFloorNum()).thenReturn(20, 20);
         when(mockedElevatorRMI.getElevatorNum()).thenReturn(5, 5);
-        when(mockedElevatorRMI.getFloorHeight()).thenThrow(ElevatorException.class).thenReturn(123);
+        when(mockedElevatorRMI.getFloorHeight()).thenThrow(CommunicationError.class).thenReturn(123);
 
         var generalInformation = uut.queryGeneralInformation(1);
 
@@ -135,9 +135,9 @@ public class ElevatorImplTest {
 
     @Test
     public void testDefaultRetryValueThrowing() throws RemoteException {
-        when(mockedElevatorRMI.getClockTick()).thenThrow(ElevatorException.class);
+        when(mockedElevatorRMI.getClockTick()).thenThrow(CommunicationError.class);
 
-        assertThrows(ElevatorException.class, () -> uut.queryGeneralInformation());
+        assertThrows(CommunicationError.class, () -> uut.queryGeneralInformation());
 
         verify(mockedElevatorRMI, times(ElevatorImpl.DEFAULT_MAXIMUM_RETRIES + 1)).getClockTick();
         verifyNoMoreInteractions(mockedElevatorRMI);
@@ -189,7 +189,7 @@ public class ElevatorImplTest {
     public void testThrowingQueryFloorState() throws RemoteException {
         when(mockedElevatorRMI.getClockTick()).thenReturn(1234L, 0L);
 
-        assertThrows(ElevatorException.class, () -> uut.queryFloorState(0, 0));
+        assertThrows(CommunicationError.class, () -> uut.queryFloorState(0, 0));
 
         verify(mockedElevatorRMI, times(2)).getClockTick();
         verify(mockedElevatorRMI).getFloorHeight();
@@ -259,8 +259,8 @@ public class ElevatorImplTest {
         assertEquals(15, elevatorState1.getTargetFloor());
         assertEquals(16, elevatorState0.getCurrentWeight());
         assertEquals(16, elevatorState1.getCurrentWeight());
-        assertEquals(DoorStatus.CLOSED, elevatorState0.getCurrentDoorStatus());
-        assertEquals(DoorStatus.CLOSED, elevatorState1.getCurrentDoorStatus());
+        assertEquals(DoorState.CLOSED, elevatorState0.getCurrentDoorState());
+        assertEquals(DoorState.CLOSED, elevatorState1.getCurrentDoorState());
         assertEquals(Arrays.asList(true, false, true), elevatorState0.getCurrentFloorButtonsPressed());
         assertEquals(Arrays.asList(false, true, false), elevatorState1.getCurrentFloorButtonsPressed());
         assertEquals(Arrays.asList(false, true, false), elevatorState0.getServicedFloors());
@@ -274,7 +274,7 @@ public class ElevatorImplTest {
         when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(IElevator.ELEVATOR_DIRECTION_DOWN);
         when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
 
-        assertThrows(ElevatorException.class, () -> uut.queryElevatorState(0, 0));
+        assertThrows(CommunicationError.class, () -> uut.queryElevatorState(0, 0));
 
         verify(mockedElevatorRMI, times(2)).getClockTick();
         verify(mockedElevatorRMI, times(1)).getElevatorCapacity(anyInt());
@@ -297,7 +297,7 @@ public class ElevatorImplTest {
     public void testThrowingSetServicedFloors1Floor() throws RemoteException {
         doThrow(RemoteException.class).when(mockedElevatorRMI).setServicesFloors(anyInt(), anyInt(), anyBoolean());
 
-        assertThrows(ElevatorException.class, () -> uut.setServicedFloors(10, 123, true));
+        assertThrows(CommunicationError.class, () -> uut.setServicedFloors(10, 123, true));
 
         verify(mockedElevatorRMI).setServicesFloors(10, 123, true);
         verifyNoMoreInteractions(mockedElevatorRMI);
@@ -363,7 +363,7 @@ public class ElevatorImplTest {
     public void testThrowingSetTargetFloorToCurrent() throws RemoteException {
         when(mockedElevatorRMI.getElevatorFloor(anyInt())).thenThrow(RemoteException.class);
 
-        assertThrows(ElevatorException.class, () -> uut.setTargetFloor(8, 10));
+        assertThrows(CommunicationError.class, () -> uut.setTargetFloor(8, 10));
 
         verify(mockedElevatorRMI).getElevatorFloor(8);
         verifyNoMoreInteractions(mockedElevatorRMI);

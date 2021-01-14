@@ -1,7 +1,7 @@
 package at.fhhagenberg.esd.sqe.ws20.gui;
 
 import at.fhhagenberg.esd.sqe.ws20.model.*;
-import at.fhhagenberg.esd.sqe.ws20.utils.RMIConnectionException;
+import at.fhhagenberg.esd.sqe.ws20.utils.ConnectionError;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
@@ -129,14 +129,16 @@ public class ECCController implements Initializable {
     }
 
     private void log(String message) {
-        errorText.set(errorText.get() + message + "\n");
+        Platform.runLater(() -> errorText.set(errorText.get() + message + "\n"));
     }
 
     private void log(Throwable e, int level) {
         final String indent = "  ".repeat(level);
-        log(indent + e.getMessage().replace("\n", "\n" + indent));
-        if (e.getCause() != null)
-            log(e.getCause(), level + 1);
+        if (e.getMessage() != null) {
+            log(indent + e.getMessage().replace("\n", "\n" + indent));
+            if (e.getCause() != null)
+                log(e.getCause(), level + 1);
+        }
     }
 
     private void log(Throwable e) {
@@ -154,7 +156,7 @@ public class ECCController implements Initializable {
         try {
             info = model.queryGeneralInformation();
         } catch (Exception e) {
-            if (e instanceof RMIConnectionException)
+            if (e instanceof ConnectionError)
                 disconnect();
             log(e);
             return;
@@ -231,18 +233,19 @@ public class ECCController implements Initializable {
         try {
             elevatorState = model.queryElevatorState(currentElevator.intValue());
         } catch (Exception e) {
-            if (e instanceof RMIConnectionException) {
+            if (e instanceof ConnectionError) {
                 if (isConnected.get())
                     disconnect();
                 else
                     return null;
             }
+
             log(e);
             return null;
         }
 
         if (!isConnected.get())
-            connect();
+            Platform.runLater(this::connect);
 
         return elevatorState;
     }
@@ -252,7 +255,7 @@ public class ECCController implements Initializable {
         try {
             state = model.queryFloorState(i);
         } catch (Exception e) {
-            if (e instanceof RMIConnectionException) {
+            if (e instanceof ConnectionError) {
                 disconnect();
                 return null;
             }
@@ -279,7 +282,8 @@ public class ECCController implements Initializable {
             position.setValue(elevatorState.getCurrentPosition());
             weight.setValue(elevatorState.getCurrentWeight());
             currentFloor.setValue(elevatorState.getCurrentFloor());
-            isDoorOpen.setValue(elevatorState.getCurrentDoorStatus() == DoorStatus.OPEN);
+
+            isDoorOpen.setValue(elevatorState.getCurrentDoorState() == DoorState.OPEN);
             isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.UP);
             targetFloor.setValue(elevatorState.getTargetFloor());
 
@@ -287,10 +291,13 @@ public class ECCController implements Initializable {
 
             for (int i = 0; i < info.getNrOfFloors(); i++) {
                 var state = getFloorState(i);
-                floors[i].requestUp.set(state.isUpRequest());
-                floors[i].requestDown.set(state.isDownRequest());
-                floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
-                floors[i].isServiced.set(servicedFloors.get(i));
+                if (state != null)
+                {
+                    floors[i].requestUp.set(state.isUpRequest());
+                    floors[i].requestDown.set(state.isDownRequest());
+                    floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
+                    floors[i].isServiced.set(servicedFloors.get(i));
+                }
             }
         });
     }
@@ -367,7 +374,7 @@ public class ECCController implements Initializable {
             try {
                 model.setTargetFloor(currentElevator.get(), selectedFloor.get());
             } catch (Exception e) {
-                if (e instanceof RMIConnectionException) {
+                if (e instanceof ConnectionError) {
                     disconnect();
                 }
                 log(e);
