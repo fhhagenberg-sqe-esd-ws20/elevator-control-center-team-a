@@ -246,7 +246,7 @@ public class ECCController implements Initializable {
         }
 
         if (!isConnected.get())
-            connect();
+            Platform.runLater(this::connect);
 
         return elevatorState;
     }
@@ -292,10 +292,13 @@ public class ECCController implements Initializable {
 
             for (int i = 0; i < info.getNrOfFloors(); i++) {
                 var state = getFloorState(i);
-                floors[i].requestUp.set(state.isUpRequest());
-                floors[i].requestDown.set(state.isDownRequest());
-                floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
-                floors[i].isServiced.set(servicedFloors.get(i));
+                if (state != null)
+                {
+                    floors[i].requestUp.set(state.isUpRequest());
+                    floors[i].requestDown.set(state.isDownRequest());
+                    floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
+                    floors[i].isServiced.set(servicedFloors.get(i));
+                }
             }
         });
     }
