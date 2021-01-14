@@ -144,31 +144,46 @@
 						    <HBox style="-fx-padding: 25 5 2.5 0;">
 						    	<children>
 						    		<Label text="%ECC.4" />
-						    		<Label fx:id="lCurFloor" />
+						    		<Label fx:id="lCurFloor">
+                                 <padding>
+                                    <Insets left="32.0" />
+                                 </padding></Label>
 						    	</children>
 						    </HBox>
 						    <HBox style="-fx-padding: 2.5 5 2.5 0;">
 						    	<children>
 						    		<Label text="%ECC.5" />
-						    		<Label fx:id="lTargetFloor" />
+						    		<Label fx:id="lTargetFloor">
+                                 <padding>
+                                    <Insets left="10.0" />
+                                 </padding></Label>
 						    	</children>
 						    </HBox>
 						    <HBox style="-fx-padding: 2.5 5 2.5 0;">
 						    	<children>
 						    		<Label text="%ECC.6" />
-						    		<Label fx:id="lDirection" />
+						    		<Label fx:id="lDirection">
+                                 <padding>
+                                    <Insets left="55.0" />
+                                 </padding></Label>
 						    	</children>
 						    </HBox>
 						    <HBox style="-fx-padding: 2.5 5 2.5 0;">
 						    	<children>
 						    		<Label text="%ECC.7" />
-						    		<Label fx:id="lSpeed" />
+						    		<Label fx:id="lSpeed">
+                                 <padding>
+                                    <Insets left="30.0" />
+                                 </padding></Label>
 						    	</children>
 						    </HBox>
 						    <HBox style="-fx-padding: 2.5 5 2.5 0;">
 						    	<children>
 						    		<Label text="%ECC.8" />
-						    		<Label fx:id="lWeight" />
+						    		<Label fx:id="lWeight">
+                                 <padding>
+                                    <Insets left="38.0" />
+                                 </padding></Label>
 						    	</children>
 						    </HBox>
 						    <HBox alignment="CENTER_LEFT" style="-fx-padding: 2.5 5 2.5 0;">
@@ -193,6 +208,9 @@
                                        </image>
                                     </ImageView>
                                  </children>
+                                 <padding>
+                                    <Insets left="40.0" />
+                                 </padding>
                               </GridPane>
 						    	</children>
 						    </HBox>
