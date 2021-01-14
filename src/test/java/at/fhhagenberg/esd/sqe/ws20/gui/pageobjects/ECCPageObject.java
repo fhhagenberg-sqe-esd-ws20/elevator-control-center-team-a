@@ -281,7 +281,7 @@ public class ECCPageObject {
         robot.clickOn(cb);
 
         assertTrue(itemIdx < cb.getItems().size(), "Given item index is out of range!");
-        robot.type(KeyCode.DOWN);
+        robot.type(KeyCode.PAGE_UP);
         for (int i = 0; i < itemIdx; ++i) {
             robot.type(KeyCode.DOWN);
         }
