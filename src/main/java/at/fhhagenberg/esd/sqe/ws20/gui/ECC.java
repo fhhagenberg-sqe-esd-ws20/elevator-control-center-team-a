@@ -47,10 +47,9 @@ public class ECC extends Application {
         ECCController controller = loader.getController();
         controller.setModel(elevatorModel);
 
-        Scene scene = new Scene(root);
-
         stage.setTitle(Messages.getString("ECC.2"));
-        stage.setScene(scene);
+        stage.setScene(new Scene(root));
+        stage.setOnCloseRequest(windowEvent -> controller.shutdown());
         stage.show();
     }
 
