@@ -201,71 +201,229 @@ class ElevatorImplTest {
 
 
     @Test
-    void testSuccessfulQueryElevatorState() throws RemoteException {
-        var elevatorButtonGen = new BoolGenerator(true);
-        var serviceFloorGen = new BoolGenerator(false);
-
-
-        when(mockedElevatorRMI.getClockTick()).thenReturn(1L, 0L, 0L, 1L, 1L, 1L, 0L, 0L);
-        when(mockedElevatorRMI.getFloorNum()).thenReturn(3);
-
-        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(IElevator.ELEVATOR_DIRECTION_DOWN);
-        when(mockedElevatorRMI.getElevatorCapacity(anyInt())).thenReturn(10);
-        when(mockedElevatorRMI.getElevatorAccel(anyInt())).thenReturn(11);
-        when(mockedElevatorRMI.getElevatorSpeed(anyInt())).thenReturn(12);
-        when(mockedElevatorRMI.getElevatorPosition(anyInt())).thenReturn(13);
-        when(mockedElevatorRMI.getElevatorFloor(anyInt())).thenReturn(14);
-        when(mockedElevatorRMI.getTarget(anyInt())).thenReturn(15);
-        when(mockedElevatorRMI.getElevatorWeight(anyInt())).thenReturn(16);
+    void testSuccessfulQueryElevatorStateNumber() throws RemoteException {
+        when(mockedElevatorRMI.getClockTick()).thenReturn(1L);
         when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
 
-        when(mockedElevatorRMI.getElevatorButton(anyInt(), anyInt())).thenAnswer(inv -> elevatorButtonGen.getNext());
-        when(mockedElevatorRMI.getServicesFloors(anyInt(), anyInt())).thenAnswer(inv -> serviceFloorGen.getNext());
+        var state0 = uut.queryElevatorState(10);
+        var state1 = uut.queryElevatorState(17);
+
+        verify(mockedElevatorRMI, times(4)).getClockTick();
+
+        assertEquals(10, state0.getNumber());
+        assertEquals(17, state1.getNumber());
+    }
 
 
-        var elevatorState0 = uut.queryElevatorState(10);
-        var elevatorState1 = uut.queryElevatorState(17);
+    @Test
+    void testSuccessfulQueryElevatorStateDirection() throws RemoteException {
+        when(mockedElevatorRMI.getClockTick()).thenReturn(1L);
+        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
 
+        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(Direction.UP.getValue()).thenReturn(Direction.DOWN.getValue());
 
-        verify(mockedElevatorRMI, times(8)).getClockTick();
-        verify(mockedElevatorRMI, times(4)).getElevatorCapacity(anyInt());
-        verify(mockedElevatorRMI, times(4)).getElevatorAccel(anyInt());
-        verify(mockedElevatorRMI, times(4)).getElevatorSpeed(anyInt());
-        verify(mockedElevatorRMI, times(4)).getCommittedDirection(anyInt());
-        verify(mockedElevatorRMI, times(4)).getElevatorPosition(anyInt());
-        verify(mockedElevatorRMI, times(4)).getElevatorFloor(anyInt());
-        verify(mockedElevatorRMI, times(4)).getTarget(anyInt());
-        verify(mockedElevatorRMI, times(4)).getElevatorWeight(anyInt());
-        verify(mockedElevatorRMI, times(4)).getElevatorDoorStatus(anyInt());
-        verify(mockedElevatorRMI, times(4)).getFloorNum();
-        verify(mockedElevatorRMI, times(12)).getElevatorButton(anyInt(), anyInt());
-        verify(mockedElevatorRMI, times(12)).getServicesFloors(anyInt(), anyInt());
-        verifyNoMoreInteractions(mockedElevatorRMI);
+        var state0 = uut.queryElevatorState(10);
+        var state1 = uut.queryElevatorState(17);
 
-        assertEquals(10, elevatorState0.getNumber());
-        assertEquals(17, elevatorState1.getNumber());
-        assertEquals(Direction.DOWN, elevatorState0.getCurrentDirection());
-        assertEquals(Direction.DOWN, elevatorState1.getCurrentDirection());
-        assertEquals(10, elevatorState0.getCapacity());
-        assertEquals(10, elevatorState1.getCapacity());
-        assertEquals(11, elevatorState0.getCurrentAcceleration());
-        assertEquals(11, elevatorState1.getCurrentAcceleration());
-        assertEquals(12, elevatorState0.getCurrentSpeed());
-        assertEquals(12, elevatorState1.getCurrentSpeed());
-        assertEquals(13, elevatorState0.getCurrentPosition());
-        assertEquals(13, elevatorState1.getCurrentPosition());
-        assertEquals(14, elevatorState0.getCurrentFloor());
-        assertEquals(14, elevatorState1.getCurrentFloor());
-        assertEquals(15, elevatorState0.getTargetFloor());
-        assertEquals(15, elevatorState1.getTargetFloor());
-        assertEquals(16, elevatorState0.getCurrentWeight());
-        assertEquals(16, elevatorState1.getCurrentWeight());
-        assertEquals(DoorState.CLOSED, elevatorState0.getCurrentDoorState());
-        assertEquals(DoorState.CLOSED, elevatorState1.getCurrentDoorState());
-        assertEquals(Arrays.asList(true, false, true), elevatorState0.getCurrentFloorButtonsPressed());
-        assertEquals(Arrays.asList(false, true, false), elevatorState1.getCurrentFloorButtonsPressed());
-        assertEquals(Arrays.asList(false, true, false), elevatorState0.getServicedFloors());
-        assertEquals(Arrays.asList(true, false, true), elevatorState1.getServicedFloors());
+        verify(mockedElevatorRMI, times(4)).getClockTick();
+        verify(mockedElevatorRMI).getCommittedDirection(10);
+        verify(mockedElevatorRMI).getCommittedDirection(17);
+
+        assertEquals(Direction.UP, state0.getCurrentDirection());
+        assertEquals(Direction.DOWN, state1.getCurrentDirection());
+    }
+
+    @Test
+    void testSuccessfulQueryElevatorStateCapacity() throws RemoteException {
+        when(mockedElevatorRMI.getClockTick()).thenReturn(1L);
+        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
+        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(Direction.UNCOMMITTED.getValue());
+
+        when(mockedElevatorRMI.getElevatorCapacity(anyInt())).thenReturn(123).thenReturn(321);
+
+        var state0 = uut.queryElevatorState(10);
+        var state1 = uut.queryElevatorState(17);
+
+        verify(mockedElevatorRMI, times(4)).getClockTick();
+        verify(mockedElevatorRMI).getElevatorCapacity(10);
+        verify(mockedElevatorRMI).getElevatorCapacity(17);
+
+        assertEquals(123, state0.getCapacity());
+        assertEquals(321, state1.getCapacity());
+    }
+
+    @Test
+    void testSuccessfulQueryElevatorStateAccel() throws RemoteException {
+        when(mockedElevatorRMI.getClockTick()).thenReturn(1L);
+        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
+        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(Direction.UNCOMMITTED.getValue());
+
+        when(mockedElevatorRMI.getElevatorAccel(anyInt())).thenReturn(111).thenReturn(222);
+
+        var state0 = uut.queryElevatorState(10);
+        var state1 = uut.queryElevatorState(17);
+
+        verify(mockedElevatorRMI, times(4)).getClockTick();
+        verify(mockedElevatorRMI).getElevatorAccel(10);
+        verify(mockedElevatorRMI).getElevatorAccel(17);
+
+        assertEquals(111, state0.getCurrentAcceleration());
+        assertEquals(222, state1.getCurrentAcceleration());
+    }
+
+    @Test
+    void testSuccessfulQueryElevatorStateSpeed() throws RemoteException {
+        when(mockedElevatorRMI.getClockTick()).thenReturn(1L);
+        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
+        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(Direction.UNCOMMITTED.getValue());
+
+        when(mockedElevatorRMI.getElevatorSpeed(anyInt())).thenReturn(19).thenReturn(91);
+
+        var state0 = uut.queryElevatorState(10);
+        var state1 = uut.queryElevatorState(17);
+
+        verify(mockedElevatorRMI, times(4)).getClockTick();
+        verify(mockedElevatorRMI).getElevatorSpeed(10);
+        verify(mockedElevatorRMI).getElevatorSpeed(17);
+
+        assertEquals(19, state0.getCurrentSpeed());
+        assertEquals(91, state1.getCurrentSpeed());
+    }
+
+    @Test
+    void testSuccessfulQueryElevatorStatePosition() throws RemoteException {
+        when(mockedElevatorRMI.getClockTick()).thenReturn(1L);
+        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
+        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(Direction.UNCOMMITTED.getValue());
+
+        when(mockedElevatorRMI.getElevatorPosition(anyInt())).thenReturn(888).thenReturn(666);
+
+        var state0 = uut.queryElevatorState(10);
+        var state1 = uut.queryElevatorState(17);
+
+        verify(mockedElevatorRMI, times(4)).getClockTick();
+        verify(mockedElevatorRMI).getElevatorPosition(10);
+        verify(mockedElevatorRMI).getElevatorPosition(17);
+
+        assertEquals(888, state0.getCurrentPosition());
+        assertEquals(666, state1.getCurrentPosition());
+    }
+
+    @Test
+    void testSuccessfulQueryElevatorStateFloor() throws RemoteException {
+        when(mockedElevatorRMI.getClockTick()).thenReturn(1L);
+        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
+        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(Direction.UNCOMMITTED.getValue());
+
+        when(mockedElevatorRMI.getElevatorFloor(anyInt())).thenReturn(0).thenReturn(1);
+
+        var state0 = uut.queryElevatorState(10);
+        var state1 = uut.queryElevatorState(17);
+
+        verify(mockedElevatorRMI, times(4)).getClockTick();
+        verify(mockedElevatorRMI).getElevatorFloor(10);
+        verify(mockedElevatorRMI).getElevatorFloor(17);
+
+        assertEquals(0, state0.getCurrentFloor());
+        assertEquals(1, state1.getCurrentFloor());
+    }
+
+    @Test
+    void testSuccessfulQueryElevatorStateTargetFloor() throws RemoteException {
+        when(mockedElevatorRMI.getClockTick()).thenReturn(1L);
+        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
+        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(Direction.UNCOMMITTED.getValue());
+
+        when(mockedElevatorRMI.getTarget(anyInt())).thenReturn(1).thenReturn(0);
+
+        var state0 = uut.queryElevatorState(10);
+        var state1 = uut.queryElevatorState(17);
+
+        verify(mockedElevatorRMI, times(4)).getClockTick();
+        verify(mockedElevatorRMI).getTarget(10);
+        verify(mockedElevatorRMI).getTarget(17);
+
+        assertEquals(1, state0.getTargetFloor());
+        assertEquals(0, state1.getTargetFloor());
+    }
+
+    @Test
+    void testSuccessfulQueryElevatorStateWeight() throws RemoteException {
+        when(mockedElevatorRMI.getClockTick()).thenReturn(1L);
+        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
+        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(Direction.UNCOMMITTED.getValue());
+
+        when(mockedElevatorRMI.getElevatorWeight(anyInt())).thenReturn(646).thenReturn(535);
+
+        var state0 = uut.queryElevatorState(10);
+        var state1 = uut.queryElevatorState(17);
+
+        verify(mockedElevatorRMI, times(4)).getClockTick();
+        verify(mockedElevatorRMI).getElevatorWeight(10);
+        verify(mockedElevatorRMI).getElevatorWeight(17);
+
+        assertEquals(646, state0.getCurrentWeight());
+        assertEquals(535, state1.getCurrentWeight());
+    }
+
+    @Test
+    void testSuccessfulQueryElevatorStateDoorStatus() throws RemoteException {
+        when(mockedElevatorRMI.getClockTick()).thenReturn(1L);
+        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(Direction.UNCOMMITTED.getValue());
+
+        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(DoorState.OPENING.getValue()).thenReturn(DoorState.CLOSED.getValue());
+
+        var state0 = uut.queryElevatorState(10);
+        var state1 = uut.queryElevatorState(17);
+
+        verify(mockedElevatorRMI, times(4)).getClockTick();
+        verify(mockedElevatorRMI).getElevatorDoorStatus(10);
+        verify(mockedElevatorRMI).getElevatorDoorStatus(17);
+
+        assertEquals(DoorState.OPENING, state0.getCurrentDoorState());
+        assertEquals(DoorState.CLOSED, state1.getCurrentDoorState());
+    }
+
+    @Test
+    void testSuccessfulQueryElevatorStateElevatorButtons() throws RemoteException {
+        when(mockedElevatorRMI.getClockTick()).thenReturn(1L);
+        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
+        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(Direction.UNCOMMITTED.getValue());
+
+        when(mockedElevatorRMI.getFloorNum()).thenReturn(3);
+        BoolGenerator boolGenerator = new BoolGenerator(true);
+        when(mockedElevatorRMI.getElevatorButton(anyInt(), anyInt())).thenAnswer((i) -> boolGenerator.getNext());
+
+        var state0 = uut.queryElevatorState(10);
+        var state1 = uut.queryElevatorState(17);
+
+        verify(mockedElevatorRMI, times(4)).getClockTick();
+        verify(mockedElevatorRMI, times(3)).getElevatorButton(eq(10), anyInt());
+        verify(mockedElevatorRMI, times(3)).getElevatorButton(eq(17), anyInt());
+
+        assertEquals(Arrays.asList(true, false, true), state0.getCurrentFloorButtonsPressed());
+        assertEquals(Arrays.asList(false, true, false), state1.getCurrentFloorButtonsPressed());
+    }
+
+    @Test
+    void testSuccessfulQueryElevatorStateServicedFloors() throws RemoteException {
+        when(mockedElevatorRMI.getClockTick()).thenReturn(1L);
+        when(mockedElevatorRMI.getElevatorDoorStatus(anyInt())).thenReturn(IElevator.ELEVATOR_DOORS_CLOSED);
+        when(mockedElevatorRMI.getCommittedDirection(anyInt())).thenReturn(Direction.UNCOMMITTED.getValue());
+
+        when(mockedElevatorRMI.getFloorNum()).thenReturn(3);
+        BoolGenerator boolGenerator = new BoolGenerator(false);
+        when(mockedElevatorRMI.getServicesFloors(anyInt(), anyInt())).thenAnswer((i) -> boolGenerator.getNext());
+
+        var state0 = uut.queryElevatorState(10);
+        var state1 = uut.queryElevatorState(17);
+
+        verify(mockedElevatorRMI, times(4)).getClockTick();
+        verify(mockedElevatorRMI, times(3)).getElevatorButton(eq(10), anyInt());
+        verify(mockedElevatorRMI, times(3)).getElevatorButton(eq(17), anyInt());
+
+        assertEquals(Arrays.asList(false, true, false), state0.getServicedFloors());
+        assertEquals(Arrays.asList(true, false, true), state1.getServicedFloors());
     }
 
     @Test
