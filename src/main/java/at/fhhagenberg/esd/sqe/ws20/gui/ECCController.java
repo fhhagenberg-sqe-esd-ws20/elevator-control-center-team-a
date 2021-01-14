@@ -397,4 +397,10 @@ public class ECCController implements Initializable {
         private final BooleanProperty stopRequest = new SimpleBooleanProperty(false);
         private final BooleanProperty isServiced = new SimpleBooleanProperty(false);
     }
+
+    public void shutdown()
+    {
+        if (timer != null)
+            timer.cancel();
+    }
 }

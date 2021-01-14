@@ -52,6 +52,7 @@ public class ECC extends Application {
         stage.setTitle(Messages.getString("ECC.2"));
         stage.setScene(scene);
         stage.show();
+        stage.setOnCloseRequest(windowEvent -> controller.shutdown());
     }
 
     /**
