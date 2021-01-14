@@ -28,6 +28,8 @@ import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.stage.Stage;
+
 public class ECCController implements Initializable {
 
     private final BooleanProperty isDoorOpen = new SimpleBooleanProperty();
@@ -116,6 +118,7 @@ public class ECCController implements Initializable {
     private ReadOnlyIntegerProperty selectedFloor;
     private IElevatorWrapper model;
     private GeneralInformation info;
+    private Stage stage;
 
     private Integer oldPercentage = 0;
     private static ImageView createFloorImageView(String path, ObservableValue<Boolean> visible) {
@@ -362,7 +365,7 @@ public class ECCController implements Initializable {
         lElvCurFloor.textProperty().bind(currentFloor.asString());
 
         position.addListener((observableValue, oldVal, newVal) ->
-                translateElevator(100 * newVal.intValue() / ((info.getNrOfFloors() - 1) * info.getFloorHeight())));
+                translateElevator(100 * newVal.intValue() / ((info.getNrOfFloors() - 1) * info.getFloorHeight()), false));
         isDirectionUp.addListener((observableValue, oldVal, newVal) ->
                 lDirection.setText(Boolean.TRUE.equals(newVal) ? "Up" : "Down"));
         tbtnOperationMode.selectedProperty().addListener((observableValue, oldVal, newVal) ->
@@ -386,13 +389,18 @@ public class ECCController implements Initializable {
             log(Messages.getString("invalidSelection"));
     }
 
-    private void translateElevator(Integer percentage) {
+    private void translateElevator(Integer percentage, Boolean triggerResize) {
+    	if(triggerResize) {
+    		percentage = oldPercentage;
+    	} else {
+    		oldPercentage = percentage;
+    	}
         double maxHeight = gElevator.getHeight();
         double elevatorHeight = groupElevator.getBoundsInLocal().getHeight();
         double yRect = (maxHeight - elevatorHeight) * percentage / 100.0;
 
         groupElevator.translateYProperty().set(-yRect);
-        oldPercentage = percentage;
+        
     }   
 
     private static class FloorState {
@@ -402,11 +410,10 @@ public class ECCController implements Initializable {
         private final BooleanProperty isServiced = new SimpleBooleanProperty(false);
     }
     
-    public void resizeElevator() {
-    	double maxHeight = gElevator.getHeight();
-        double elevatorHeight = groupElevator.getBoundsInLocal().getHeight();
-        double yRect = (maxHeight - elevatorHeight) * oldPercentage / 100.0;
-
-        groupElevator.translateYProperty().set(-yRect);
+    public void setStageAndSetUpListeners(Stage mainStage) {
+    	stage = mainStage;
+    	stage.heightProperty().addListener((obs, oldVal, newVal) -> {
+    		translateElevator(0, true);
+    	});
     }
 }
