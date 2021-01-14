@@ -245,7 +245,7 @@ public class ECCController implements Initializable {
         }
 
         if (!isConnected.get())
-            connect();
+            Platform.runLater(this::connect);
 
         return elevatorState;
     }
