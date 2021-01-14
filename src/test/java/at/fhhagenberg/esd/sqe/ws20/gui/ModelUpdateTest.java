@@ -17,7 +17,7 @@ import org.testfx.framework.junit5.Start;
 
 
 @ExtendWith(ApplicationExtension.class)
-public class ModelUpdateTest {
+class ModelUpdateTest {
 
     // TestFX may need additional VM options:
     // --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED

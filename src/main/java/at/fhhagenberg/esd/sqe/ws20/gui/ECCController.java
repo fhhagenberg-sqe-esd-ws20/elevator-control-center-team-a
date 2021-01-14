@@ -397,20 +397,20 @@ public class ECCController implements Initializable {
     @FXML
     protected void gotoTargetFloor(ActionEvent event) {
         var elevator = currentElevator.get();
-        var targetFloor = selectedFloor.get();
+        var selectedTargetFloor = selectedFloor.get();
         var floor = currentFloor.get();
 
-        if (elevator >= 0 && targetFloor >= 0) {
+        if (elevator >= 0 && selectedTargetFloor >= 0) {
             try {
                 Direction direction = Direction.UNCOMMITTED;
-                if (targetFloor < floor) {
+                if (selectedTargetFloor < floor) {
                     direction = Direction.DOWN;
-                } else if (targetFloor > floor) {
+                } else if (selectedTargetFloor > floor) {
                     direction = Direction.UP;
                 }
 
                 model.setCommittedDirection(elevator, direction);
-                model.setTargetFloor(elevator, targetFloor);
+                model.setTargetFloor(elevator, selectedTargetFloor);
             } catch (Exception e) {
                 if (e instanceof ConnectionError) {
                     disconnect();
@@ -444,7 +444,7 @@ public class ECCController implements Initializable {
     public void setStageAndSetUpListeners(Stage mainStage) {
         mainStage.heightProperty().addListener((obs, oldVal, newVal) -> translateElevator());
     }
-  
+
     public void shutdown() {
         timer.cancel();
     }

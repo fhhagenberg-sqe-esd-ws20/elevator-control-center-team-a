@@ -7,13 +7,10 @@ import sqelevator.IElevator;
 import at.fhhagenberg.esd.sqe.ws20.utils.CommunicationError;
 import org.jetbrains.annotations.NotNull;
 
-import java.rmi.ConnectException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Supplier;
 
 
 public class ElevatorImpl implements IElevatorWrapper {

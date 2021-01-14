@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 @ExtendWith(ApplicationExtension.class)
-public class GUIInteractionTest {
+class GUIInteractionTest {
 
     // TestFX may need additional VM options:
     // --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
