@@ -199,7 +199,7 @@
                                  <children>
       						    		<ImageView fx:id="ivDoorStateClosed" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
       						                <image>
-      						                    <Image backgroundLoading="true" url="file:images/doorClosedReworked.png" />
+      						                    <Image url="file:images/doorClosedReworked.png" />
       						                </image>
       						            </ImageView>
                                     <ImageView fx:id="ivDoorStateOpen" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
