@@ -371,7 +371,7 @@ public class ECCController implements Initializable {
 	    		} else if((Integer)newVal == Direction.DOWN.getValue()) {
 	    			lDirection.setText("Down");
 	    		}else {
-	    			lDirection.setText("Uncomitted");
+	    			lDirection.setText("Uncommitted");
 	    		}
 			});
                 
