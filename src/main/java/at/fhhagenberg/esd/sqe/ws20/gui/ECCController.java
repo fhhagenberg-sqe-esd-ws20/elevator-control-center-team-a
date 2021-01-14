@@ -193,7 +193,7 @@ public class ECCController implements Initializable {
                     createFloorImageView("images/arrowUp.png", floors[i].requestUp),
                     createFloorImageView("images/arrowDown.png", floors[i].requestDown),
                     createFloorImageView("images/hand.png", floors[i].stopRequest),
-                    createFloorImageView("images/filler.jpeg", targetFloor.isEqualTo(i)),
+                    createFloorImageView("images/fillerReworked.png", targetFloor.isEqualTo(i)),
                     label,
                     line);
 
