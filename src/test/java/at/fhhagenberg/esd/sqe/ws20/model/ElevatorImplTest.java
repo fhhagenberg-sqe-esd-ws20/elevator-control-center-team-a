@@ -381,4 +381,13 @@ class ElevatorImplTest {
 
         verifyNoMoreInteractions(mockedElevatorRMI);
     }
+
+    @Test
+    void testThrowUnexpectedException() throws RemoteException {
+        when(mockedElevatorRMI.getClockTick()).thenThrow(RuntimeException.class);
+
+        assertThrows(IllegalStateException.class, () -> uut.queryGeneralInformation());
+
+        verifyNoMoreInteractions(mockedElevatorRMI);
+    }
 }
