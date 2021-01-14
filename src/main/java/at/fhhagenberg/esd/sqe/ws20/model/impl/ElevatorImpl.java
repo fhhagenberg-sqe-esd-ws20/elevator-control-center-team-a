@@ -1,14 +1,19 @@
 package at.fhhagenberg.esd.sqe.ws20.model.impl;
 
 import at.fhhagenberg.esd.sqe.ws20.model.*;
+import at.fhhagenberg.esd.sqe.ws20.utils.ConnectionError;
+import at.fhhagenberg.esd.sqe.ws20.utils.ECCError;
 import sqelevator.IElevator;
 import at.fhhagenberg.esd.sqe.ws20.utils.CommunicationError;
 import org.jetbrains.annotations.NotNull;
 
+import java.rmi.ConnectException;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
 
 public class ElevatorImpl implements IElevatorWrapper {
@@ -35,11 +40,7 @@ public class ElevatorImpl implements IElevatorWrapper {
     @Override
     @NotNull
     public GeneralInformation queryGeneralInformation(int maximumRetries) {
-        try {
-            return runSupplierChecked(this::queryGeneralInformationInternalUnchecked, maximumRetries);
-        } catch (RemoteException | TimeoutException ex) {
-            throw new CommunicationError(ModelMessages.getString("generalInfoQueryFailed"), ex);
-        }
+        return runSupplierSynchronized(this::queryGeneralInformationInternalUnchecked, maximumRetries, "generalInfoQueryFailed");
     }
 
     @Override
@@ -51,11 +52,7 @@ public class ElevatorImpl implements IElevatorWrapper {
     @Override
     @NotNull
     public ElevatorState queryElevatorState(int elevatorNumber, int maximumRetries) {
-        try {
-            return runSupplierChecked(() -> queryElevatorStateInternalUnchecked(elevatorNumber), maximumRetries);
-        } catch (RemoteException | TimeoutException ex) {
-            throw new CommunicationError(ModelMessages.getString("elevatorStateQueryFailed"), ex);
-        }
+        return runSupplierSynchronized(() -> queryElevatorStateInternalUnchecked(elevatorNumber), maximumRetries, "elevatorStateQueryFailed");
     }
 
     @Override
@@ -67,11 +64,7 @@ public class ElevatorImpl implements IElevatorWrapper {
     @Override
     @NotNull
     public FloorState queryFloorState(int floorNr, int maximumRetries) {
-        try {
-            return runSupplierChecked(() -> queryFloorStateInternalUnchecked(floorNr), maximumRetries);
-        } catch (RemoteException | TimeoutException ex) {
-            throw new CommunicationError(ModelMessages.getString("floorStateQueryFailed"), ex);
-        }
+        return runSupplierSynchronized(() -> queryFloorStateInternalUnchecked(floorNr), maximumRetries, "floorStateQueryFailed");
     }
 
     @Override
@@ -79,7 +72,6 @@ public class ElevatorImpl implements IElevatorWrapper {
         try {
             rmiInterface.setServicesFloors(elevatorNr, servicedFloor, isServiced);
         } catch (RemoteException ex) {
-            // TODO: use localised strings as exception text!
             throw new CommunicationError(ModelMessages.getString("setServicedFloorsFailed"), ex);
         }
     }
@@ -94,22 +86,20 @@ public class ElevatorImpl implements IElevatorWrapper {
     @Override
     public void setTargetFloor(int elevatorNr, int targetFloor) {
         try {
-            int currentFloor = rmiInterface.getElevatorFloor(elevatorNr);
-            Direction direction = Direction.UNCOMMITTED;
-            if (targetFloor > currentFloor) {
-                direction = Direction.UP;
-            } else if (targetFloor < currentFloor) {
-                direction = Direction.DOWN;
-            }
-
-            rmiInterface.setCommittedDirection(elevatorNr, direction.getValue());
             rmiInterface.setTarget(elevatorNr, targetFloor);
         } catch (RemoteException ex) {
             throw new CommunicationError(ModelMessages.getString("setTargetFloorFailed"), ex);
         }
-
     }
 
+    @Override
+    public void setCommittedDirection(int elevatorNr, Direction direction) {
+        try {
+            rmiInterface.setCommittedDirection(elevatorNr, direction.getValue());
+        } catch (RemoteException ex) {
+            throw new CommunicationError(ModelMessages.getString("setCommittedDirectionFailed"), ex);
+        }
+    }
 
     // ----------------------------------------------------------------
     // Private methods for assembling state objects
@@ -180,12 +170,12 @@ public class ElevatorImpl implements IElevatorWrapper {
     }
 
     @NotNull
-    private <T, E extends Exception> T runSupplierChecked(@NotNull ThrowingSupplier<T, E> supplier, int maximumRetries) throws E, RemoteException, TimeoutException {
+    private <T, E extends Exception> T runSupplierSynchronized(@NotNull ThrowingSupplier<T, E> supplier, int maximumRetries, String errorMessageKey) {
         T result = null;
         long clockTickBefore = -1;
         long clockTickAfter = -1;
 
-        CommunicationError storedEx;
+        ECCError storedEx;
         int retries = maximumRetries;
 
         do {
@@ -197,6 +187,12 @@ public class ElevatorImpl implements IElevatorWrapper {
                 clockTickAfter = rmiInterface.getClockTick();
             } catch (CommunicationError ex) {
                 storedEx = ex;
+            } catch (ConnectionError ex) {
+                throw ex;
+            } catch (RemoteException ex) {
+                storedEx = mapRemoteException(ex, errorMessageKey);
+            } catch (Exception ex) {
+                throw new IllegalStateException("Unexpected exception was thrown", ex);
             }
         } while (retries-- > 0 && (storedEx != null || clockTickAfter != clockTickBefore));
 
@@ -205,9 +201,17 @@ public class ElevatorImpl implements IElevatorWrapper {
         }
 
         if (clockTickAfter != clockTickBefore) {
-            throw new TimeoutException(ModelMessages.getString("maximumRetriesReached"));
+            throw mapTimeoutException(new TimeoutException(ModelMessages.getString("maximumRetriesReached")), errorMessageKey);
         }
 
         return result;
+    }
+
+    private CommunicationError mapRemoteException(RemoteException ex, String errorMessageKey, Object... args) {
+        return new CommunicationError(ModelMessages.getString(errorMessageKey, args), ex);
+    }
+
+    private ConnectionError mapTimeoutException(TimeoutException ex, String errorMessageKey, Object... args) {
+        return new ConnectionError(ModelMessages.getString(errorMessageKey, args), ex);
     }
 }

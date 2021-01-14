@@ -20,4 +20,6 @@ public interface IElevatorWrapper {
     void setServicedFloors(int elevatorNr, List<Integer> servicedFloors);
 
     void setTargetFloor(int elevatorNr, int targetFloor);
+
+    void setCommittedDirection(int elevatorNr, Direction direction);
 }

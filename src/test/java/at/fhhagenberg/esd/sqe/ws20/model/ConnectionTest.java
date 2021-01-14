@@ -58,7 +58,8 @@ class ConnectionTest {
 
         assertThrows(CommunicationError.class, () -> elevatorWrapper.queryElevatorState(0));
         assertFalse(managedElevator.isConnected());
-        verifyNoInteractions(mockConnector);
+        verify(mockConnector, times(ElevatorImpl.DEFAULT_MAXIMUM_RETRIES)).connect();
+        verifyNoMoreInteractions(mockConnector);
     }
 
     @Test

@@ -69,6 +69,11 @@ public class ModelUpdateTest {
 
     @Test
     void testDirectionUpdating() {
+        // If the current floor equals the target floor the committed direction is automatically reset to UNCOMMITTED
+        elevatorRMIMock.setCurrentFloor(0, 1);
+        elevatorRMIMock.setCurrentFloor(1, 1);
+        elevatorRMIMock.setCurrentFloor(2, 1);
+
         elevatorRMIMock.setCommittedDirection(0, Direction.UP.getValue());
         elevatorRMIMock.setCommittedDirection(1, Direction.DOWN.getValue());
         elevatorRMIMock.setCommittedDirection(2, Direction.UNCOMMITTED.getValue());
