@@ -400,7 +400,6 @@ public class ECCController implements Initializable {
 
     public void shutdown()
     {
-        if (timer != null)
-            timer.cancel();
+        timer.cancel();
     }
 }
