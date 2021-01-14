@@ -118,7 +118,6 @@ public class ECCController implements Initializable {
     private ReadOnlyIntegerProperty selectedFloor;
     private IElevatorWrapper model;
     private GeneralInformation info;
-    private Stage stage;
 
     private Integer oldPercentage = 0;
     private static ImageView createFloorImageView(String path, ObservableValue<Boolean> visible) {
@@ -365,7 +364,7 @@ public class ECCController implements Initializable {
         lElvCurFloor.textProperty().bind(currentFloor.asString());
 
         position.addListener((observableValue, oldVal, newVal) ->
-                translateElevator(100 * newVal.intValue() / ((info.getNrOfFloors() - 1) * info.getFloorHeight()), false));
+                translateElevator(100 * newVal.intValue() / ((info.getNrOfFloors() - 1) * info.getFloorHeight())));
         isDirectionUp.addListener((observableValue, oldVal, newVal) ->
                 lDirection.setText(Boolean.TRUE.equals(newVal) ? "Up" : "Down"));
         tbtnOperationMode.selectedProperty().addListener((observableValue, oldVal, newVal) ->
@@ -388,19 +387,18 @@ public class ECCController implements Initializable {
         } else
             log(Messages.getString("invalidSelection"));
     }
-
-    private void translateElevator(Integer percentage, Boolean triggerResize) {
-    	if(triggerResize) {
-    		percentage = oldPercentage;
-    	} else {
-    		oldPercentage = percentage;
-    	}
+    
+    private void translateElevator() {
+    	translateElevator(oldPercentage);
+    } 
+    
+    private void translateElevator(Integer percentage) {
         double maxHeight = gElevator.getHeight();
         double elevatorHeight = groupElevator.getBoundsInLocal().getHeight();
         double yRect = (maxHeight - elevatorHeight) * percentage / 100.0;
 
         groupElevator.translateYProperty().set(-yRect);
-        
+        oldPercentage = percentage;
     }   
 
     private static class FloorState {
@@ -411,9 +409,8 @@ public class ECCController implements Initializable {
     }
     
     public void setStageAndSetUpListeners(Stage mainStage) {
-    	stage = mainStage;
-    	stage.heightProperty().addListener((obs, oldVal, newVal) -> {
-    		translateElevator(0, true);
+    	mainStage.heightProperty().addListener((obs, oldVal, newVal) -> {
+    		translateElevator();
     	});
     }
 }
