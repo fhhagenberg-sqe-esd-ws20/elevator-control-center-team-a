@@ -151,7 +151,7 @@ public class ECCController implements Initializable {
         log(e, 0);
     }
 
-    private void connect() {
+    private void connect(boolean initial) {
         if (model == null) {
             disconnect();
             log(Messages.getString("connectFailed.NoModelSet"));
@@ -162,9 +162,10 @@ public class ECCController implements Initializable {
         try {
             info = model.queryGeneralInformation();
         } catch (Exception e) {
+            if (initial || isConnected.get())
+                log(e);
             if (e instanceof ConnectionError)
                 disconnect();
-            log(e);
             return;
         }
 
@@ -225,7 +226,7 @@ public class ECCController implements Initializable {
         }
         this.model = model;
 
-        connect();
+        connect(true);
 
         timer.schedule(new TimerTask() {
             @Override
@@ -251,9 +252,6 @@ public class ECCController implements Initializable {
             return null;
         }
 
-        if (!isConnected.get())
-            Platform.runLater(this::connect);
-
         return elevatorState;
     }
 
@@ -276,6 +274,9 @@ public class ECCController implements Initializable {
         if (model == null) {
             log(Messages.getString("modelInvalid"));
             disconnect();
+            return;
+        } else if (!isConnected.get()) {
+            Platform.runLater(() -> connect(false));
             return;
         } else if (currentElevator.get() < 0)
             return;
