@@ -17,12 +17,12 @@ import org.testfx.framework.junit5.Start;
 
 
 @ExtendWith(ApplicationExtension.class)
-public class ModelUpdateTest {
+class ModelUpdateTest {
 
     // TestFX may need additional VM options:
     // --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
 
-    private final ElevatorRMIMock elevatorRMIMock = new ElevatorRMIMock(2, 3, 10);
+    private final ElevatorRMIMock elevatorRMIMock = new ElevatorRMIMock(3, 3, 10);
     private final IElevatorWrapper elevatorModel = new ElevatorImpl(new ManagedIElevator(elevatorRMIMock));
 
     private ECCPageObject page;
@@ -69,14 +69,23 @@ public class ModelUpdateTest {
 
     @Test
     void testDirectionUpdating() {
+        // If the current floor equals the target floor the committed direction is automatically reset to UNCOMMITTED
+        elevatorRMIMock.setCurrentFloor(0, 1);
+        elevatorRMIMock.setCurrentFloor(1, 1);
+        elevatorRMIMock.setCurrentFloor(2, 1);
+
         elevatorRMIMock.setCommittedDirection(0, Direction.UP.getValue());
         elevatorRMIMock.setCommittedDirection(1, Direction.DOWN.getValue());
+        elevatorRMIMock.setCommittedDirection(2, Direction.UNCOMMITTED.getValue());
 
         page.selectElevator(0);
         page.assertCommittedDirectionWithTimeout(Direction.UP);
 
         page.selectElevator(1);
         page.assertCommittedDirectionWithTimeout(Direction.DOWN);
+
+        page.selectElevator(2);
+        page.assertCommittedDirectionWithTimeout(Direction.UNCOMMITTED);
     }
 
 

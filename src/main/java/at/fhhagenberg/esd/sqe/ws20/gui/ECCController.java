@@ -2,6 +2,7 @@ package at.fhhagenberg.esd.sqe.ws20.gui;
 
 import at.fhhagenberg.esd.sqe.ws20.model.*;
 import at.fhhagenberg.esd.sqe.ws20.utils.ConnectionError;
+import at.fhhagenberg.esd.sqe.ws20.utils.ECCError;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
@@ -28,10 +29,12 @@ import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.stage.Stage;
+
 public class ECCController implements Initializable {
 
     private final BooleanProperty isDoorOpen = new SimpleBooleanProperty();
-    private final BooleanProperty isDirectionUp = new SimpleBooleanProperty();
+    private final IntegerProperty direction = new SimpleIntegerProperty(Direction.UNCOMMITTED.getValue());
     private final BooleanProperty isAutomatic = new SimpleBooleanProperty();
     private final ListProperty<String> elevators = new SimpleListProperty<>();
     private final ListProperty<String> floorNames = new SimpleListProperty<>();
@@ -116,6 +119,9 @@ public class ECCController implements Initializable {
     private IElevatorWrapper model;
     private GeneralInformation info;
 
+    private Integer oldPercentage = 0;
+
+
     private static ImageView createFloorImageView(String path, ObservableValue<Boolean> visible) {
         File file = new File(path);
         Image image = new Image(file.toURI().toString());
@@ -145,7 +151,7 @@ public class ECCController implements Initializable {
         log(e, 0);
     }
 
-    private void connect() {
+    private void connect(boolean initial) {
         if (model == null) {
             disconnect();
             log(Messages.getString("connectFailed.NoModelSet"));
@@ -156,14 +162,16 @@ public class ECCController implements Initializable {
         try {
             info = model.queryGeneralInformation();
         } catch (Exception e) {
+            if (initial || isConnected.get())
+                log(e);
             if (e instanceof ConnectionError)
                 disconnect();
-            log(e);
             return;
         }
 
         floorNames.clear();
         gElevatorFloors.getChildren().clear();
+        gElevatorFloors.getRowConstraints().clear();
         floors = new FloorState[info.getNrOfFloors()];
 
         lTopFloor.setText(((Integer) (info.getNrOfFloors() - 1)).toString());
@@ -192,7 +200,7 @@ public class ECCController implements Initializable {
                     createFloorImageView("images/arrowUp.png", floors[i].requestUp),
                     createFloorImageView("images/arrowDown.png", floors[i].requestDown),
                     createFloorImageView("images/hand.png", floors[i].stopRequest),
-                    createFloorImageView("images/filler.jpeg", targetFloor.isEqualTo(i)),
+                    createFloorImageView("images/fillerReworked.png", targetFloor.isEqualTo(i)),
                     label,
                     line);
 
@@ -218,7 +226,7 @@ public class ECCController implements Initializable {
         }
         this.model = model;
 
-        connect();
+        connect(true);
 
         timer.schedule(new TimerTask() {
             @Override
@@ -244,9 +252,6 @@ public class ECCController implements Initializable {
             return null;
         }
 
-        if (!isConnected.get())
-            Platform.runLater(this::connect);
-
         return elevatorState;
     }
 
@@ -270,12 +275,27 @@ public class ECCController implements Initializable {
             log(Messages.getString("modelInvalid"));
             disconnect();
             return;
+        } else if (!isConnected.get()) {
+            Platform.runLater(() -> connect(false));
+            return;
         } else if (currentElevator.get() < 0)
             return;
 
         var elevatorState = getElevatorState();
         if (elevatorState == null)
             return;
+
+        // Set direction to uncommitted if the elevator reached its destination
+        if (elevatorState.getCurrentFloor() == elevatorState.getTargetFloor() && elevatorState.getCurrentDirection() != Direction.UNCOMMITTED) {
+            try {
+                model.setCommittedDirection(currentElevator.get(), Direction.UNCOMMITTED);
+            } catch (ECCError e) {
+                if (e instanceof ConnectionError) {
+                    disconnect();
+                }
+                log(e);
+            }
+        }
 
         Platform.runLater(() -> {
             speed.setValue(elevatorState.getCurrentSpeed());
@@ -284,22 +304,26 @@ public class ECCController implements Initializable {
             currentFloor.setValue(elevatorState.getCurrentFloor());
 
             isDoorOpen.setValue(elevatorState.getCurrentDoorState() == DoorState.OPEN);
-            isDirectionUp.setValue(elevatorState.getCurrentDirection() == Direction.UP);
+            direction.setValue(elevatorState.getCurrentDirection().getValue());
+
             targetFloor.setValue(elevatorState.getTargetFloor());
 
-            var servicedFloors = elevatorState.getServicedFloors();
-
-            for (int i = 0; i < info.getNrOfFloors(); i++) {
-                var state = getFloorState(i);
-                if (state != null)
-                {
-                    floors[i].requestUp.set(state.isUpRequest());
-                    floors[i].requestDown.set(state.isDownRequest());
-                    floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
-                    floors[i].isServiced.set(servicedFloors.get(i));
-                }
-            }
+            updateFloors(elevatorState);
         });
+    }
+
+    private void updateFloors(ElevatorState elevatorState) {
+        var servicedFloors = elevatorState.getServicedFloors();
+
+        for (int i = 0; i < info.getNrOfFloors(); i++) {
+            var state = getFloorState(i);
+            if (state != null) {
+                floors[i].requestUp.set(state.isUpRequest());
+                floors[i].requestDown.set(state.isDownRequest());
+                floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
+                floors[i].isServiced.set(servicedFloors.get(i));
+            }
+        }
     }
 
     @Override
@@ -326,9 +350,9 @@ public class ECCController implements Initializable {
         ivDoorStateClosed.visibleProperty().bind(isDoorOpen.not().and(anyElevatorSelected).and(isConnected));
         ivDoorStateOpen.visibleProperty().bind(isDoorOpen.and(anyElevatorSelected).and(isConnected));
 
-        ivGElvDirUp.visibleProperty().bind(isDirectionUp.and(anyElevatorSelected));
+        ivGElvDirUp.visibleProperty().bind(direction.isEqualTo(Direction.UP.getValue()).and(anyElevatorSelected));
         ivGElvDirUp.disableProperty().bind(isConnected.not());
-        ivGElvDirDown.visibleProperty().bind(isDirectionUp.not().and(anyElevatorSelected).and(isConnected));
+        ivGElvDirDown.visibleProperty().bind(direction.isEqualTo(Direction.DOWN.getValue()).and(anyElevatorSelected).and(isConnected));
         ivGElvDirDown.disableProperty().bind(isConnected.not());
 
         cbTargetFloor.itemsProperty().bind(floorNames);
@@ -360,8 +384,15 @@ public class ECCController implements Initializable {
 
         position.addListener((observableValue, oldVal, newVal) ->
                 translateElevator(100 * newVal.intValue() / ((info.getNrOfFloors() - 1) * info.getFloorHeight())));
-        isDirectionUp.addListener((observableValue, oldVal, newVal) ->
-                lDirection.setText(Boolean.TRUE.equals(newVal) ? "Up" : "Down"));
+        direction.addListener((observableValue, oldVal, newVal) -> {
+            if ((Integer) newVal == Direction.UP.getValue()) {
+                lDirection.setText("Up");
+            } else if ((Integer) newVal == Direction.DOWN.getValue()) {
+                lDirection.setText("Down");
+            } else {
+                lDirection.setText("Uncommitted");
+            }
+        });
         tbtnOperationMode.selectedProperty().addListener((observableValue, oldVal, newVal) ->
                 tbtnOperationMode.setText(Boolean.TRUE.equals(newVal) ? "Automatic" : "Manual"));
         taErrorLog.textProperty().bind(errorText);
@@ -370,9 +401,21 @@ public class ECCController implements Initializable {
     @SuppressWarnings("unused")
     @FXML
     protected void gotoTargetFloor(ActionEvent event) {
-        if (currentElevator.get() >= 0 && selectedFloor.get() >= 0) {
+        var elevator = currentElevator.get();
+        var selectedTargetFloor = selectedFloor.get();
+        var floor = currentFloor.get();
+
+        if (elevator >= 0 && selectedTargetFloor >= 0) {
             try {
-                model.setTargetFloor(currentElevator.get(), selectedFloor.get());
+                Direction dir = Direction.UNCOMMITTED;
+                if (selectedTargetFloor < floor) {
+                    dir = Direction.DOWN;
+                } else if (selectedTargetFloor > floor) {
+                    dir = Direction.UP;
+                }
+
+                model.setCommittedDirection(elevator, dir);
+                model.setTargetFloor(elevator, selectedTargetFloor);
             } catch (Exception e) {
                 if (e instanceof ConnectionError) {
                     disconnect();
@@ -383,12 +426,17 @@ public class ECCController implements Initializable {
             log(Messages.getString("invalidSelection"));
     }
 
+    private void translateElevator() {
+        translateElevator(oldPercentage);
+    }
+
     private void translateElevator(Integer percentage) {
         double maxHeight = gElevator.getHeight();
         double elevatorHeight = groupElevator.getBoundsInLocal().getHeight();
         double yRect = (maxHeight - elevatorHeight) * percentage / 100.0;
 
         groupElevator.translateYProperty().set(-yRect);
+        oldPercentage = percentage;
     }
 
     private static class FloorState {
@@ -396,6 +444,10 @@ public class ECCController implements Initializable {
         private final BooleanProperty requestDown = new SimpleBooleanProperty(false);
         private final BooleanProperty stopRequest = new SimpleBooleanProperty(false);
         private final BooleanProperty isServiced = new SimpleBooleanProperty(false);
+    }
+
+    public void setStageAndSetUpListeners(Stage mainStage) {
+        mainStage.heightProperty().addListener((obs, oldVal, newVal) -> translateElevator());
     }
 
     public void shutdown() {
