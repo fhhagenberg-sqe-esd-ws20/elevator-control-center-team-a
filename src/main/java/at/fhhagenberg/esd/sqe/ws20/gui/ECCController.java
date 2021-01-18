@@ -419,7 +419,7 @@ public class ECCController implements Initializable {
         goToTargetFloor(selectedFloor.get()); 
     }
     
-    private void goToTargetFloor(int newTargetFloor) {
+    private void gotoTargetFloor(int newTargetFloor) {
     	var elevator = currentElevator.get();
         var floor = currentFloor.get();
         
@@ -492,14 +492,14 @@ public class ECCController implements Initializable {
         	}
         	for(int i = startFloor; i < info.getNrOfFloors(); i++) {
         		if(weight.get() > maxPayload) {
-        			if(floors[i].stopRequest.get() == true) {
-        				goToTargetFloor(i);
+        			if(floors[i].stopRequest.get()) {
+        				gotoTargetFloor(i);
         				newTargetFloorSet = true;
         				break;        			
             		}
         		} else {
         			if(floors[i].requestUp.get() == true || floors[i].stopRequest.get() == true) {
-        				goToTargetFloor(i);
+        				gotoTargetFloor(i);
         				newTargetFloorSet = true;
         				break;        			
             		}
@@ -522,14 +522,14 @@ public class ECCController implements Initializable {
         	}
         	for(int i = startFloor; i >= 0; i--) {
         		if(weight.get() > maxPayload) {
-        			if(floors[i].stopRequest.get() == true) {
-        				goToTargetFloor(i);
+        			if(floors[i].stopRequest.get()) {
+        				gotoTargetFloor(i);
         				newTargetFloorSet = true;
         				break;
             		}
         		} else {
         			if(floors[i].requestDown.get() == true || floors[i].stopRequest.get() == true) {
-        				goToTargetFloor(i);
+        				gotoTargetFloor(i);
         				newTargetFloorSet = true;
         				break;
             		}
