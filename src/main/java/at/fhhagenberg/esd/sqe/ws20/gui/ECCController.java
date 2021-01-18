@@ -123,7 +123,7 @@ public class ECCController implements Initializable {
     
     // Automatic Mode Variables
     private boolean autoModeDirectionUp = true;
-    private int maxPayload = 1400;
+    private static final int MAX_PAYLOAD = 1400;
     private boolean canAutoamticBeTriggered = true;
     private boolean directionChanged = false;
     private Integer timeoutCnt = 0;
@@ -476,6 +476,23 @@ public class ECCController implements Initializable {
 	    }
     }
     
+    private boolean checkConditions(Integer floor, boolean up) {
+    	if(weight.get() > MAX_PAYLOAD) {
+			if(floors[floor].stopRequest.get()) {
+				return true;       			
+    		}
+		} else if(up) {
+			if(floors[floor].requestUp.get() || floors[floor].stopRequest.get()) {
+				return true;
+    		}
+		} else {
+			if(floors[floor].requestDown.get() || floors[floor].stopRequest.get()) {
+				return true;  
+    		}
+		}
+    	return false;
+    }
+    
     private void updateAutomaticMode() {
     	if(!isDoorOpen.get()) {
     		return;
@@ -485,7 +502,7 @@ public class ECCController implements Initializable {
     		return;
     	}
     	
-    	Boolean newTargetFloorSet = false;
+    	boolean newTargetFloorSet = false;
         if(autoModeDirectionUp) {
         	if(startFloor < info.getNrOfFloors() - 1) {
         		startFloor++;
@@ -495,18 +512,10 @@ public class ECCController implements Initializable {
         		directionChanged = false;
         	}
         	for(int i = startFloor; i < info.getNrOfFloors(); i++) {
-        		if(weight.get() > maxPayload) {
-        			if(floors[i].stopRequest.get()) {
-        				gotoTargetFloor(i);
-        				newTargetFloorSet = true;
-        				break;        			
-            		}
-        		} else {
-        			if(floors[i].requestUp.get() || floors[i].stopRequest.get()) {
-        				gotoTargetFloor(i);
-        				newTargetFloorSet = true;
-        				break;        			
-            		}
+        		if(checkConditions(i, true)) {
+        			gotoTargetFloor(i);
+    				newTargetFloorSet = true;
+    				break;  
         		}
         	}
         	if(!newTargetFloorSet) {
@@ -525,18 +534,10 @@ public class ECCController implements Initializable {
         		directionChanged = false;
         	}
         	for(int i = startFloor; i >= 0; i--) {
-        		if(weight.get() > maxPayload) {
-        			if(floors[i].stopRequest.get()) {
-        				gotoTargetFloor(i);
-        				newTargetFloorSet = true;
-        				break;
-            		}
-        		} else {
-        			if(floors[i].requestDown.get() || floors[i].stopRequest.get()) {
-        				gotoTargetFloor(i);
-        				newTargetFloorSet = true;
-        				break;
-            		}
+        		if(checkConditions(i, false)) {
+        			gotoTargetFloor(i);
+    				newTargetFloorSet = true;
+    				break;  
         		}
         	}
         	if(!newTargetFloorSet) {
