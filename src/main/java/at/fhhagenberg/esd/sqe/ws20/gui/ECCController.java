@@ -295,6 +295,10 @@ public class ECCController implements Initializable {
                 log(e);
             }
         }
+        
+        if(isAutomatic.get()) {
+        	updateAutomaticMode();
+        }
 
         Platform.runLater(() -> {
             speed.setValue(elevatorState.getCurrentSpeed());
@@ -396,21 +400,24 @@ public class ECCController implements Initializable {
     @SuppressWarnings("unused")
     @FXML
     protected void gotoTargetFloor(ActionEvent event) {
-        var elevator = currentElevator.get();
-        var selectedTargetFloor = selectedFloor.get();
+        goToTargetFloor(selectedFloor.get()); 
+    }
+    
+    private void goToTargetFloor(int targetFloor) {
+    	var elevator = currentElevator.get();
         var floor = currentFloor.get();
-
-        if (elevator >= 0 && selectedTargetFloor >= 0) {
+        
+    	if (elevator >= 0 && targetFloor >= 0) {
             try {
                 Direction direction = Direction.UNCOMMITTED;
-                if (selectedTargetFloor < floor) {
+                if (targetFloor < floor) {
                     direction = Direction.DOWN;
-                } else if (selectedTargetFloor > floor) {
+                } else if (targetFloor > floor) {
                     direction = Direction.UP;
                 }
 
                 model.setCommittedDirection(elevator, direction);
-                model.setTargetFloor(elevator, selectedTargetFloor);
+                model.setTargetFloor(elevator, targetFloor);
             } catch (Exception e) {
                 if (e instanceof ConnectionError) {
                     disconnect();
@@ -447,5 +454,62 @@ public class ECCController implements Initializable {
 
     public void shutdown() {
         timer.cancel();
+    }
+    
+    private Boolean autoModeDirectionUp = true;
+    private int maxPayload = 1400;
+    private void updateAutomaticMode() {
+    	if(!isDoorOpen.get()) {
+    		return;
+    	}
+    	
+    	Boolean newTargetFloorSet = false;
+    	int startFloor = currentFloor.get();
+    	
+        if(autoModeDirectionUp) {
+        	if(startFloor < info.getNrOfFloors() - 1) {
+        		startFloor++;
+        	}
+        	for(int i = startFloor; i < info.getNrOfFloors(); i++) {
+        		if(weight.get() > maxPayload) {
+        			if(floors[i].stopRequest.get() == true) {
+        				goToTargetFloor(i);
+        				newTargetFloorSet = true;
+        				break;        			
+            		}
+        		} else {
+        			if(floors[i].requestUp.get() == true || floors[i].stopRequest.get() == true || floors[i].requestDown.get() == true) {
+        				goToTargetFloor(i);
+        				newTargetFloorSet = true;
+        				break;        			
+            		}
+        		}
+        	}
+        	if(!newTargetFloorSet) {
+        		autoModeDirectionUp = false;
+        	}
+        } else {
+        	if(startFloor > 0) {
+        		startFloor--;
+        	}
+        	for(int i = startFloor; i >= 0; i--) {
+        		if(weight.get() > maxPayload) {
+        			if(floors[i].stopRequest.get() == true) {
+        				goToTargetFloor(i);
+        				newTargetFloorSet = true;
+        				break;
+            		}
+        		} else {
+        			if(floors[i].requestDown.get() == true || floors[i].stopRequest.get() == true || floors[i].requestUp.get() == true) {
+        				goToTargetFloor(i);
+        				newTargetFloorSet = true;
+        				break;
+            		}
+        		}
+        	}
+        	if(!newTargetFloorSet) {
+        		autoModeDirectionUp = true;
+        	}
+        }
     }
 }
