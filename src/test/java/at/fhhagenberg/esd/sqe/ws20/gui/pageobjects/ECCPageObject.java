@@ -234,6 +234,13 @@ public class ECCPageObject {
         assertNonEmptyErrorLog();
     }
 
+    public void assertElevatorSelectionEnabled(boolean enabled) {
+        if (enabled)
+            FxAssert.verifyThat(elevatorComboBoxId, NodeMatchers.isEnabled());
+        else
+            FxAssert.verifyThat(elevatorComboBoxId, NodeMatchers.isDisabled());
+    }
+
 
     // ----------------------------------------------------------------
     // Private helper methods
