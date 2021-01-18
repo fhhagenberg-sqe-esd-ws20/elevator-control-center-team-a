@@ -416,7 +416,7 @@ public class ECCController implements Initializable {
     @SuppressWarnings("unused")
     @FXML
     protected void gotoTargetFloor(ActionEvent event) {
-        goToTargetFloor(selectedFloor.get()); 
+    	gotoTargetFloor(selectedFloor.get()); 
     }
     
     private void gotoTargetFloor(int newTargetFloor) {
