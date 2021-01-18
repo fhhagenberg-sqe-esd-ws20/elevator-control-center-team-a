@@ -419,14 +419,14 @@ public class ECCController implements Initializable {
         
     	if (elevator >= 0 && newTargetFloor >= 0) {
             try {
-                Direction direction = Direction.UNCOMMITTED;
+                Direction dir = Direction.UNCOMMITTED;
                 if (newTargetFloor < floor) {
-                    direction = Direction.DOWN;
+                    dir = Direction.DOWN;
                 } else if (newTargetFloor > floor) {
-                    direction = Direction.UP;
+                    dir = Direction.UP;
                 }
 
-                model.setCommittedDirection(elevator, direction);
+                model.setCommittedDirection(elevator, dir);
                 model.setTargetFloor(elevator, newTargetFloor);
             } catch (Exception e) {
                 if (e instanceof ConnectionError) {
