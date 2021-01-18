@@ -297,7 +297,16 @@ public class ECCController implements Initializable {
         }
         
         if(isAutomatic.get()) {
-        	updateAutomaticMode();
+        	if(canAutoamticBeTriggered || timeoutCnt >= maxTimeoutCnt) {
+        		updateAutomaticMode();
+        		timeoutCnt = 0;
+        	} else {
+        		if(!isDoorOpen.get()) {
+        			canAutoamticBeTriggered = true;
+        		} else {
+        			timeoutCnt++;
+        		}
+        	}
         }
 
         Platform.runLater(() -> {
@@ -403,21 +412,21 @@ public class ECCController implements Initializable {
         goToTargetFloor(selectedFloor.get()); 
     }
     
-    private void goToTargetFloor(int targetFloor) {
+    private void goToTargetFloor(int newTargetFloor) {
     	var elevator = currentElevator.get();
         var floor = currentFloor.get();
         
-    	if (elevator >= 0 && targetFloor >= 0) {
+    	if (elevator >= 0 && newTargetFloor >= 0) {
             try {
                 Direction direction = Direction.UNCOMMITTED;
-                if (targetFloor < floor) {
+                if (newTargetFloor < floor) {
                     direction = Direction.DOWN;
-                } else if (targetFloor > floor) {
+                } else if (newTargetFloor > floor) {
                     direction = Direction.UP;
                 }
 
                 model.setCommittedDirection(elevator, direction);
-                model.setTargetFloor(elevator, targetFloor);
+                model.setTargetFloor(elevator, newTargetFloor);
             } catch (Exception e) {
                 if (e instanceof ConnectionError) {
                     disconnect();
@@ -458,17 +467,27 @@ public class ECCController implements Initializable {
     
     private Boolean autoModeDirectionUp = true;
     private int maxPayload = 1400;
+    private Boolean canAutoamticBeTriggered = true;
+    private Boolean directionChanged = false;
+    private Integer timeoutCnt = 0;
+    private static final Integer maxTimeoutCnt = 10;
     private void updateAutomaticMode() {
     	if(!isDoorOpen.get()) {
     		return;
     	}
+    	int startFloor = currentFloor.get();
+    	if(targetFloor.get() != startFloor) {
+    		return;
+    	}
     	
     	Boolean newTargetFloorSet = false;
-    	int startFloor = currentFloor.get();
-    	
         if(autoModeDirectionUp) {
         	if(startFloor < info.getNrOfFloors() - 1) {
         		startFloor++;
+        	}
+        	if(directionChanged) {
+        		startFloor = 0;
+        		directionChanged = false;
         	}
         	for(int i = startFloor; i < info.getNrOfFloors(); i++) {
         		if(weight.get() > maxPayload) {
@@ -478,7 +497,7 @@ public class ECCController implements Initializable {
         				break;        			
             		}
         		} else {
-        			if(floors[i].requestUp.get() == true || floors[i].stopRequest.get() == true || floors[i].requestDown.get() == true) {
+        			if(floors[i].requestUp.get() == true || floors[i].stopRequest.get() == true) {
         				goToTargetFloor(i);
         				newTargetFloorSet = true;
         				break;        			
@@ -487,10 +506,18 @@ public class ECCController implements Initializable {
         	}
         	if(!newTargetFloorSet) {
         		autoModeDirectionUp = false;
+        		directionChanged = true;
+        	}
+        	else {
+        		canAutoamticBeTriggered = false;
         	}
         } else {
         	if(startFloor > 0) {
         		startFloor--;
+        	}
+        	if(directionChanged) {
+        		startFloor = info.getNrOfFloors() - 1;
+        		directionChanged = false;
         	}
         	for(int i = startFloor; i >= 0; i--) {
         		if(weight.get() > maxPayload) {
@@ -500,7 +527,7 @@ public class ECCController implements Initializable {
         				break;
             		}
         		} else {
-        			if(floors[i].requestDown.get() == true || floors[i].stopRequest.get() == true || floors[i].requestUp.get() == true) {
+        			if(floors[i].requestDown.get() == true || floors[i].stopRequest.get() == true) {
         				goToTargetFloor(i);
         				newTargetFloorSet = true;
         				break;
@@ -509,6 +536,9 @@ public class ECCController implements Initializable {
         	}
         	if(!newTargetFloorSet) {
         		autoModeDirectionUp = true;
+        		directionChanged = true;
+        	} else {
+        		canAutoamticBeTriggered = false;
         	}
         }
     }
