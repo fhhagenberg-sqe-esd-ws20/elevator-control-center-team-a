@@ -513,7 +513,7 @@ public class ECCController implements Initializable {
         	}
         	if(directionChanged) {
         		directionChanged = false;
-        		return (int)(info.getNrOfFloors() - 1);
+        		return (info.getNrOfFloors() - 1);
         	}
     	}
 		return startFloor;
