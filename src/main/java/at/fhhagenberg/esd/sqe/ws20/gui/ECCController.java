@@ -499,14 +499,11 @@ public class ECCController implements Initializable {
     }
     
     private void updateAutomaticMode() {
-    	if(!isDoorOpen.get()) {
-    		return;
-    	}
     	int startFloor = currentFloor.get();
-    	if(targetFloor.get() != startFloor) {
+    	if(!isDoorOpen.get() || targetFloor.get() != startFloor) {
     		return;
     	}
-    	
+
     	boolean newTargetFloorSet = false;
         if(autoModeDirectionUp) {
         	if(startFloor < info.getNrOfFloors() - 1) {
@@ -523,13 +520,6 @@ public class ECCController implements Initializable {
     				break;  
         		}
         	}
-        	if(!newTargetFloorSet) {
-        		autoModeDirectionUp = false;
-        		directionChanged = true;
-        	}
-        	else {
-        		canAutoamticBeTriggered = false;
-        	}
         } else {
         	if(startFloor > 0) {
         		startFloor--;
@@ -545,12 +535,12 @@ public class ECCController implements Initializable {
     				break;  
         		}
         	}
-        	if(!newTargetFloorSet) {
-        		autoModeDirectionUp = true;
-        		directionChanged = true;
-        	} else {
-        		canAutoamticBeTriggered = false;
-        	}
         }
+        if(!newTargetFloorSet) {
+    		autoModeDirectionUp = !autoModeDirectionUp;
+    		directionChanged = true;
+    	} else {
+    		canAutoamticBeTriggered = false;
+    	}
     }
 }
