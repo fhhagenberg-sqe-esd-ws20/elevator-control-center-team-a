@@ -308,18 +308,22 @@ public class ECCController implements Initializable {
 
             targetFloor.setValue(elevatorState.getTargetFloor());
 
-            var servicedFloors = elevatorState.getServicedFloors();
-
-            for (int i = 0; i < info.getNrOfFloors(); i++) {
-                var state = getFloorState(i);
-                if (state != null) {
-                    floors[i].requestUp.set(state.isUpRequest());
-                    floors[i].requestDown.set(state.isDownRequest());
-                    floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
-                    floors[i].isServiced.set(servicedFloors.get(i));
-                }
-            }
+            updateFloors(elevatorState);
         });
+    }
+
+    private void updateFloors(ElevatorState elevatorState) {
+        var servicedFloors = elevatorState.getServicedFloors();
+
+        for (int i = 0; i < info.getNrOfFloors(); i++) {
+            var state = getFloorState(i);
+            if (state != null) {
+                floors[i].requestUp.set(state.isUpRequest());
+                floors[i].requestDown.set(state.isDownRequest());
+                floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
+                floors[i].isServiced.set(servicedFloors.get(i));
+            }
+        }
     }
 
     @Override
@@ -403,14 +407,14 @@ public class ECCController implements Initializable {
 
         if (elevator >= 0 && selectedTargetFloor >= 0) {
             try {
-                Direction direction = Direction.UNCOMMITTED;
+                Direction dir = Direction.UNCOMMITTED;
                 if (selectedTargetFloor < floor) {
-                    direction = Direction.DOWN;
+                    dir = Direction.DOWN;
                 } else if (selectedTargetFloor > floor) {
-                    direction = Direction.UP;
+                    dir = Direction.UP;
                 }
 
-                model.setCommittedDirection(elevator, direction);
+                model.setCommittedDirection(elevator, dir);
                 model.setTargetFloor(elevator, selectedTargetFloor);
             } catch (Exception e) {
                 if (e instanceof ConnectionError) {
