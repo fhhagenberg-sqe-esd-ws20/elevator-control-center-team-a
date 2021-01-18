@@ -501,7 +501,7 @@ public class ECCController implements Initializable {
     private int updatestartFloor(int startFloor, boolean directionMode) {
     	if(directionMode) {
     		if(startFloor < info.getNrOfFloors() - 1) {
-        		return startFloor++;
+        		return (startFloor + 1);
         	}
         	if(directionChanged) {
         		directionChanged = false;
@@ -509,7 +509,7 @@ public class ECCController implements Initializable {
         	}
     	} else {
     		if(startFloor > 0) {
-        		return startFloor--;
+        		return (startFloor- 1);
         	}
         	if(directionChanged) {
         		directionChanged = false;
@@ -532,6 +532,7 @@ public class ECCController implements Initializable {
         		if(checkConditions(i, true)) {
         			gotoTargetFloor(i);
     				newTargetFloorSet = true;
+    				canAutoamticBeTriggered = false;
     				break;  
         		}
         	}
@@ -541,6 +542,7 @@ public class ECCController implements Initializable {
         		if(checkConditions(i, false)) {
         			gotoTargetFloor(i);
     				newTargetFloorSet = true;
+    				canAutoamticBeTriggered = false;
     				break;  
         		}
         	}
@@ -548,8 +550,6 @@ public class ECCController implements Initializable {
         if(!newTargetFloorSet) {
     		autoModeDirectionUp = !autoModeDirectionUp;
     		directionChanged = true;
-    	} else {
-    		canAutoamticBeTriggered = false;
     	}
     }
 }
