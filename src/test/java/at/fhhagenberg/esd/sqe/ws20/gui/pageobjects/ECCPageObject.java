@@ -241,6 +241,11 @@ public class ECCPageObject {
             FxAssert.verifyThat(elevatorComboBoxId, NodeMatchers.isDisabled());
     }
 
+    public void assertElevatorSelectionEnabledTimeout(boolean enabled) {
+        waitUntilComboboxEnabled(elevatorComboBoxId, enabled);
+        assertElevatorSelectionEnabled(enabled);
+    }
+
 
     // ----------------------------------------------------------------
     // Private helper methods
@@ -254,6 +259,17 @@ public class ECCPageObject {
             });
         } catch (TimeoutException ex) {
             throw new AssertionFailedError("Text of TextInputControl '" + query + "' did not contain text as expected.", ex);
+        }
+    }
+
+    private void waitUntilComboboxEnabled(String query, boolean enabled) {
+        try {
+            WaitForAsyncUtils.waitFor(DEFAULT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS, () -> {
+                ComboBox comboBox = robot.lookup(query).query();
+                return enabled != comboBox.isDisabled();
+            });
+        } catch (TimeoutException ex) {
+            throw new AssertionFailedError("Enabled state of ComboBox '" + query + "' is not as expected.", ex);
         }
     }
 

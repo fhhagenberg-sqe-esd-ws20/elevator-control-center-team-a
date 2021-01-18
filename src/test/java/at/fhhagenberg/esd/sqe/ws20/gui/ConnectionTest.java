@@ -22,8 +22,7 @@ import sqelevator.IElevator;
 import java.rmi.RemoteException;
 
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(ApplicationExtension.class)
 class ConnectionTest {
@@ -65,18 +64,16 @@ class ConnectionTest {
     void testConnectionError() throws Exception {
         page.selectElevator(0);
         when(mockElevator.getClockTick()).thenThrow(ConnectionError.class);
-        Thread.sleep(150);
-        page.assertElevatorSelectionEnabled(false);
+        page.assertElevatorSelectionEnabledTimeout(false);
     }
 
     @Test
     void testReconnectAfterFailure() throws Exception {
         page.selectElevator(0);
         when(mockElevator.getClockTick()).thenThrow(ConnectionError.class);
-        Thread.sleep(150);
+        page.assertElevatorSelectionEnabledTimeout(false);
         Mockito.reset(mockElevator);
         when(mockElevator.getClockTick()).thenReturn(0L);
-        Thread.sleep(150);
-        page.assertElevatorSelectionEnabled(true);
+        page.assertElevatorSelectionEnabledTimeout(true);
     }
 }

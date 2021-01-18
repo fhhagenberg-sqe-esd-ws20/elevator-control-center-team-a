@@ -66,7 +66,6 @@ class InitialConnectionTest {
         page.assertElevatorSelectionEnabled(false);
         Mockito.reset(mockElevator);
         when(mockElevator.getClockTick()).thenReturn(0L);
-        Thread.sleep(150);
-        page.assertElevatorSelectionEnabled(true);
+        page.assertElevatorSelectionEnabledTimeout(true);
     }
 }
