@@ -498,6 +498,27 @@ public class ECCController implements Initializable {
     	return false;
     }
     
+    private int updatestartFloor(int startFloor, boolean directionMode) {
+    	if(directionMode) {
+    		if(startFloor < info.getNrOfFloors() - 1) {
+        		return startFloor++;
+        	}
+        	if(directionChanged) {
+        		directionChanged = false;
+        		return 0;
+        	}
+    	} else {
+    		if(startFloor > 0) {
+        		return startFloor--;
+        	}
+        	if(directionChanged) {
+        		directionChanged = false;
+        		return (int)(info.getNrOfFloors() - 1);
+        	}
+    	}
+		return startFloor;
+    }
+    
     private void updateAutomaticMode() {
     	int startFloor = currentFloor.get();
     	if(!isDoorOpen.get() || targetFloor.get() != startFloor) {
@@ -506,13 +527,7 @@ public class ECCController implements Initializable {
 
     	boolean newTargetFloorSet = false;
         if(autoModeDirectionUp) {
-        	if(startFloor < info.getNrOfFloors() - 1) {
-        		startFloor++;
-        	}
-        	if(directionChanged) {
-        		startFloor = 0;
-        		directionChanged = false;
-        	}
+        	startFloor = updatestartFloor(startFloor, true);
         	for(int i = startFloor; i < info.getNrOfFloors(); i++) {
         		if(checkConditions(i, true)) {
         			gotoTargetFloor(i);
@@ -521,13 +536,7 @@ public class ECCController implements Initializable {
         		}
         	}
         } else {
-        	if(startFloor > 0) {
-        		startFloor--;
-        	}
-        	if(directionChanged) {
-        		startFloor = info.getNrOfFloors() - 1;
-        		directionChanged = false;
-        	}
+        	startFloor = updatestartFloor(startFloor, false);
         	for(int i = startFloor; i >= 0; i--) {
         		if(checkConditions(i, false)) {
         			gotoTargetFloor(i);
