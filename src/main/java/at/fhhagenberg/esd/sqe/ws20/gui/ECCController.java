@@ -122,10 +122,10 @@ public class ECCController implements Initializable {
     private Integer oldPercentage = 0;
     
     // Automatic Mode Variables
-    private Boolean autoModeDirectionUp = true;
+    private boolean autoModeDirectionUp = true;
     private int maxPayload = 1400;
-    private Boolean canAutoamticBeTriggered = true;
-    private Boolean directionChanged = false;
+    private boolean canAutoamticBeTriggered = true;
+    private boolean directionChanged = false;
     private Integer timeoutCnt = 0;
     private static final Integer maxTimeoutCnt = 10;
 
