@@ -127,7 +127,7 @@ public class ECCController implements Initializable {
     private boolean canAutoamticBeTriggered = true;
     private boolean directionChanged = false;
     private Integer timeoutCnt = 0;
-    private static final Integer maxTimeoutCnt = 10;
+    private static final Integer MAX_TIMEOUT_CNT = 10;
 
     private static ImageView createFloorImageView(String path, ObservableValue<Boolean> visible) {
         File file = new File(path);
@@ -303,18 +303,7 @@ public class ECCController implements Initializable {
             }
         }
         
-        if(isAutomatic.get()) {
-        	if(canAutoamticBeTriggered || timeoutCnt >= maxTimeoutCnt) {
-        		updateAutomaticMode();
-        		timeoutCnt = 0;
-        	} else {
-        		if(!isDoorOpen.get()) {
-        			canAutoamticBeTriggered = true;
-        		} else {
-        			timeoutCnt++;
-        		}
-        	}
-        }
+        triggerAutomaticModeUpdateIfNeeded();
 
         Platform.runLater(() -> {
             speed.setValue(elevatorState.getCurrentSpeed());
@@ -472,6 +461,21 @@ public class ECCController implements Initializable {
         timer.cancel();
     }
     
+    private void triggerAutomaticModeUpdateIfNeeded() {
+		if(isAutomatic.get()) {
+	    	if(canAutoamticBeTriggered || timeoutCnt >= MAX_TIMEOUT_CNT) {
+	    		updateAutomaticMode();
+	    		timeoutCnt = 0;
+	    	} else {
+	    		if(!isDoorOpen.get()) {
+	    			canAutoamticBeTriggered = true;
+	    		} else {
+	    			timeoutCnt++;
+	    		}
+	    	}
+	    }
+    }
+    
     private void updateAutomaticMode() {
     	if(!isDoorOpen.get()) {
     		return;
@@ -498,7 +502,7 @@ public class ECCController implements Initializable {
         				break;        			
             		}
         		} else {
-        			if(floors[i].requestUp.get() == true || floors[i].stopRequest.get() == true) {
+        			if(floors[i].requestUp.get() || floors[i].stopRequest.get()) {
         				gotoTargetFloor(i);
         				newTargetFloorSet = true;
         				break;        			
@@ -528,7 +532,7 @@ public class ECCController implements Initializable {
         				break;
             		}
         		} else {
-        			if(floors[i].requestDown.get() == true || floors[i].stopRequest.get() == true) {
+        			if(floors[i].requestDown.get() || floors[i].stopRequest.get()) {
         				gotoTargetFloor(i);
         				newTargetFloorSet = true;
         				break;
