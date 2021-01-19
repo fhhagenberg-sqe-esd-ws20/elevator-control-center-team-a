@@ -226,7 +226,7 @@ public class ECCController implements Initializable {
                     floor.requestUp.set(false);
                     floor.stopRequest.set(false);
                 }
-                targetFloor.set(0);
+                targetFloor.set(-1);
 
                 translateElevator(0);
             });
