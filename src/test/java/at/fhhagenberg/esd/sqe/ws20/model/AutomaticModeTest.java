@@ -11,7 +11,7 @@ import at.fhhagenberg.esd.sqe.ws20.model.AutomaticMode.FloorStates;
 import at.fhhagenberg.esd.sqe.ws20.model.impl.ElevatorImpl;
 import at.fhhagenberg.esd.sqe.ws20.utils.ManagedIElevator;
 
-public class AutomaticModeTest {
+class AutomaticModeTest {
 	
 	public AutomaticMode autoMode;
 	public static final int MAX_FLOORS = 3;
@@ -22,7 +22,7 @@ public class AutomaticModeTest {
     }
 
     @Test
-    public void testUpwardsDirection() {
+    void testUpwardsDirection() {
     	FloorStates[] floors = new FloorStates[MAX_FLOORS];
 		for (int i = 0; i < MAX_FLOORS; i++) {
 			floors[i] = new FloorStates();
@@ -41,7 +41,7 @@ public class AutomaticModeTest {
     }
     
     @Test
-    public void testDownwardsDirection() {
+    void testDownwardsDirection() {
     	FloorStates[] floors = new FloorStates[MAX_FLOORS];
 		for (int i = 0; i < MAX_FLOORS; i++) {
 			floors[i] = new FloorStates();
@@ -64,19 +64,23 @@ public class AutomaticModeTest {
     }
     
     @Test
-    public void testUpwardsDirectionOverweight() {
+    void testUpwardsDirectionOverweight() {
     	FloorStates[] floors = new FloorStates[MAX_FLOORS];
 		for (int i = 0; i < MAX_FLOORS; i++) {
 			floors[i] = new FloorStates();
-		    floors[i].stopRequest.set(true);
 		}
-    	 
+		floors[1].stopRequest.set(true);
+		
 		int targetFloor = autoMode.triggerAutomaticModeUpdateIfNeeded(0, MAX_FLOORS, true, 1500, floors);
 		assertEquals(1, targetFloor);
+		floors[1].stopRequest.set(false);
+		
+		targetFloor = autoMode.triggerAutomaticModeUpdateIfNeeded(0, MAX_FLOORS, true, 1500, floors);
+		assertEquals(-1, targetFloor);
     }
     
     @Test
-    public void testTimeout() {
+    void testTimeout() {
     	FloorStates[] floors = new FloorStates[MAX_FLOORS];
 		for (int i = 0; i < MAX_FLOORS; i++) {
 			floors[i] = new FloorStates();
@@ -95,7 +99,7 @@ public class AutomaticModeTest {
     }
     
     @Test
-    public void testDirectionChangeFromUpToDown() {
+    void testDirectionChangeFromUpToDown() {
     	FloorStates[] floors = new FloorStates[MAX_FLOORS];
 		for (int i = 0; i < MAX_FLOORS; i++) {
 			floors[i] = new FloorStates();
@@ -116,7 +120,7 @@ public class AutomaticModeTest {
     }  
     
     @Test
-    public void testDirectionChangeFromDownToUp() {
+    void testDirectionChangeFromDownToUp() {
     	FloorStates[] floors = new FloorStates[MAX_FLOORS];
 		for (int i = 0; i < MAX_FLOORS; i++) {
 			floors[i] = new FloorStates();
