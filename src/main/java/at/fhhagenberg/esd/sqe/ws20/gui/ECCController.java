@@ -175,13 +175,13 @@ public class ECCController implements Initializable {
             floorNames.clear();
             gElevatorFloors.getChildren().clear();
             gElevatorFloors.getRowConstraints().clear();
-            floors = new FloorState[info.getNrOfFloors()];
+            floors = new FloorStates[info.getNrOfFloors()];
 
             lTopFloor.setText(((Integer) (info.getNrOfFloors() - 1)).toString());
 
             for (int i = 0; i < info.getNrOfFloors(); i++) {
                 floorNames.add("Floor " + i);
-                floors[i] = new FloorState();
+                floors[i] = new FloorStates();
 
                 RowConstraints rCon = new RowConstraints();
                 rCon.setMinHeight(20);
