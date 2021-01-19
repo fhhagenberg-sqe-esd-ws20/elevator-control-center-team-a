@@ -38,3 +38,14 @@ mvn clean package
 ```
 
 The resulting archive (`.jar` file) is in the `target` directory.
+
+
+### Test Concept
+For the test concept, an attempt was made to try out the techniques learned in class. Accordingly, various approaches were used to increase the code quality and to test it accordingly. The following approaches were taken into account:
+
+1. Testseparation : The basic principles were used for the test separation. Accordingly, the tests were separated based on their classes and packages.
+2. Uasge of Test Automation Pattern: Special care was taken to cover the model with unit tests as far as possible. Furthermore, attention was paid to also cover the given interfaces and the connection as well as connection interruptions with appropriate tests. The function of the GUI was also checked by automatic tests. Finally, manual tests were also carried out for special cases in order to achieve an appropriate balance between automation of the test cases and development time.
+3. GUI End-to-End tests: Two information channels were examined separately from each other. First, it was checked whether the information comes from the model to the GUI. Accordingly, parameters were changed in the model and finders were used to check whether the display in the GUI changed accordingly. In the second step, the opposite flow of information was examined. Here, selections were made in the GUI and then the model was verified to see whether the selection in the GUI also changed the model accordingly. 
+4. Page Object Pattern: In order to increase the readability of the GUI end-to-end tests on the one hand, and on the other hand to ensure appropriate maintainability in the case of GUI changes, the page object pattern was used. The GUI interaction was abstracted into a separate class. The GUI interactions by means of robots and finders were thus encapsulated in individual methods to enable the tests to interact with the GUI in an appropriately abstracted manner. 
+5. White Box Techniques: Appropriate tools (Jacococ, SonarCloud) were used to generate coverage data. Based on this data, the current tests were analyzed and new tests were derived to further increase the coverage. 
+6. Black Box Techniques: Care was taken to also check for the relevant boundary cases.
