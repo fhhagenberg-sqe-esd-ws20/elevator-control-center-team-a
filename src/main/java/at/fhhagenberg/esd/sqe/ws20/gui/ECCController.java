@@ -169,49 +169,51 @@ public class ECCController implements Initializable {
             return;
         }
 
-        floorNames.clear();
-        gElevatorFloors.getChildren().clear();
-        gElevatorFloors.getRowConstraints().clear();
-        floors = new FloorState[info.getNrOfFloors()];
+        Platform.runLater(() -> {
+            floorNames.clear();
+            gElevatorFloors.getChildren().clear();
+            gElevatorFloors.getRowConstraints().clear();
+            floors = new FloorState[info.getNrOfFloors()];
 
-        lTopFloor.setText(((Integer) (info.getNrOfFloors() - 1)).toString());
+            lTopFloor.setText(((Integer) (info.getNrOfFloors() - 1)).toString());
 
-        for (int i = 0; i < info.getNrOfFloors(); i++) {
-            floorNames.add("Floor " + i);
-            floors[i] = new FloorState();
+            for (int i = 0; i < info.getNrOfFloors(); i++) {
+                floorNames.add("Floor " + i);
+                floors[i] = new FloorState();
 
-            RowConstraints rCon = new RowConstraints();
-            rCon.setMinHeight(20);
-            rCon.setPercentHeight(100.0 / info.getNrOfFloors());
+                RowConstraints rCon = new RowConstraints();
+                rCon.setMinHeight(20);
+                rCon.setPercentHeight(100.0 / info.getNrOfFloors());
 
-            HBox hb = new HBox();
-            hb.setAlignment(Pos.CENTER_RIGHT);
-            hb.setSpacing(5);
-            hb.setPadding(new Insets(5, 5, 5, 5));
-            hb.translateXProperty().set(10);
+                HBox hb = new HBox();
+                hb.setAlignment(Pos.CENTER_RIGHT);
+                hb.setSpacing(5);
+                hb.setPadding(new Insets(5, 5, 5, 5));
+                hb.translateXProperty().set(10);
 
-            Line line = new Line(0, 0, 10, 0);
-            line.disableProperty().bind(floors[i].isServiced.not());
+                Line line = new Line(0, 0, 10, 0);
+                line.disableProperty().bind(floors[i].isServiced.not());
 
-            Label label = new Label(Integer.toString(i));
-            label.disableProperty().bind(floors[i].isServiced.not());
+                Label label = new Label(Integer.toString(i));
+                label.disableProperty().bind(floors[i].isServiced.not());
 
-            hb.getChildren().addAll(
-                    createFloorImageView("images/arrowUp.png", floors[i].requestUp),
-                    createFloorImageView("images/arrowDown.png", floors[i].requestDown),
-                    createFloorImageView("images/hand.png", floors[i].stopRequest),
-                    createFloorImageView("images/fillerReworked.png", targetFloor.isEqualTo(i)),
-                    label,
-                    line);
+                hb.getChildren().addAll(
+                        createFloorImageView("images/arrowUp.png", floors[i].requestUp),
+                        createFloorImageView("images/arrowDown.png", floors[i].requestDown),
+                        createFloorImageView("images/hand.png", floors[i].stopRequest),
+                        createFloorImageView("images/fillerReworked.png", targetFloor.isEqualTo(i)),
+                        label,
+                        line);
 
-            gElevatorFloors.getRowConstraints().add(rCon);
-            gElevatorFloors.add(hb, 0, info.getNrOfFloors() - i - 1);
-        }
+                gElevatorFloors.getRowConstraints().add(rCon);
+                gElevatorFloors.add(hb, 0, info.getNrOfFloors() - i - 1);
+            }
 
-        elevators.clear();
-        for (int i = 0; i < info.getNrOfElevators(); i++) {
-            elevators.add("Elevator " + i);
-        }
+            elevators.clear();
+            for (int i = 0; i < info.getNrOfElevators(); i++) {
+                elevators.add("Elevator " + i);
+            }
+        });
 
         isConnected.set(true);
     }
@@ -276,7 +278,7 @@ public class ECCController implements Initializable {
             disconnect();
             return;
         } else if (!isConnected.get()) {
-            Platform.runLater(() -> connect(false));
+            connect(false);
             return;
         } else if (currentElevator.get() < 0)
             return;
