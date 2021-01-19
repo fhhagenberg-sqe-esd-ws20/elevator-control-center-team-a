@@ -1,6 +1,7 @@
 package at.fhhagenberg.esd.sqe.ws20.gui;
 
 import at.fhhagenberg.esd.sqe.ws20.model.*;
+import at.fhhagenberg.esd.sqe.ws20.model.AutomaticMode.FloorStates;
 import at.fhhagenberg.esd.sqe.ws20.utils.ConnectionError;
 import at.fhhagenberg.esd.sqe.ws20.utils.ECCError;
 import javafx.application.Platform;
@@ -113,7 +114,7 @@ public class ECCController implements Initializable {
     @SuppressWarnings("unused")
     @FXML
     private Group groupElevator;
-    private FloorState[] floors;
+    private FloorStates[] floors;
     private ReadOnlyIntegerProperty currentElevator;
     private ReadOnlyIntegerProperty selectedFloor;
     private IElevatorWrapper model;
@@ -121,13 +122,7 @@ public class ECCController implements Initializable {
 
     private Integer oldPercentage = 0;
     
-    // Automatic Mode Variables
-    private boolean autoModeDirectionUp = true;
-    private static final int MAX_PAYLOAD = 1400;
-    private boolean canAutoamticBeTriggered = true;
-    private boolean directionChanged = false;
-    private Integer timeoutCnt = 0;
-    private static final Integer MAX_TIMEOUT_CNT = 10;
+    private AutomaticMode autoMode = new AutomaticMode();
 
     private static ImageView createFloorImageView(String path, ObservableValue<Boolean> visible) {
         File file = new File(path);
@@ -179,13 +174,13 @@ public class ECCController implements Initializable {
         floorNames.clear();
         gElevatorFloors.getChildren().clear();
         gElevatorFloors.getRowConstraints().clear();
-        floors = new FloorState[info.getNrOfFloors()];
+        floors = new FloorStates[info.getNrOfFloors()];
 
         lTopFloor.setText(((Integer) (info.getNrOfFloors() - 1)).toString());
 
         for (int i = 0; i < info.getNrOfFloors(); i++) {
             floorNames.add("Floor " + i);
-            floors[i] = new FloorState();
+            floors[i] = new FloorStates();
 
             RowConstraints rCon = new RowConstraints();
             rCon.setMinHeight(20);
@@ -304,7 +299,12 @@ public class ECCController implements Initializable {
             }
         }
         
-        triggerAutomaticModeUpdateIfNeeded();
+        if(isAutomatic.get()) {
+			int newTargetFloor = autoMode.triggerAutomaticModeUpdateIfNeeded(currentFloor.get(), info.getNrOfFloors(), isDoorOpen.get(), weight.get(), floors);
+			if(newTargetFloor >= 0) {
+				gotoTargetFloor(newTargetFloor);
+			}
+		}
 
         Platform.runLater(() -> {
             speed.setValue(elevatorState.getCurrentSpeed());
@@ -451,105 +451,11 @@ public class ECCController implements Initializable {
         oldPercentage = percentage;
     }
 
-    private static class FloorState {
-        private final BooleanProperty requestUp = new SimpleBooleanProperty(false);
-        private final BooleanProperty requestDown = new SimpleBooleanProperty(false);
-        private final BooleanProperty stopRequest = new SimpleBooleanProperty(false);
-        private final BooleanProperty isServiced = new SimpleBooleanProperty(false);
-    }
-
     public void setStageAndSetUpListeners(Stage mainStage) {
         mainStage.heightProperty().addListener((obs, oldVal, newVal) -> translateElevator());
     }
 
     public void shutdown() {
         timer.cancel();
-    }
-    
-    private void triggerAutomaticModeUpdateIfNeeded() {
-		if(isAutomatic.get()) {
-	    	if(canAutoamticBeTriggered || timeoutCnt >= MAX_TIMEOUT_CNT) {
-	    		updateAutomaticMode();
-	    		timeoutCnt = 0;
-	    	} else {
-	    		if(!isDoorOpen.get()) {
-	    			canAutoamticBeTriggered = true;
-	    		} else {
-	    			timeoutCnt++;
-	    		}
-	    	}
-	    }
-    }
-    
-    private boolean checkConditions(Integer floor, boolean up) {
-    	if(weight.get() > MAX_PAYLOAD) {
-			if(floors[floor].stopRequest.get()) {
-				return true;       			
-    		}
-		} else if(up) {
-			if(floors[floor].requestUp.get() || floors[floor].stopRequest.get()) {
-				return true;
-    		}
-		} else {
-			if(floors[floor].requestDown.get() || floors[floor].stopRequest.get()) {
-				return true;  
-    		}
-		}
-    	return false;
-    }
-    
-    private int updatestartFloor(int startFloor, boolean directionMode) {
-    	if(directionMode) {
-    		if(startFloor < info.getNrOfFloors() - 1) {
-        		return (startFloor + 1);
-        	}
-        	if(directionChanged) {
-        		directionChanged = false;
-        		return 0;
-        	}
-    	} else {
-    		if(startFloor > 0) {
-        		return (startFloor- 1);
-        	}
-        	if(directionChanged) {
-        		directionChanged = false;
-        		return (info.getNrOfFloors() - 1);
-        	}
-    	}
-		return startFloor;
-    }
-    
-    private void updateAutomaticMode() {
-    	int startFloor = currentFloor.get();
-    	if(!isDoorOpen.get() || targetFloor.get() != startFloor) {
-    		return;
-    	}
-
-    	boolean newTargetFloorSet = false;
-        if(autoModeDirectionUp) {
-        	startFloor = updatestartFloor(startFloor, true);
-        	for(int i = startFloor; i < info.getNrOfFloors(); i++) {
-        		if(checkConditions(i, true)) {
-        			gotoTargetFloor(i);
-    				newTargetFloorSet = true;
-    				canAutoamticBeTriggered = false;
-    				break;  
-        		}
-        	}
-        } else {
-        	startFloor = updatestartFloor(startFloor, false);
-        	for(int i = startFloor; i >= 0; i--) {
-        		if(checkConditions(i, false)) {
-        			gotoTargetFloor(i);
-    				newTargetFloorSet = true;
-    				canAutoamticBeTriggered = false;
-    				break;  
-        		}
-        	}
-        }
-        if(!newTargetFloorSet) {
-    		autoModeDirectionUp = !autoModeDirectionUp;
-    		directionChanged = true;
-    	}
     }
 }
