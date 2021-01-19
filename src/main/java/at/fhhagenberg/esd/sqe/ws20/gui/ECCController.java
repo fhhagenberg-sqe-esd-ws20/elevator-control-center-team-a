@@ -142,8 +142,6 @@ public class ECCController implements Initializable {
         final String indent = "  ".repeat(level);
         if (e.getMessage() != null) {
             log(indent + e.getMessage().replace("\n", "\n" + indent));
-            if (e.getCause() != null)
-                log(e.getCause(), level + 1);
         }
     }
 
@@ -219,6 +217,21 @@ public class ECCController implements Initializable {
     }
 
     private void disconnect() {
+        if (isConnected.get()) {
+            Platform.runLater(() -> {
+                cbElevator.getSelectionModel().clearSelection();
+
+                for (var floor : floors) {
+                    floor.requestDown.set(false);
+                    floor.requestUp.set(false);
+                    floor.stopRequest.set(false);
+                }
+                targetFloor.set(0);
+
+                translateElevator(0);
+            });
+        }
+
         isConnected.set(false);
     }
 
