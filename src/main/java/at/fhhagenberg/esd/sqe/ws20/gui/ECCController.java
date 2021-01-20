@@ -350,21 +350,23 @@ public class ECCController implements Initializable {
             states[i] = state;
         }
 
-        Platform.runLater(() -> {
-            for (int i = 0; i < info.getNrOfFloors(); i++) {
-                if (states[i] != null) {
-                    floors[i].requestUp.set(states[i].isUpRequest());
-                    floors[i].requestDown.set(states[i].isDownRequest());
-
-                    if (servicedFloors != null)
-                        floors[i].isServiced.set(servicedFloors.get(i));
-
-                    if (elevatorState != null)
-                        floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
-                }
-            }
-        });
+        Platform.runLater(() -> updateFloorUI(elevatorState, servicedFloors, states));
         return true;
+    }
+
+    private void updateFloorUI(ElevatorState elevatorState, List<Boolean> servicedFloors, at.fhhagenberg.esd.sqe.ws20.model.FloorState[] states) {
+        for (int i = 0; i < info.getNrOfFloors(); i++) {
+            if (states[i] != null) {
+                floors[i].requestUp.set(states[i].isUpRequest());
+                floors[i].requestDown.set(states[i].isDownRequest());
+
+                if (servicedFloors != null)
+                    floors[i].isServiced.set(servicedFloors.get(i));
+
+                if (elevatorState != null)
+                    floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
+            }
+        }
     }
 
     @Override
