@@ -1,6 +1,7 @@
 package at.fhhagenberg.esd.sqe.ws20.gui;
 
 import at.fhhagenberg.esd.sqe.ws20.model.*;
+import at.fhhagenberg.esd.sqe.ws20.model.AutomaticMode.FloorStates;
 import at.fhhagenberg.esd.sqe.ws20.utils.ConnectionError;
 import at.fhhagenberg.esd.sqe.ws20.utils.ECCError;
 import javafx.application.Platform;
@@ -113,14 +114,15 @@ public class ECCController implements Initializable {
     @SuppressWarnings("unused")
     @FXML
     private Group groupElevator;
-    private FloorState[] floors;
+    private FloorStates[] floors;
     private ReadOnlyIntegerProperty currentElevator;
     private ReadOnlyIntegerProperty selectedFloor;
     private IElevatorWrapper model;
     private GeneralInformation info;
 
     private Integer oldPercentage = 0;
-
+    
+    private AutomaticMode autoMode = new AutomaticMode();
 
     private static ImageView createFloorImageView(String path, ObservableValue<Boolean> visible) {
         File file = new File(path);
@@ -168,18 +170,18 @@ public class ECCController implements Initializable {
                 disconnect();
             return;
         }
-
+      
         Platform.runLater(() -> {
             floorNames.clear();
             gElevatorFloors.getChildren().clear();
             gElevatorFloors.getRowConstraints().clear();
-            floors = new FloorState[info.getNrOfFloors()];
+            floors = new FloorStates[info.getNrOfFloors()];
 
             lTopFloor.setText(((Integer) (info.getNrOfFloors() - 1)).toString());
 
             for (int i = 0; i < info.getNrOfFloors(); i++) {
                 floorNames.add("Floor " + i);
-                floors[i] = new FloorState();
+                floors[i] = new FloorStates();
 
                 RowConstraints rCon = new RowConstraints();
                 rCon.setMinHeight(20);
@@ -208,7 +210,7 @@ public class ECCController implements Initializable {
                 gElevatorFloors.getRowConstraints().add(rCon);
                 gElevatorFloors.add(hb, 0, info.getNrOfFloors() - i - 1);
             }
-
+          
             elevators.clear();
             for (int i = 0; i < info.getNrOfElevators(); i++) {
                 elevators.add("Elevator " + i);
@@ -298,6 +300,13 @@ public class ECCController implements Initializable {
                 log(e);
             }
         }
+        
+        if(isAutomatic.get()) {
+			int newTargetFloor = autoMode.triggerAutomaticModeUpdateIfNeeded(currentFloor.get(), info.getNrOfFloors(), isDoorOpen.get(), weight.get(), floors);
+			if(newTargetFloor >= 0) {
+				gotoTargetFloor(newTargetFloor);
+			}
+		}
 
         Platform.runLater(() -> {
             speed.setValue(elevatorState.getCurrentSpeed());
@@ -403,21 +412,24 @@ public class ECCController implements Initializable {
     @SuppressWarnings("unused")
     @FXML
     protected void gotoTargetFloor(ActionEvent event) {
-        var elevator = currentElevator.get();
-        var selectedTargetFloor = selectedFloor.get();
+    	gotoTargetFloor(selectedFloor.get()); 
+    }
+    
+    private void gotoTargetFloor(int newTargetFloor) {
+    	var elevator = currentElevator.get();
         var floor = currentFloor.get();
-
-        if (elevator >= 0 && selectedTargetFloor >= 0) {
+        
+    	if (elevator >= 0 && newTargetFloor >= 0) {
             try {
                 Direction dir = Direction.UNCOMMITTED;
-                if (selectedTargetFloor < floor) {
+                if (newTargetFloor < floor) {
                     dir = Direction.DOWN;
-                } else if (selectedTargetFloor > floor) {
+                } else if (newTargetFloor > floor) {
                     dir = Direction.UP;
                 }
 
                 model.setCommittedDirection(elevator, dir);
-                model.setTargetFloor(elevator, selectedTargetFloor);
+                model.setTargetFloor(elevator, newTargetFloor);
             } catch (Exception e) {
                 if (e instanceof ConnectionError) {
                     disconnect();
@@ -439,13 +451,6 @@ public class ECCController implements Initializable {
 
         groupElevator.translateYProperty().set(-yRect);
         oldPercentage = percentage;
-    }
-
-    private static class FloorState {
-        private final BooleanProperty requestUp = new SimpleBooleanProperty(false);
-        private final BooleanProperty requestDown = new SimpleBooleanProperty(false);
-        private final BooleanProperty stopRequest = new SimpleBooleanProperty(false);
-        private final BooleanProperty isServiced = new SimpleBooleanProperty(false);
     }
 
     public void setStageAndSetUpListeners(Stage mainStage) {
