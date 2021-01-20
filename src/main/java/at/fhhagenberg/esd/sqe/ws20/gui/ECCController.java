@@ -24,17 +24,14 @@ import javafx.scene.shape.Rectangle;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 import javafx.stage.Stage;
 
 public class ECCController implements Initializable {
 
     private final BooleanProperty isDoorOpen = new SimpleBooleanProperty();
-    private final IntegerProperty direction = new SimpleIntegerProperty(Direction.UNCOMMITTED.getValue());
+    private final ObjectProperty<Direction> direction = new SimpleObjectProperty<>(Direction.UNCOMMITTED);
     private final BooleanProperty isAutomatic = new SimpleBooleanProperty();
     private final ListProperty<String> elevators = new SimpleListProperty<>();
     private final ListProperty<String> floorNames = new SimpleListProperty<>();
@@ -45,7 +42,6 @@ public class ECCController implements Initializable {
     private final IntegerProperty weight = new SimpleIntegerProperty();
     private final BooleanProperty anyElevatorSelected = new SimpleBooleanProperty();
     private final Timer timer = new Timer();
-    private final StringProperty errorText = new SimpleStringProperty("");
     private final BooleanProperty isConnected = new SimpleBooleanProperty(false);
     @SuppressWarnings("unused")
     @FXML
@@ -135,15 +131,13 @@ public class ECCController implements Initializable {
     }
 
     private void log(String message) {
-        Platform.runLater(() -> errorText.set(errorText.get() + message + "\n"));
+        Platform.runLater(() -> taErrorLog.setText(taErrorLog.getText() + message + "\n"));
     }
 
     private void log(Throwable e, int level) {
         final String indent = "  ".repeat(level);
         if (e.getMessage() != null) {
             log(indent + e.getMessage().replace("\n", "\n" + indent));
-            if (e.getCause() != null)
-                log(e.getCause(), level + 1);
         }
     }
 
@@ -215,10 +209,29 @@ public class ECCController implements Initializable {
             }
         });
 
+        if (!isConnected.get()) {
+            log(Messages.getString("connectSuccess"));
+        }
         isConnected.set(true);
     }
 
     private void disconnect() {
+        if (isConnected.get()) {
+            Platform.runLater(() -> {
+                cbElevator.getSelectionModel().clearSelection();
+
+                for (var floor : floors) {
+                    floor.requestDown.set(false);
+                    floor.requestUp.set(false);
+                    floor.stopRequest.set(false);
+                }
+                targetFloor.set(-1);
+
+                currentFloor.set(0);
+                translateElevator(0);
+            });
+        }
+
         isConnected.set(false);
     }
 
@@ -264,7 +277,6 @@ public class ECCController implements Initializable {
         } catch (Exception e) {
             if (e instanceof ConnectionError) {
                 disconnect();
-                return null;
             }
             log(e);
             return null;
@@ -280,12 +292,23 @@ public class ECCController implements Initializable {
         } else if (!isConnected.get()) {
             connect(false);
             return;
-        } else if (currentElevator.get() < 0)
-            return;
+        }
 
-        var elevatorState = getElevatorState();
+        at.fhhagenberg.esd.sqe.ws20.model.ElevatorState elevatorState = null;
+        if (currentElevator.get() >= 0)
+        {
+            elevatorState = getElevatorState();
+            if (elevatorState == null)
+                return;
+        }
+
+        if (updateFloors(elevatorState))
+            updateElevator(elevatorState);
+    }
+
+    private boolean updateElevator(ElevatorState elevatorState) {
         if (elevatorState == null)
-            return;
+            return false;
 
         // Set direction to uncommitted if the elevator reached its destination
         if (elevatorState.getCurrentFloor() == elevatorState.getTargetFloor() && elevatorState.getCurrentDirection() != Direction.UNCOMMITTED) {
@@ -296,6 +319,7 @@ public class ECCController implements Initializable {
                     disconnect();
                 }
                 log(e);
+                return false;
             }
         }
 
@@ -306,24 +330,41 @@ public class ECCController implements Initializable {
             currentFloor.setValue(elevatorState.getCurrentFloor());
 
             isDoorOpen.setValue(elevatorState.getCurrentDoorState() == DoorState.OPEN);
-            direction.setValue(elevatorState.getCurrentDirection().getValue());
+            direction.setValue(elevatorState.getCurrentDirection());
 
             targetFloor.setValue(elevatorState.getTargetFloor());
-
-            updateFloors(elevatorState);
         });
+
+        return true;
     }
 
-    private void updateFloors(ElevatorState elevatorState) {
-        var servicedFloors = elevatorState.getServicedFloors();
+    private boolean updateFloors(ElevatorState elevatorState) {
+        List<Boolean> servicedFloors = elevatorState == null ? null : elevatorState.getServicedFloors();
 
+        at.fhhagenberg.esd.sqe.ws20.model.FloorState[] states = new at.fhhagenberg.esd.sqe.ws20.model.FloorState[info.getNrOfFloors()];
         for (int i = 0; i < info.getNrOfFloors(); i++) {
             var state = getFloorState(i);
-            if (state != null) {
-                floors[i].requestUp.set(state.isUpRequest());
-                floors[i].requestDown.set(state.isDownRequest());
-                floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
-                floors[i].isServiced.set(servicedFloors.get(i));
+            if (state == null)
+                return false;
+
+            states[i] = state;
+        }
+
+        Platform.runLater(() -> updateFloorUI(elevatorState, servicedFloors, states));
+        return true;
+    }
+
+    private void updateFloorUI(ElevatorState elevatorState, List<Boolean> servicedFloors, at.fhhagenberg.esd.sqe.ws20.model.FloorState[] states) {
+        for (int i = 0; i < info.getNrOfFloors(); i++) {
+            if (states[i] != null) {
+                floors[i].requestUp.set(states[i].isUpRequest());
+                floors[i].requestDown.set(states[i].isDownRequest());
+
+                if (servicedFloors != null)
+                    floors[i].isServiced.set(servicedFloors.get(i));
+
+                if (elevatorState != null)
+                    floors[i].stopRequest.set(elevatorState.getCurrentFloorButtonsPressed().get(i));
             }
         }
     }
@@ -352,9 +393,9 @@ public class ECCController implements Initializable {
         ivDoorStateClosed.visibleProperty().bind(isDoorOpen.not().and(anyElevatorSelected).and(isConnected));
         ivDoorStateOpen.visibleProperty().bind(isDoorOpen.and(anyElevatorSelected).and(isConnected));
 
-        ivGElvDirUp.visibleProperty().bind(direction.isEqualTo(Direction.UP.getValue()).and(anyElevatorSelected));
+        ivGElvDirUp.visibleProperty().bind(direction.isEqualTo(Direction.UP).and(anyElevatorSelected));
         ivGElvDirUp.disableProperty().bind(isConnected.not());
-        ivGElvDirDown.visibleProperty().bind(direction.isEqualTo(Direction.DOWN.getValue()).and(anyElevatorSelected).and(isConnected));
+        ivGElvDirDown.visibleProperty().bind(direction.isEqualTo(Direction.DOWN).and(anyElevatorSelected).and(isConnected));
         ivGElvDirDown.disableProperty().bind(isConnected.not());
 
         cbTargetFloor.itemsProperty().bind(floorNames);
@@ -381,23 +422,14 @@ public class ECCController implements Initializable {
 
         lDirection.visibleProperty().bind(anyElevatorSelected);
         lDirection.disableProperty().bind(isConnected.not());
+        lDirection.textProperty().bind(direction.asString());
 
         lElvCurFloor.textProperty().bind(currentFloor.asString());
 
         position.addListener((observableValue, oldVal, newVal) ->
                 translateElevator(100 * newVal.intValue() / ((info.getNrOfFloors() - 1) * info.getFloorHeight())));
-        direction.addListener((observableValue, oldVal, newVal) -> {
-            if ((Integer) newVal == Direction.UP.getValue()) {
-                lDirection.setText("Up");
-            } else if ((Integer) newVal == Direction.DOWN.getValue()) {
-                lDirection.setText("Down");
-            } else {
-                lDirection.setText("Uncommitted");
-            }
-        });
         tbtnOperationMode.selectedProperty().addListener((observableValue, oldVal, newVal) ->
                 tbtnOperationMode.setText(Boolean.TRUE.equals(newVal) ? "Automatic" : "Manual"));
-        taErrorLog.textProperty().bind(errorText);
     }
 
     @SuppressWarnings("unused")
