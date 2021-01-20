@@ -29,4 +29,18 @@ public enum Direction {
 
         throw new IllegalArgumentException("The given integer does not specify a valid direction!");
     }
+
+    @Override
+    public String toString() {
+        switch (this)
+        {
+            case UP:
+                return "Up";
+            case DOWN:
+                return "Down";
+            case UNCOMMITTED:
+                return "Uncommitted";
+        }
+        return "Error";
+    }
 }

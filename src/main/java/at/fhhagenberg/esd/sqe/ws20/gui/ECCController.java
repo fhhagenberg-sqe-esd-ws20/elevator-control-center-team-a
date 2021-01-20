@@ -34,7 +34,7 @@ import javafx.stage.Stage;
 public class ECCController implements Initializable {
 
     private final BooleanProperty isDoorOpen = new SimpleBooleanProperty();
-    private final IntegerProperty direction = new SimpleIntegerProperty(Direction.UNCOMMITTED.getValue());
+    private final ObjectProperty<Direction> direction = new SimpleObjectProperty<>(Direction.UNCOMMITTED);
     private final BooleanProperty isAutomatic = new SimpleBooleanProperty();
     private final ListProperty<String> elevators = new SimpleListProperty<>();
     private final ListProperty<String> floorNames = new SimpleListProperty<>();
@@ -368,9 +368,9 @@ public class ECCController implements Initializable {
         ivDoorStateClosed.visibleProperty().bind(isDoorOpen.not().and(anyElevatorSelected).and(isConnected));
         ivDoorStateOpen.visibleProperty().bind(isDoorOpen.and(anyElevatorSelected).and(isConnected));
 
-        ivGElvDirUp.visibleProperty().bind(direction.isEqualTo(Direction.UP.getValue()).and(anyElevatorSelected));
+        ivGElvDirUp.visibleProperty().bind(direction.isEqualTo(Direction.UP).and(anyElevatorSelected));
         ivGElvDirUp.disableProperty().bind(isConnected.not());
-        ivGElvDirDown.visibleProperty().bind(direction.isEqualTo(Direction.DOWN.getValue()).and(anyElevatorSelected).and(isConnected));
+        ivGElvDirDown.visibleProperty().bind(direction.isEqualTo(Direction.DOWN).and(anyElevatorSelected).and(isConnected));
         ivGElvDirDown.disableProperty().bind(isConnected.not());
 
         cbTargetFloor.itemsProperty().bind(floorNames);
@@ -397,20 +397,12 @@ public class ECCController implements Initializable {
 
         lDirection.visibleProperty().bind(anyElevatorSelected);
         lDirection.disableProperty().bind(isConnected.not());
+        lDirection.textProperty().bind(direction.asString());
 
         lElvCurFloor.textProperty().bind(currentFloor.asString());
 
         position.addListener((observableValue, oldVal, newVal) ->
                 translateElevator(100 * newVal.intValue() / ((info.getNrOfFloors() - 1) * info.getFloorHeight())));
-        direction.addListener((observableValue, oldVal, newVal) -> {
-            if ((Integer) newVal == Direction.UP.getValue()) {
-                lDirection.setText("Up");
-            } else if ((Integer) newVal == Direction.DOWN.getValue()) {
-                lDirection.setText("Down");
-            } else {
-                lDirection.setText("Uncommitted");
-            }
-        });
         tbtnOperationMode.selectedProperty().addListener((observableValue, oldVal, newVal) ->
                 tbtnOperationMode.setText(Boolean.TRUE.equals(newVal) ? "Automatic" : "Manual"));
     }
