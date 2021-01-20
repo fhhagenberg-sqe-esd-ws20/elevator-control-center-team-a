@@ -213,6 +213,9 @@ public class ECCController implements Initializable {
             }
         });
 
+        if (!isConnected.get()) {
+            log(Messages.getString("connectSuccess"));
+        }
         isConnected.set(true);
     }
 
@@ -228,6 +231,7 @@ public class ECCController implements Initializable {
                 }
                 targetFloor.set(-1);
 
+                currentFloor.set(0);
                 translateElevator(0);
             });
         }
