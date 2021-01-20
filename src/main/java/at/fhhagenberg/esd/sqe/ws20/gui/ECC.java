@@ -22,7 +22,6 @@ public class ECC extends Application {
 
 
     public ECC() {
-//        elevatorModel = new ElevatorImpl(new ElevatorRMIMock(5, 10, 10));
         elevatorModel = new ElevatorImpl(new ManagedIElevator("rmi://localhost/ElevatorSim"));
     }
 
