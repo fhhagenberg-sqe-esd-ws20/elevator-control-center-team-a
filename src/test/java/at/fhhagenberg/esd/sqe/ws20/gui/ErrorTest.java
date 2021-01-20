@@ -30,7 +30,6 @@ class ErrorTest {
 
     @Mock
     private IElevator mockElevator;
-    private IElevatorWrapper elevatorModel;
 
     private ECCPageObject page;
 
@@ -43,7 +42,7 @@ class ErrorTest {
         when(mockElevator.getCommittedDirection(anyInt())).thenReturn(Direction.UP.getValue());
         when(mockElevator.getElevatorNum()).thenReturn(1);
 
-        elevatorModel = new ElevatorImpl(new ManagedIElevator(mockElevator));
+        IElevatorWrapper elevatorModel = new ElevatorImpl(new ManagedIElevator(mockElevator));
         new ECC(elevatorModel).start(stage);
     }
 
@@ -55,6 +54,7 @@ class ErrorTest {
 
     @Test
     void testEmptyErrorLogAfterStartup() {
+        page.clearErrorLog();
         page.assertEmptyErrorLog();
     }
 

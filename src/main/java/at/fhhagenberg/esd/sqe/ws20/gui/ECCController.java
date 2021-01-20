@@ -45,7 +45,6 @@ public class ECCController implements Initializable {
     private final IntegerProperty weight = new SimpleIntegerProperty();
     private final BooleanProperty anyElevatorSelected = new SimpleBooleanProperty();
     private final Timer timer = new Timer();
-    private final StringProperty errorText = new SimpleStringProperty("");
     private final BooleanProperty isConnected = new SimpleBooleanProperty(false);
     @SuppressWarnings("unused")
     @FXML
@@ -135,7 +134,7 @@ public class ECCController implements Initializable {
     }
 
     private void log(String message) {
-        Platform.runLater(() -> errorText.set(errorText.get() + message + "\n"));
+        Platform.runLater(() -> taErrorLog.setText(taErrorLog.getText() + message + "\n"));
     }
 
     private void log(Throwable e, int level) {
@@ -414,7 +413,6 @@ public class ECCController implements Initializable {
         });
         tbtnOperationMode.selectedProperty().addListener((observableValue, oldVal, newVal) ->
                 tbtnOperationMode.setText(Boolean.TRUE.equals(newVal) ? "Automatic" : "Manual"));
-        taErrorLog.textProperty().bind(errorText);
     }
 
     @SuppressWarnings("unused")
