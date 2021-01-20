@@ -10,22 +10,22 @@ import java.util.List;
 public class ElevatorRMIMock implements IElevator {
 
     public static class ElevatorInfo {
-        public int committedDirection = IElevator.ELEVATOR_DIRECTION_UNCOMMITTED;
-        public int elevatorAccel = 0;
-        public List<Boolean> elevatorButtons = new ArrayList<>();
-        public int doorStatus = IElevator.ELEVATOR_DOORS_CLOSED;
-        public int currentFloor = 0;
-        public int currentPosition = 0;
-        public int currentSpeed = 0;
-        public int currentWeight = 0;
-        public int capacity = 0;
-        public List<Boolean> servicedFloors = new ArrayList<>();
-        public int targetFloor = 0;
+        int committedDirection = IElevator.ELEVATOR_DIRECTION_UNCOMMITTED;
+        int elevatorAccel = 0;
+        List<Boolean> elevatorButtons = new ArrayList<>();
+        int doorStatus = IElevator.ELEVATOR_DOORS_CLOSED;
+        int currentFloor = 0;
+        int currentPosition = 0;
+        int currentSpeed = 0;
+        int currentWeight = 0;
+        int capacity = 0;
+        List<Boolean> servicedFloors = new ArrayList<>();
+        int targetFloor = 0;
     }
 
     public static class FloorInfo {
-        public boolean buttonDown = false;
-        public boolean buttonUp = false;
+        boolean buttonDown = false;
+        boolean buttonUp = false;
     }
 
 

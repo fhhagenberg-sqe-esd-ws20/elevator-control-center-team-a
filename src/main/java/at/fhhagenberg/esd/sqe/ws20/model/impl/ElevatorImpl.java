@@ -14,7 +14,7 @@ import java.util.concurrent.TimeoutException;
 
 
 public class ElevatorImpl implements IElevatorWrapper {
-    public static int DEFAULT_MAXIMUM_RETRIES = 10;
+    public static final int DEFAULT_MAXIMUM_RETRIES = 10;
 
     private final IElevator rmiInterface;
 
