@@ -109,6 +109,7 @@
                     <configuration>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <argLine>@{argLine} --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
+                        <forkCount>0</forkCount>
                     </configuration>
                 </plugin>
             </plugins>
