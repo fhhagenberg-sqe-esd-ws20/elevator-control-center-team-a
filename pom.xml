@@ -3,7 +3,8 @@
 
     <groupId>at.fhhagenberg.esd.sqe.ws20</groupId>
     <artifactId>ecc-team-a</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0-Release</version>
+    <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -11,6 +12,7 @@
         <maven.compiler.target>11</maven.compiler.target>
 
         <jacoco.version>0.8.6</jacoco.version>
+        <javafx.version>13</javafx.version>
 
         <sonar.projectKey>fhhagenberg-sqe-esd-ws20_elevator-control-center-team-a</sonar.projectKey>
         <sonar.organization>fhhagenberg-sqe-esd-ws20</sonar.organization>
@@ -21,7 +23,26 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>13</version>
+            <version>${javafx.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>win</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>linux</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>mac</classifier>
         </dependency>
 
         <!-- testing with TestFx/Junit 5-->
@@ -40,7 +61,7 @@
         <dependency>
 		    <groupId>org.openjfx</groupId>
 		    <artifactId>javafx-fxml</artifactId>
-		    <version>13</version>
+		    <version>${javafx.version}</version>
 		</dependency>
         <dependency>
             <groupId>org.testfx</groupId>
@@ -122,6 +143,31 @@
 					</execution>
 				</executions>
 			</plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>project-classifier</shadedClassifierName>
+                            <outputFile>shade\${project.artifactId}.jar</outputFile>
+                            <transformers>
+                                <transformer implementation=
+                                                     "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>at.fhhagenberg.esd.sqe.ws20.gui.ECC</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
